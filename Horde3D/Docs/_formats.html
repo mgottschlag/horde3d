@@ -1,0 +1,708 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Horde3D Documentation</title>
+    <link rel="stylesheet" type="text/css" href="css/manual.css" title="ALL" media="screen,projection" />
+</head>
+
+<body>
+<div id="content">
+
+<h1>Horde3D Data Format Reference</h1>
+
+<h2>Texture Maps</h2>
+<p>
+Horde3D supports two dimensional texture maps and cube maps with up to four 8-bit color components, thus including
+an Alpha channel. It is recommended that texture maps have power of two dimensions (1, 2, 4, 8, 16, ..., 512, 1024, 2048) but this
+is no strict requirement. Newer graphics cards support textures with arbitrary sizes. If a graphics card doesn't have
+support for these so called NPOT textures Horde3D will convert the texture to a compatible size, although this can
+result in some visible stretching artifacts. Horde3D has also support for the Radiance RGBE format which makes it
+possible to use 16 bit floating point textures.
+<br />
+The engine can load the following image formats. Since Horde uses a pretty lightweight image loading library there
+are some limitations concerning exotic formats like 1 bpp textures.
+</p>
+<ul>
+    <li>JPEG (non-progressive)</li>
+    <li>PNG (non-interlaced)</li>
+    <li>TGA</li>
+	<li>BMP (non-RLE)</li>
+    <li>PSD (RGB format only)</li>
+    <li>HDR</li>
+</ul>
+<p>
+Cube maps are stored with a special texture layout, a so called vertical cross, as can be seen in the
+following figure. The label <b>PZ</b> stands for <i>positive z coordinate</i> and is the front face of the
+cube map.
+<br />
+<br />
+<img src="images/cubemap.png" alt="cubemap" />
+</p>
+<br /><br /><br />
+
+<h2>Materials</h2>
+<p><i>Filename-extension: .material.xml</i></p>
+<p>
+Materials are used to bind data to shaders. They can reference a shader and setup texture units
+with images. Furthermore materials can define shader uniforms which are four-dimensional
+float vectors with arbitrary user defined data. Materials can e.g. be used to define the appearance of
+a surface. Every material can have a class which is useful for accessing geometry with specific properties,
+e.g. translucency. Since the material system is hierarchical, names can contain subclasses which are
+separated from the parent class using a dot character. A further feature of the material system is that
+a single material can link to another material to use its texture units and uniforms. This is useful
+to define global data (e.g. ambient lighting settings) at a single location.
+In Horde3D materials are specified with an XML syntax.
+<br />
+<br />
+The following XML node elements with the described attributes are supported:
+<br />
+</p>
+
+<div class="syntaxbox">
+<table>
+    <tr>
+        <td><b>Material</b></td>
+        <td>
+			root element of the document {1}
+			<table>
+                <tr>
+                    <td><b>class</b></td>
+                    <td>hierarchical class name (Default: <i>empty string</i>) {optional}</td>
+                </tr>
+				<tr>
+                    <td><b>link</b></td>
+                    <td>link to other material (Default: <i>empty string</i>) {optional}</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td><b>Shader</b></td>
+        <td>
+            shader used for rendering {0, 1}
+            <table>
+                <tr>
+                    <td><b>source</b></td>
+                    <td>name of the shader resource {required}</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td><b>TexUnit</b></td>
+        <td>
+            configuration for a texture unit {*}
+            <table>
+                <tr>
+                    <td><b>unit</b></td>
+                    <td>index of the texture unit (Values: 0-11) {required}</td>
+                </tr>
+                <tr>
+                    <td><b>map</b></td>
+                    <td>name of the texture resource for the specified unit {required}</td>
+                </tr>
+				<tr>
+                    <td><b>type</b></td>
+                    <td>
+                    type of the texture map (Default: 2D) {optional}<br />
+                    Values: <b>2D</b> for standard texture maps and <b>CUBE</b> for cube maps
+                    </td>
+                </tr>
+                <tr>
+                    <td><b>allowPOTConversion</b></td>
+                    <td>
+                    true if texture may be converted to power-of-two dimensions on hardware without NPOT-support, otherwise false; (Default: true) {optional}<br />
+                    <b>Note: </b> This flag is only respected if the texture isn't already loaded with an opposed flag setting
+                    </td>
+                </tr>
+                <tr>
+                    <td><b>allowCompression</b></td>
+                    <td>
+                    true if texture may be compressed, otherwise false; (Default: true) {optional}<br />
+                    <b>Note: </b> This flag is only respected if the texture isn't already loaded with an opposed flag setting
+                    </td>
+                </tr>
+                <tr>
+                    <td><b>mipmaps</b></td>
+                    <td>
+                    true if texture shall use mipmaps, otherwise false; (Default: true) {optional}<br />
+                    <b>Note: </b> This flag is only respected if the texture isn't already loaded with an opposed flag setting
+                    </td>
+                </tr>
+                <tr>
+                    <td><b>bilinear</b></td>
+                    <td>
+                    true if texture shall use bilinear filtering, otherwise false; (Default: true) {optional}<br />
+                    <b>Note: </b> This flag is only respected if the texture isn't already loaded with an opposed flag setting
+                    </td>
+                </tr>
+                <tr>
+                    <td><b>repeatMode</b></td>
+                    <td>
+                    true if texture shall be repeated for texture coordinates larger than one, otherwise false (clamping); (Default: true) {optional}<br />
+                    <b>Note: </b> This flag is only respected if the texture isn't already loaded with an opposed flag setting
+                    </td>
+                </tr>
+            </table>
+            
+        </td>
+    </tr>
+    <tr>
+        <td><b>Uniform</b></td>
+        <td>
+            definition of a four-dimensional vector shader uniform {*}
+            <table>
+                <tr>
+                    <td><b>name</b></td>
+                    <td>name of the uniform {required}</td>
+                </tr>
+				<tr>
+                    <td><b>a</b></td>
+                    <td>value of first component (Default: 0.0) {optional}</td>
+                </tr>
+                <tr>
+                    <td><b>b</b></td>
+                    <td>value of second component (Default: 0.0) {optional}</td>
+                </tr>
+                <tr>
+                    <td><b>c</b></td>
+                    <td>value of third component (Default: 0.0) {optional}</td>
+                </tr>
+                <tr>
+                    <td><b>d</b></td>
+                    <td>value of fourth component (Default: 0.0) {optional}</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</div>
+<br />
+
+<h4>Sample</h4>
+
+<div class="memdoc">
+<pre>
+&lt;Material class="Translucent.MyClass"&gt;
+    &lt;Shader source="myshader.shader.xml" /&gt;
+    &lt;TexUnit unit="0" map="mytex.jpg" /&gt;
+    &lt;Uniform name="myColor" a="1.0" b="1.0" c="0.5" /&gt;
+&lt;/Material&gt;
+</pre>
+</div>
+<br /><br /><br />
+
+
+<h2>Code Files</h2>
+<p><i>Filename-extension: arbitrary, usually .txt</i></p>
+<p>
+Code files are pure text files that can be used to define shader code. These files can be referenced by shader resources.
+</p>
+<br /><br /><br />
+
+
+<h2>Shaders</h2>
+<p><i>Filename-extension: .shader.xml</i></p>
+<p>
+Shaders are used to create a plenty of different effects. A shader can generally be executed in different stages of the
+rendering pipeline. For that reason it is possible to define shader contexts. Horde3D uses an XML format to define
+shaders in the OpenGL Shading Language (GLSL). To make it easier to locate errors returned by the GLSL compiler, Horde3D
+uses a special system for encoding line numbers. Each DefCode and InsCode is considered as a block and gets a consecutive number
+starting at 1. The number of the block where an error occured is encoded as thousand and the actual line number inside this
+block as the rest. So if you get the message that there is an error in line 2023, you know that the problem is in the second
+block in line 23.
+<br /><br />
+The following XML node elements with the described attributes are supported for a shader file:
+</p>
+<div class="syntaxbox">
+<table>
+    <tr>
+        <td><b>Shader</b></td>
+        <td>root element of the document {1}</td>
+    </tr>
+    <tr>
+        <td><b>Context</b></td>
+        <td>
+            definition of a shader context
+            <table>
+                <tr>
+                    <td><b>id</b></td>
+                    <td>name of the context {required}</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+   
+    <tr>
+        <td><b>RenderConfig</b></td>
+        <td>
+			configuration of rendering parameters; child of <b>Context</b> element {1}
+            <table>
+                <tr>
+                    <td><b>writeDepth</b></td>
+                    <td>enable writing to depth buffer (Values: false, true) (Default: true)  {optional}</td>
+                </tr>
+                <tr>
+                    <td><b>blendMode</b></td>
+                    <td>blend function (Values: REPLACE, BLEND, ADD, ADD_BLENDED, MULT) (Default: REPLACE)  {optional}</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td><b>VertexShader</b></td>
+        <td>vertex shader created by concatenating code blocks; child of <b>Context</b> element {1}</td>
+    </tr>
+    <tr>
+        <td><b>FragmentShader</b></td>
+        <td>fragment shader created by concatenating code blocks; child of <b>Context</b> element {1}</td>
+    </tr>
+    
+    <tr>
+        <td><b>DefCode</b></td>
+        <td>
+            directly defines GLSL code block in CDATA section; child of <b>VertexShader</b> or <b>FragmentShader</b> element {*}
+        </td>
+    </tr>
+    
+    <tr>
+        <td><b>InsCode</b></td>
+        <td>
+            inserts code block from a Code resource; child of <b>VertexShader</b> or <b>FragmentShader</b> element {*}
+            <table>
+                <tr>
+                    <td><b>code</b></td>
+                    <td>name of the Code resource {required}</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</div>
+<br />
+<h4>Sample</h4>
+<div class="memdoc">
+<pre>
+&lt;Shader&gt;
+    &lt;Context id="OVERLAY"&gt;
+        &lt;VertexShader&gt;
+            &lt;DefCode&gt;
+            &lt;![CDATA[<i>
+                void main( void )
+                {
+                    gl_TexCoord[0] = gl_MultiTexCoord0;
+                    gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;    
+                }</i>
+            ]]&gt;
+            &lt;/DefCode&gt;
+        &lt;/VertexShader&gt;
+        
+        &lt;FragmentShader&gt;
+            &lt;InsCode code="texUtils.txt" /&gt;
+            &lt;DefCode&gt;
+            &lt;![CDATA[<i>
+                uniform sampler2D tex0;
+            
+                void main( void )
+                {
+                    vec4 albedo = getColor( tex0, gl_TexCoord[0].st );
+                    gl_FragColor = albedo;
+                }</i>
+            ]]&gt;
+            &lt;/DefCode&gt;
+        &lt;/FragmentShader&gt;
+    &lt;/Context&gt;
+&lt;/Shader&gt;
+</pre>
+</div>
+<br />
+<p>
+For more information on available shader attributes see the <a href="_pipeline.html">pipeline documentation</a>.
+</p>
+<br /><br />
+
+<h2>Scene Graph Files</h2>
+<p><i>Filename-extension: .scene.xml</i></p>
+<p>
+Scene graph files are XML documents that define a subtree of the scene graph.
+<br />
+<br />
+Each scene node defined as XML element can have the following XML attributes:
+<br />
+</p>
+<div class="syntaxbox">
+<table>
+    <tr>
+        <td><b>name</b></td>
+        <td>name of the node {optional}</td>
+    </tr>
+    <tr>
+        <td><b>tx, ty, tz</b></td>
+        <td>translation of the node {optional}</td>
+    </tr>
+    <tr>
+        <td><b>rx, ry, rz</b></td>
+        <td>rotation of the node in Euler angles (degrees) {optional}</td>
+    </tr>
+    <tr>
+        <td><b>sx, sy, sz</b></td>
+        <td>scale of the node {optional}</td>
+    </tr>
+</table>
+</div>
+<br />
+<p>
+The following XML elements and attributes are supported for defining the scene nodes.
+</p>
+<div class="syntaxbox">
+<table>
+    <tr>
+        <td><b>Group</b></td>
+        <td>
+            Group scene node {*}
+            <table>
+                <tr>
+                    <td><b>minDist</b></td>
+                    <td>see <a href="_api.html#GroupNodeParams">GroupNodeParams</a> {optional}</td>
+                </tr>
+                <tr>
+                    <td><b>maxDist</b></td>
+                    <td>see <a href="_api.html#GroupNodeParams">GroupNodeParams</a> {optional}</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td><b>Reference</b></td>
+        <td>
+            reference to another scene graph resource that shall be included in the scene graph at the specified position in the tree hierarchy {*}<br />
+            name (if specified) and transformation of Reference node are taken over for root node of referenced scene structure
+            <table>
+                <tr>
+                    <td><b>sceneGraph</b></td>
+                    <td>(file-)name of the scene graph resource {required}</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td><b>Model</b></td>
+        <td>
+            Model scene node {*}
+            <table>
+                <tr>
+                    <td><b>geometry</b></td>
+                    <td>(file-)name of the geometry resource {required}</td>
+                </tr>
+                <tr>
+                    <td><b>softwareSkinning</b></td>
+					<td>see <a href="_api.html#ModelNodeParams">ModelNodeParams</a> {optional}</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td><b>Mesh</b></td>
+        <td>
+            Mesh scene node {*}
+            <table>
+                <tr>
+                    <td><b>material</b></td>
+                    <td>(file-)name of the material resource {required}</td>
+                </tr>
+                <tr>
+                    <td><b>batchStart</b></td>
+                    <td>first vertex index in geometry resource of parent model {required}</td>
+                </tr>
+                <tr>
+                    <td><b>batchCount</b></td>
+                    <td>number of vertex indices in geometry resource of parent model {required}</td>
+                </tr>
+                <tr>
+                    <td><b>vertRStart</b></td>
+                    <td>minimum vertex array index contained in indices of geometry resource of parent model {required}</td>
+                </tr>
+                <tr>
+                    <td><b>vertREnd</b></td>
+                    <td>maximum vertex array index contained in indices of geometry resource of parent model {required}</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td><b>Joint</b></td>
+        <td>
+            Joint scene node {*}
+            <table>
+                <tr>
+                    <td><b>jointIndex</b></td>
+                    <td>index of joint in geometry resource of parent model {required}</td>
+                </tr>
+           </table>
+       </td>
+    </tr>
+    <tr>
+        <td><b>Light</b></td>
+        <td>
+            Light scene node {*}
+            <table>
+                <tr>
+                    <td><b>material</b></td>
+                    <td>(file-)name of the light material resource {optional}</td>
+                </tr>
+                <tr>
+                    <td><b>lightingContext</b></td>
+                    <td>name of the shader context used for lighting {required}</td>
+                </tr>
+                <tr>
+                    <td><b>shadowContext</b></td>
+                    <td>name of the shader context used for shadow map rendering {required}</td>
+                </tr>
+                <tr>
+                    <td><b>radius</b></td>
+                    <td>see <a href="_api.html#LightNodeParams">LightNodeParams</a> {optional}</td>
+                </tr>
+                <tr>
+                    <td><b>fov</b></td>
+                    <td>see <a href="_api.html#LightNodeParams">LightNodeParams</a> {optional}</td>
+                </tr>
+                <tr>
+                    <td><b>col_R</b></td>
+                    <td>see <a href="_api.html#LightNodeParams">LightNodeParams</a> {optional}</td>
+                </tr>
+                <tr>
+                    <td><b>col_G</b></td>
+                    <td>see <a href="_api.html#LightNodeParams">LightNodeParams</a> {optional}</td>
+                </tr>
+                <tr>
+                    <td><b>col_B</b></td>
+                    <td>see <a href="_api.html#LightNodeParams">LightNodeParams</a> {optional}</td>
+                </tr>
+                <tr>
+                    <td><b>shadowMapCount</b></td>
+                    <td>see <a href="_api.html#LightNodeParams">LightNodeParams</a> {optional}</td>
+                </tr>
+                <tr>
+                    <td><b>shadowSplitLambda</b></td>
+                    <td>see <a href="_api.html#LightNodeParams">LightNodeParams</a> {optional}</td>
+                </tr>
+                <tr>
+                    <td><b>shadowMapBias</b></td>
+                    <td>see <a href="_api.html#LightNodeParams">LightNodeParams</a> {optional}</td>
+                </tr>
+           </table>
+       </td>
+    </tr>
+    
+    <tr>
+        <td><b>Camera</b></td>
+        <td>
+            Camera scene node {*}
+            <table>
+                <tr>
+                    <td><b>pipelineRes</b></td>
+                    <td>(file-)name of pipeline resource used for rendering {required}</td>
+                </tr>
+                <tr>
+                    <td><b>outputTex</b></td>
+                    <td>see <a href="_api.html#CameraNodeParams">CameraNodeParams</a> {optional}</td>
+                </tr>
+                <tr>
+                    <td><b>outputBufferIndex</b></td>
+                    <td>see <a href="_api.html#CameraNodeParams">CameraNodeParams</a> {optional}</td>
+                </tr>
+				<tr>
+                    <td><b>leftPlane</b></td>
+                    <td>see <a href="_api.html#CameraNodeParams">CameraNodeParams</a> {optional}</td>
+                </tr>
+                <tr>
+                    <td><b>rightPlane</b></td>
+                    <td>see <a href="_api.html#CameraNodeParams">CameraNodeParams</a> {optional}</td>
+                </tr>
+				<tr>
+                    <td><b>bottomPlane</b></td>
+                    <td>see <a href="_api.html#CameraNodeParams">CameraNodeParams</a> {optional}</td>
+                </tr>
+				<tr>
+                    <td><b>topPlane</b></td>
+                    <td>see <a href="_api.html#CameraNodeParams">CameraNodeParams</a> {optional}</td>
+                </tr>
+				<tr>
+                    <td><b>nearPlane</b></td>
+                    <td>see <a href="_api.html#CameraNodeParams">CameraNodeParams</a> {optional}</td>
+                </tr>
+				<tr>
+                    <td><b>farPlane</b></td>
+                    <td>see <a href="_api.html#CameraNodeParams">CameraNodeParams</a> {optional}</td>
+                </tr>
+                <tr>
+                    <td><b>orthographic</b></td>
+                    <td>see <a href="_api.html#CameraNodeParams">CameraNodeParams</a> {optional}</td>
+                </tr>
+                <tr>
+                    <td><b>occlusionCulling</b></td>
+                    <td>see <a href="_api.html#CameraNodeParams">CameraNodeParams</a> {optional}</td>
+                </tr>
+           </table>
+       </td>
+    </tr>
+    
+    <tr>
+        <td><b>Emitter</b></td>
+        <td>
+            Emitter scene node {*}
+            <table>
+                <tr>
+                    <td><b>material</b></td>
+                    <td>(file-)name of material resource {required}</td>
+                </tr>
+                <tr>
+                    <td><b>effect</b></td>
+                    <td>(file-)name of effect resource {required}</td>
+                </tr>
+                <tr>
+                    <td><b>maxCount</b></td>
+                    <td>maximal number of particles {required}</td>
+                </tr>
+                <tr>
+                    <td><b>respawnCount</b></td>
+                    <td>number of times a particle is reborn (-1 for inifinite) {required}</td>
+                </tr>
+                
+                <tr>
+                    <td><b>delay</b></td>
+                    <td>see <a href="_api.html#EmitterNodeParams">EmitterNodeParams</a> {optional}</td>
+                </tr>
+                <tr>
+                    <td><b>emissionRate</b></td>
+                    <td>see <a href="_api.html#EmitterNodeParams">EmitterNodeParams</a> {optional}</td>
+                </tr>
+                <tr>
+                    <td><b>spreadAngle</b></td>
+                    <td>see <a href="_api.html#EmitterNodeParams">EmitterNodeParams</a> {optional}</td>
+                </tr>
+                <tr>
+                    <td><b>forceX</b></td>
+                    <td>see <a href="_api.html#EmitterNodeParams">EmitterNodeParams</a> {optional}</td>
+                </tr>
+                <tr>
+                    <td><b>forceY</b></td>
+                    <td>see <a href="_api.html#EmitterNodeParams">EmitterNodeParams</a> {optional}</td>
+                </tr>
+                <tr>
+                    <td><b>forceZ</b></td>
+                    <td>see <a href="_api.html#EmitterNodeParams">EmitterNodeParams</a> {optional}</td>
+                </tr>
+           </table>
+       </td>
+    </tr>
+</table>
+</div>
+<br />
+<p>
+The XML document can have an arbitrary scene node as root element.
+</p>
+<br /><br />
+
+
+<h2>Effect Files</h2>
+<p><i>Filename-extension: .effect.xml</i></p>
+<p>
+Effect files are used to configure particles of a particle system. Each particle has a randomly selected
+life time which is assigned when the particle is created. This time is continually decreased and when
+it is equal to zero the particle has died and can possibly be reborn. The particle has several channels
+defining its properties over the life time. The following channels are available:
+<br /><br />
+
+<b>moveVel</b> - Velocity defining how many units per second particle is moving <br />
+<b>rotVel</b> - Velocity defining how many degrees per second particle is rotating <br />
+<b>size</b> - Size of the particle in generic units <br />
+<b>colR</b> - Color red intensity between 0.0 and 1.0 <br />
+<b>colG</b> - Color green intensity between 0.0 and 1.0 <br />
+<b>colB</b> - Color blue intensity between 0.0 and 1.0 <br />
+<b>colA</b> - Color alpha intensity between 0.0 and 1.0 <br />
+
+
+<br /><br />
+The following XML node elements with the described attributes are supported for an effect file:
+</p>
+<div class="syntaxbox">
+<table>
+    <tr>
+        <td><b>ParticleConfig</b></td>
+        <td>
+			root element of the document {1}
+			<table>
+                <tr>
+                    <td><b>lifeMin</b></td>
+                    <td>minimum value for selecting random life time {required}</td>
+                </tr>
+                <tr>
+                    <td><b>lifeMax</b></td>
+                    <td>maximum value for selecting random life time {required}</td>
+                </tr>
+            </table>
+		</td>
+    </tr>
+    <tr>
+        <td><b>ChannelOverLife</b></td>
+        <td>
+            configuration of a channel
+            <table>
+                <tr>
+                    <td><b>channel</b></td>
+                    <td>id of the channel {required}</td>
+                </tr>
+                <tr>
+                    <td><b>startMin</b></td>
+                    <td>minimum value for selecting random initial value {required}</td>
+                </tr>
+                <tr>
+                    <td><b>startMax</b></td>
+                    <td>maximum value for selecting random initial value (Default: startMin) {optional}</td>
+                </tr>
+                <tr>
+                    <td><b>endRate</b></td>
+                    <td>percentage of the initial value when particle is dying (Default: 1.0) {optional}</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</div>
+<br />
+<h4>Sample</h4>
+<div class="memdoc">
+<pre>
+&lt;ParticleConfig lifeMin="4.0" lifeMax="7.0"&gt;
+    &lt;ChannelOverLife channel="moveVel" startMin="3.0" startMax="3.0" endRate="0.0" /&gt;
+    &lt;ChannelOverLife channel="colR" startMin="0.4" startMax="0.4" endRate="0.5" /&gt;
+&lt;/ParticleConfig&gt;
+</pre>
+</div>
+<br /><br />
+
+
+<h2>Geometry and Animations</h2>
+<p><i>Filename-extensions: .geo and .anim</i></p>
+<p>
+The file formats for geometry and animations are binary formats and have to be created with a suitable tool
+like the Collada Converter described above.
+A geometry resource contains the raw vertex data with optional morph targets organized as streams. Furthermore
+it contains the triangle data as well as information about the skeleton of a model.
+The animation resource consists of sampled animation data for the joints and meshes of a model.
+<br /><br />
+<b>Important Note:</b> Currently the maximum number of joints for skeletal animation is limited to 75.
+</p>
+<br /><br />
+
+
+<div id="copy">Copyright &copy; 2006-2008 Nicolas Schulz</div>
+</div>
+
+<div id="logo">
+    <a href="http://www.nextgen-engine.net" ><img src="images/doclogo.gif" alt="Horde3D" /></a>
+</div>
+
+</body>
+</html>
