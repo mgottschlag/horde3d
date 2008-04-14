@@ -69,7 +69,11 @@ namespace Horde3DTerrain
 		itr = attribs.find( "heightmap" );
 		if( itr != attribs.end() )
 		{
-			uint32 res = Modules::resMan().addResource( ResourceTypes::Texture2D, itr->second, 0, false );
+			uint32 res = Modules::resMan().addResource( 
+				ResourceTypes::Texture2D, 
+				itr->second, 
+				ResourceFlags::NoTexCompression | ResourceFlags::NoTexMipmaps,
+				false );
 			if( res != 0 )
 				terrainTpl->hmapRes = (Texture2DResource *)Modules::resMan().resolveResHandle( res );
 		}
