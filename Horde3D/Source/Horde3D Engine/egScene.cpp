@@ -131,6 +131,7 @@ void SceneNode::markChildrenDirty()
 		if( !_children[i]->_dirty )
 		{	
 			_children[i]->_dirty = true;
+			_children[i]->_transformed = true;
 			_children[i]->markChildrenDirty();
 		}
 	}
