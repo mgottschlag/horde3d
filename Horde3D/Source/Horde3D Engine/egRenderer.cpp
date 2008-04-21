@@ -1185,14 +1185,14 @@ void Renderer::drawDebugAABB( const Vec3f &bbMin, const Vec3f &bbMax, bool saveS
 	
 	// Restore old states
 	glPopAttrib();
-	//glUseProgram( shader );
 	
 	if( saveStates )
 	{
+		glUseProgram( shader );
 		glBindBuffer( GL_ARRAY_BUFFER, array_buffer );
 		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, element_buffer );
-		glPopClientAttrib();
 		if( vertexArray ) glVertexPointer( vSize, vType, vStride, vArray );
+		glPopClientAttrib();
 	}
 }
 

@@ -145,8 +145,8 @@ namespace Horde3DTerrain
 			if( uni_terBlockParams >= 0 )
 				glUniform4f( uni_terBlockParams, minU, minV, scale, scale );  // Bias and scale
 		
-			uint32 size = terrain->_blockSize + 2;
-			float invScale = 1.0f / ( terrain->_blockSize - 1 );
+			const uint32 size = terrain->_blockSize + 2;
+			const float invScale = 1.0f / ( terrain->_blockSize - 1 );
 			
 			for( uint32 v = 0; v < size; ++v )
 			{	
@@ -159,8 +159,8 @@ namespace Horde3DTerrain
 					if( u == 0 ) s = 0.0f; else if( u == size - 1 ) s = 1.0f;	// Skirt
 					
 					float *vertHeight = &terrain->_heightArray[v * size + u];
-					float newU = (s * scale + minU) * (terrain->_hmapSize - 1) + 0.4f;
-					float newV = (t * scale + minV) * (terrain->_hmapSize - 1) + 0.4f;
+					const float newU = (s * scale + minU) * (terrain->_hmapSize - 1) + 0.5f;
+					const float newV = (t * scale + minV) * (terrain->_hmapSize - 1) + 0.5f;
 					uint32 index = ((int)newV * terrain->_hmapSize + (int)newU );
 					
 					*vertHeight = terrain->_heightData[index] / 65535.0f;
@@ -169,7 +169,7 @@ namespace Horde3DTerrain
 					if( v == 0 || v == size - 1 || u == 0 || u == size - 1 )
 					{
 						// Skirt can be smaller when camera is near
-						float skirtHeight = terrain->_skirtHeight * dist;
+						const float skirtHeight = terrain->_skirtHeight * dist;
 						*vertHeight = maxf( *vertHeight - skirtHeight, 0 );
 					}
 				}
