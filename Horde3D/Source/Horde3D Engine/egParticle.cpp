@@ -158,6 +158,18 @@ bool EffectResource::load( const char *data, int size )
 	return true;
 }
 
+float EffectResource::getParamf(int param)
+{
+	switch( param )
+	{
+	case EffectResParams::LifeMin:
+		return _lifeMin;
+	case EffectResParams::LifeMax:
+		return _lifeMax;
+	default:
+		return Resource::getParamf( param );
+	}
+}
 
 // *************************************************************************************************
 // EmitterNode

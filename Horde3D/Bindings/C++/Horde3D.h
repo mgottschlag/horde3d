@@ -30,7 +30,7 @@
 #	if defined( WIN32 ) || defined( _WINDOWS )
 #		define DLL extern "C" __declspec( dllimport )
 #	else
-#		define DLL
+#		define DLL extern "C"
 #	endif
 #endif
 
@@ -190,6 +190,21 @@ struct AnimationResParams
 	enum List
 	{
 		FrameCount = 300
+	};
+};
+
+struct EffectResParams
+{
+	/*	Enum: EffectResParams
+			The available Effect resource parameters.
+	  
+	   LifeMin   - minimum value for selecting random life time
+	   LifeMax	 - maximum value for selecting random life time
+	*/
+	enum List
+	{
+		LifeMin = 400,
+		LifeMax
 	};
 };
 

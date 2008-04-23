@@ -50,6 +50,15 @@ struct EmitterNodeParams
 	};
 };
 
+struct EffectResParams
+{
+	enum List
+	{
+		LifeMin = 400,
+		LifeMax
+	};
+};
+
 struct ParticleChannel
 {
 	float	startMin, startMax;
@@ -82,6 +91,8 @@ public:
 	void initDefault();
 	void release();
 	bool load( const char *data, int size );
+
+	float getParamf( int param );
 
 	friend class EmitterNode;
 };

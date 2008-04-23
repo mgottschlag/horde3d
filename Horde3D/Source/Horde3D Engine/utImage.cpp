@@ -1257,7 +1257,7 @@ static int process_frame_header(int scan)
          }
          return e("outofmem", "Out of memory");
       }
-      img_comp[i].data = (uint8*) (((int) img_comp[i].raw_data + 15) & ~15);
+	  img_comp[i].data = (uint8*) (((size_t) img_comp[i].raw_data + 15) & ~15);
       img_comp[i].linebuf = NULL;
    }
 

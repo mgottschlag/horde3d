@@ -43,13 +43,13 @@
 #	ifdef PLATFORM_WIN
 #		define DLLEXP extern "C" __declspec( dllexport )
 #	else
-#		define DLLEXP
+#		define DLLEXP extern "C"
 #	endif
 #endif
 
 #ifndef PLATFORM_WIN
 #	define _stricmp strcasecmp
-#	define _mkdir( name ) mkdir( name, -1 )
+#	define _mkdir( name ) mkdir( name, 0755 )
 #endif
 
 // The following lines will produce a compiler error if integer types have unexpected sizes

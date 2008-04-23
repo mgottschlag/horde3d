@@ -32,7 +32,7 @@
 #	if defined( WIN32 ) || defined( _WINDOWS )
 #		define DLL extern "C" __declspec( dllimport )
 #	else
-#		define DLL
+#		define DLL extern "C"
 #	endif
 #endif
 
