@@ -1236,7 +1236,7 @@ namespace Horde3D
 	*/
 	DLL int getNodeParami( NodeHandle node, int param );
 	
-	/* 	Function: setNodeParamf
+	/* 	Function: setNodeParami
 			Sets a property of a scene node.
 		
 		This function sets a specified property of the specified node to a specified value.
