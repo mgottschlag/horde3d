@@ -1563,6 +1563,8 @@ void Renderer::drawModels( const string &shaderContext, const string &theClass, 
 		{
 			MeshNode *meshNode = (MeshNode *)modelNode->_nodeList[j].node;
 
+			if( !meshNode->_active ) continue;
+
 			// Frustum culling for meshes
 			if( (frust1 != 0x0 && frust1->cullBox( meshNode->_bBox )) ||
 				(frust2 != 0x0 && frust2->cullBox( meshNode->_bBox )) )
