@@ -67,11 +67,11 @@ SceneNodeTpl *LightNode::parsingFunc( map< string, string > &attribs )
 	if( itr != attribs.end() ) lightTpl->radius = (float)atof( itr->second.c_str() );
 	itr = attribs.find( "fov" );
 	if( itr != attribs.end() ) lightTpl->fov = (float)atof( itr->second.c_str() );
-	itr = attribs.find( "col_r" );
+	itr = attribs.find( "col_R" );
 	if( itr != attribs.end() ) lightTpl->col_R = (float)atof( itr->second.c_str() );
-	itr = attribs.find( "col_r" );
+	itr = attribs.find( "col_G" );
 	if( itr != attribs.end() ) lightTpl->col_G = (float)atof( itr->second.c_str() );
-	itr = attribs.find( "col_r" );
+	itr = attribs.find( "col_B" );
 	if( itr != attribs.end() ) lightTpl->col_B = (float)atof( itr->second.c_str() );
 	itr = attribs.find( "shadowMapCount" );
 	if( itr != attribs.end() ) lightTpl->shadowMapCount = atoi( itr->second.c_str() );
