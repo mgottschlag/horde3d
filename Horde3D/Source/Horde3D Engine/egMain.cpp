@@ -667,16 +667,21 @@ namespace Horde3D
 	{
 		SceneNode *sn = Modules::sceneMan().resolveNodeHandle( node );
 		
-		if( sn != 0x0 || mat4x4 == 0x0 )
+		if( sn != 0x0 && mat4x4 != 0x0 )
 		{
 			static Matrix4f mat;
 			memcpy( mat.c, mat4x4, 16 * sizeof( float ) );
 			sn->setTransform( mat );
 			return true;
 		}
-		else
+		else if( sn == 0x0 )
 		{
 			Modules::log().writeDebugInfo( "Invalid node handle %i in setNodeTransformMatrix", node );
+			return false;
+		}
+		else 
+		{
+			Modules::log().writeDebugInfo( "Invalid transformation data in setNodeTransformMatrix", node );
 			return false;
 		}
 	}
