@@ -681,7 +681,7 @@ namespace Horde3D
 		}
 		else 
 		{
-			Modules::log().writeDebugInfo( "Invalid transformation data in setNodeTransformMatrix", node );
+			Modules::log().writeDebugInfo( "Invalid transformation data in setNodeTransformMatrix");
 			return false;
 		}
 	}
