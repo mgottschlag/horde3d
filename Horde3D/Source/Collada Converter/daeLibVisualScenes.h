@@ -35,16 +35,11 @@ using namespace std;
 
 struct DaeTransformation
 {
+	enum Type { MATRIX, TRANSLATION, ROTATION, SCALE };
 	string					sid;
+	unsigned int			type;
 	float					values[16];
-
-
-	DaeTransformation()
-	{
-		// Identity matrix
-		for( unsigned int i = 0; i < 16; ++i ) values[i] = 0;
-		for( unsigned int i = 0; i < 4; ++i ) values[i * 4 + i] = 1;
-	}
+	float					animValues[16];		// Temporary animation values
 };
 
 
@@ -57,12 +52,13 @@ struct DaeInstance
 
 struct DaeNode
 {
-	string					id, sid;
-	string					name;
-	bool					joint;
-	DaeTransformation		transMat;		// Single baked matrix, relative to parent
-	vector< DaeNode * >		children;
-	vector< DaeInstance >	instances;
+	string						id, sid;
+	string						name;
+	bool						joint;
+	
+	vector< DaeTransformation >	transStack;
+	vector< DaeNode * >			children;
+	vector< DaeInstance >		instances;
 	
 
 	bool parse( const XMLNode &nodeNode )
@@ -76,16 +72,19 @@ struct DaeNode
 		else joint = false;
 		
 		// Parse transformations
-		unsigned int numMatrices = 0;
 		int nodeItr1 = 0;
 		XMLNode node1 = nodeNode.getChildNode( nodeItr1 );
-		if( !node1.isEmpty() && node1.getName() != 0x0 )
+		while( !node1.isEmpty() )
 		{
-			if( strcmp( node1.getName(), "matrix" ) == 0 && numMatrices < 1 )
+			if( node1.getName() == 0x0 ) continue;
+
+			DaeTransformation trans;
+			trans.sid = node1.getAttribute( "sid", "" );
+			
+			if( strcmp( node1.getName(), "matrix" ) == 0 )
 			{
-				++numMatrices;
-				transMat.sid = node1.getAttribute( "sid", "" );
-				
+				trans.type = DaeTransformation::MATRIX;
+
 				unsigned int pos = 0;
 				char *s = (char *)node1.getText();
 				if( s == 0x0 ) return false;
@@ -93,18 +92,61 @@ struct DaeNode
 				{
 					float f;
 					parseFloat( s, pos, f );
-					transMat.values[i] = f;
+					trans.values[i] = f;
 				}
+
+				memcpy( trans.animValues, trans.values, 16 * sizeof( float ) );
+				transStack.push_back( trans );
 			}
-			else
+			else if( strcmp( node1.getName(), "translate" ) == 0 )
 			{
-				if( strcmp( node1.getName(), "translate" ) == 0 || strcmp( node1.getName(), "rotate" ) == 0 ||
-					strcmp( node1.getName(), "scale" ) == 0 || strcmp( node1.getName(), "skew" ) == 0 ||
-					strcmp( node1.getName(), "matrix" ) == 0 )
-				{
-					log( "Warning: Expected single baked matrix for node; use appropriate export options" );
-				}
+				trans.type = DaeTransformation::TRANSLATION;
+
+				unsigned int pos = 0;
+				char *s = (char *)node1.getText();
+				if( s == 0x0 ) continue;
+				parseFloat( s, pos, trans.values[0] );
+				parseFloat( s, pos, trans.values[1] );
+				parseFloat( s, pos, trans.values[2] );
+
+				memcpy( trans.animValues, trans.values, 16 * sizeof( float ) );
+				transStack.push_back( trans );
 			}
+			else if( strcmp( node1.getName(), "rotate" ) == 0 )
+			{
+				trans.type = DaeTransformation::ROTATION;
+
+				unsigned int pos = 0;
+				char *s = (char *)node1.getText();
+				if( s == 0x0 ) continue;
+				parseFloat( s, pos, trans.values[0] );
+				parseFloat( s, pos, trans.values[1] );
+				parseFloat( s, pos, trans.values[2] );
+				parseFloat( s, pos, trans.values[3] );
+
+				memcpy( trans.animValues, trans.values, 16 * sizeof( float ) );
+				transStack.push_back( trans );
+			}
+			else if( strcmp( node1.getName(), "scale" ) == 0 )
+			{
+				trans.type = DaeTransformation::SCALE;
+
+				unsigned int pos = 0;
+				char *s = (char *)node1.getText();
+				if( s == 0x0 ) continue;
+				parseFloat( s, pos, trans.values[0] );
+				parseFloat( s, pos, trans.values[1] );
+				parseFloat( s, pos, trans.values[2] );
+
+				memcpy( trans.animValues, trans.values, 16 * sizeof( float ) );
+				transStack.push_back( trans );
+			}
+			else if( strcmp( node1.getName(), "skew" ) == 0 )
+			{
+				log( "Warning: Unsupported transformation type" );
+			}
+
+			node1 = nodeNode.getChildNode( ++nodeItr1 );
 		}
 
 		// Parse instances
@@ -163,6 +205,66 @@ struct DaeNode
 		}
 		
 		return true;
+	}
+
+	
+	Matrix4f assembleMatrix()
+	{
+		Matrix4f mat;
+		
+		for( unsigned int i = 0; i < transStack.size(); ++i )
+		{
+			switch( transStack[i].type )
+			{
+			case DaeTransformation::MATRIX:
+				mat = mat * Matrix4f( transStack[i].values ).transposed();
+				break;
+			case DaeTransformation::TRANSLATION:
+				mat = mat * Matrix4f::TransMat( transStack[i].values[0], transStack[i].values[1],
+												transStack[i].values[2] );
+				break;
+			case DaeTransformation::ROTATION:
+				mat = mat * Matrix4f::RotMat( Vec3f( transStack[i].values[0], transStack[i].values[1],
+											  transStack[i].values[2] ), degToRad( transStack[i].values[3] ) );
+				break;
+			case DaeTransformation::SCALE:
+				mat = mat * Matrix4f::ScaleMat( transStack[i].values[0], transStack[i].values[1],
+												transStack[i].values[2] );
+				break;
+			}
+		}
+		
+		return mat;
+	}
+
+
+	Matrix4f assembleAnimMatrix()
+	{
+		Matrix4f mat;
+		
+		for( unsigned int i = 0; i < transStack.size(); ++i )
+		{
+			switch( transStack[i].type )
+			{
+			case DaeTransformation::MATRIX:
+				mat = mat * Matrix4f( transStack[i].animValues ).transposed();
+				break;
+			case DaeTransformation::TRANSLATION:
+				mat = mat * Matrix4f::TransMat( transStack[i].animValues[0], transStack[i].animValues[1],
+												transStack[i].animValues[2] );
+				break;
+			case DaeTransformation::ROTATION:
+				mat = mat * Matrix4f::RotMat( Vec3f( transStack[i].animValues[0], transStack[i].animValues[1],
+											  transStack[i].animValues[2] ), degToRad( transStack[i].animValues[3] ) );
+				break;
+			case DaeTransformation::SCALE:
+				mat = mat * Matrix4f::ScaleMat( transStack[i].animValues[0], transStack[i].animValues[1],
+												transStack[i].animValues[2] );
+				break;
+			}
+		}
+		
+		return mat;
 	}
 };
 

@@ -44,8 +44,9 @@ struct DaeSampler
 struct DaeChannel
 {
 	DaeSampler		*source;
-	string			nodeId;			// Target node
-	string			transSid;		// Target transformation channel
+	string			nodeId;				// Target node
+	string			transSid;			// Target transformation channel
+	int				transValuesIndex;	// Index in values of node transformation (-1 for no index)
 };
 
 
@@ -77,18 +78,21 @@ struct DaeAnimation
 	}
 
 	
-	DaeSampler *findAnimForTarget( const string &nodeId, const string &transSid )
+	DaeSampler *findAnimForTarget( const string &nodeId, const string &transSid, int *transValuesIndex )
 	{
 		for( unsigned int i = 0; i < channels.size(); ++i )
 		{
 			if( channels[i].nodeId == nodeId && channels[i].transSid == transSid )
+			{
+				if( transValuesIndex != 0x0 ) *transValuesIndex = channels[i].transValuesIndex;
 				return channels[i].source;
+			}
 		}
 		
 		// Parse children
 		for( unsigned int i = 0; i < children.size(); ++i )
 		{
-			DaeSampler *sampler = children[i]->findAnimForTarget( nodeId, transSid );
+			DaeSampler *sampler = children[i]->findAnimForTarget( nodeId, transSid, transValuesIndex );
 			if( sampler != 0x0 ) return sampler;
 		}
 
@@ -158,6 +162,7 @@ struct DaeAnimation
 		{
 			channels.push_back( DaeChannel() );
 			DaeChannel &channel = channels[channels.size() - 1];
+			channel.transValuesIndex = -1;
 
 			// Parse target
 			string s = node1.getAttribute( "target", "" );
@@ -165,11 +170,46 @@ struct DaeAnimation
 			if( pos != string::npos && pos != s.length() - 1 )
 			{
 				channel.nodeId = s.substr( 0, pos );
-				channel.transSid = s.substr( pos + 1, s.length() - pos );
-				if( channel.transSid.find( "(" ) != string::npos ||
-					channel.transSid.find( "." ) != string::npos )
+				channel.transSid = s.substr( pos + 1, s.length() - pos );				
+				if( channel.transSid.find( ".X" ) != string::npos )
 				{
-					log( "Warning: Animation for " + channel.nodeId + " has unsupported address syntax"  );
+					channel.transValuesIndex = 0;
+					channel.transSid = channel.transSid.substr( 0, channel.transSid.find(".") );
+				}
+				else if( channel.transSid.find( ".Y" ) != string::npos )
+				{
+					channel.transValuesIndex = 1;
+					channel.transSid = channel.transSid.substr( 0, channel.transSid.find(".") );
+				}
+				else if( channel.transSid.find( ".Z" ) != string::npos )
+				{
+					channel.transValuesIndex = 2;
+					channel.transSid = channel.transSid.substr( 0, channel.transSid.find(".") );
+				}
+				else if( channel.transSid.find( ".ANGLE" ) != string::npos )
+				{
+					channel.transValuesIndex = 3;
+					channel.transSid = channel.transSid.substr( 0, channel.transSid.find(".") );
+				}
+				else if( channel.transSid.find( '(' ) != string::npos )
+				{
+					size_t index1 = channel.transSid.find( '(' );
+					size_t index2 = channel.transSid.find( '(', index1 + 1 );
+					if( index2 == string::npos ) // we got a vector index
+					{
+						channel.transValuesIndex = atoi( 
+							channel.transSid.substr( index1 + 1, channel.transSid.find(')', index1) - ( index1 + 1) ).c_str() );
+					}
+					else // we got an array index
+					{
+						int x = atoi( channel.transSid.substr( 
+							index1 + 1, channel.transSid.find(')', index1 ) - ( index1 + 1 ) ).c_str() );
+						int y = atoi( channel.transSid.substr( 
+							index2 + 1, channel.transSid.find(')', index2 ) - ( index2 + 1 ) ).c_str() );
+						// TODO is this the correct access order? Maybe collada defines it transposed
+						channel.transValuesIndex = y * 4 + x; 
+					}
+					channel.transSid = channel.transSid.substr( 0, index1 );					
 				}
 			}
 			
@@ -226,11 +266,11 @@ struct DaeLibAnimations
 	}
 	
 
-	DaeSampler *findAnimForTarget( const string &nodeId, string const &transSid )
+	DaeSampler *findAnimForTarget( const string &nodeId, string const &transSid, int *index )
 	{
 		for( unsigned int i = 0; i < animations.size(); ++i )
 		{
-			DaeSampler *sampler = animations[i]->findAnimForTarget( nodeId, transSid );
+			DaeSampler *sampler = animations[i]->findAnimForTarget( nodeId, transSid, index );
 			if( sampler != 0x0 ) return sampler;
 		}
 

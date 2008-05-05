@@ -59,7 +59,9 @@ Converter::~Converter()
 SceneNode *Converter::processNode( ColladaDocument &doc, DaeNode &node, SceneNode *parentNode,
 								   Matrix4f transAccum, vector< Matrix4f > animTransAccum )
 {
-	// Process instances and create nodes after the following rules:
+	// Note: animTransAccum is used for pure transformation nodes of Collada that are no joints or meshes
+	
+	// Process instances and create nodes using the following rules:
 	//		* DaeJoint and no Instance -> create joint
 	//		* DaeJoint and one Instance -> create joint and mesh
 	//		* DaeJoint and several Instances -> create joint and mesh with submeshes
@@ -68,7 +70,7 @@ SceneNode *Converter::processNode( ColladaDocument &doc, DaeNode &node, SceneNod
 	//		* DaeNode and several Instances -> create mesh with submeshes
 	
 	// Assemble matrix
-	Matrix4f relMat = transAccum * makeMatrix4f( node.transMat.values, doc.y_up );
+	Matrix4f relMat = transAccum * makeMatrix4f( node.assembleMatrix().transposed().x, doc.y_up );
 	
 	SceneNode *oNode = 0x0;
 	
@@ -162,36 +164,54 @@ SceneNode *Converter::processNode( ColladaDocument &doc, DaeNode &node, SceneNod
 	else transAccum = relMat;
 
 	// Animation (assume sampled data)
-	DaeSampler *sampler = doc.libAnimations.findAnimForTarget( node.id, node.transMat.sid );
-	
-	if( sampler != 0x0 && sampler->output->floatArray.size() == _frameCount * 16 )
+	for( unsigned int i = 0; i < _frameCount; ++i )
 	{
-		for( unsigned int i = 0; i < _frameCount; ++i )
+		for( unsigned int j = 0; j < node.transStack.size(); ++j )
 		{
-			Matrix4f mat = animTransAccum[i] * makeMatrix4f( &sampler->output->floatArray[i * 16], doc.y_up );
-		
-			if( oNode != 0x0 )
+			int index;
+			DaeSampler *sampler = doc.libAnimations.findAnimForTarget( node.id, node.transStack[j].sid, &index );
+
+			if( sampler != 0x0 )
 			{
-				oNode->frames.push_back( mat );
-				animTransAccum[i] = Matrix4f();
+				if( index >= 0 )
+				{
+					if( sampler->output->floatArray.size() != _frameCount )
+						log( "Warning: Use animation sampling for export!" );
+					else
+						node.transStack[j].animValues[index] = sampler->output->floatArray[i];
+				}
+				else
+				{
+					unsigned int size = 0;
+					switch( node.transStack[j].type )
+					{
+					case DaeTransformation::MATRIX:
+						size = 16;
+						break;
+					// Note: Routine assumes that order is X, Y, Z, ANGLE
+					case DaeTransformation::SCALE:
+					case DaeTransformation::TRANSLATION:
+						size = 3;
+						break;
+					case DaeTransformation::ROTATION:
+						size = 4;
+						break;
+					}					
+					if( sampler->output->floatArray.size() != _frameCount * size )
+						log( "Warning: Use animation sampling for export!" );
+					else
+						memcpy( node.transStack[j].animValues, &sampler->output->floatArray[i * size], size * sizeof( float ) );
+				}
 			}
-			else animTransAccum[i] = mat;
-		}
-	}
-	else
-	{
-		for( unsigned int i = 0; i < _frameCount; ++i )
-		{
-			if( oNode != 0x0 )
-			{
-				oNode->frames.push_back( relMat );
-				animTransAccum[i] = Matrix4f();
-			}
-			else animTransAccum[i] = relMat;
 		}
 
-		if( sampler != 0x0 && sampler->output->floatArray.size() != _frameCount * 16 )
-			log( "Warning: Use animation sampling for export!" );
+		Matrix4f mat = animTransAccum[i] * makeMatrix4f( node.assembleAnimMatrix().transposed().x, doc.y_up );
+		if( oNode != 0x0 )
+		{
+			oNode->frames.push_back( mat );
+			animTransAccum[i] = Matrix4f();
+		}
+		else animTransAccum[i] = mat;	// Pure transformation node
 	}
 	
 	// Process children
@@ -529,7 +549,7 @@ void Converter::processMeshes( ColladaDocument &doc, bool optimize )
 
 			oTriGroup.vertREnd = (unsigned int)_vertices.size() - 1;
 			
-			// Remove degnerated triangles
+			// Remove degenerated triangles
 			unsigned int numDegTris = MeshOptimizer::removeDegeneratedTriangles( oTriGroup, _vertices, _indices );
 			if( numDegTris > 0 )
 			{
@@ -538,10 +558,6 @@ void Converter::processMeshes( ColladaDocument &doc, bool optimize )
 				log( "Removed " + ss.str() + " degenerated triangles from mesh " + _meshes[i]->daeNode->id );
 			}
 			
-			// Optimize order of indices for best vertex cache usage
-			if( optimize )
-				MeshOptimizer::optimizeIndexOrder( oTriGroup, _vertices, _indices );
-
 			_meshes[i]->triGroups.push_back( oTriGroup );
 		}
 
@@ -658,11 +674,15 @@ void Converter::processMeshes( ColladaDocument &doc, bool optimize )
 		}
 	}
 
-	// Clean up
+	// Optimization and clean up
 	for( unsigned int i = 0; i < _meshes.size(); ++i )
 	{
 		for( unsigned int j = 0; j < _meshes[i]->triGroups.size(); ++j )
 		{
+			// Optimize order of indices for best vertex cache usage
+			if( optimize )
+				MeshOptimizer::optimizeIndexOrder( _meshes[i]->triGroups[j], _vertices, _indices );
+			
 			delete[] _meshes[i]->triGroups[j].posIndexToVertices;
 			_meshes[i]->triGroups[j].posIndexToVertices = 0x0;
 		}

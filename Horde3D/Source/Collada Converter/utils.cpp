@@ -152,7 +152,7 @@ void log( const string &msg )
 Matrix4f makeMatrix4f( float *floatArray16, bool y_up )
 {
 	Matrix4f mat( floatArray16 );
-	mat = mat.transposed();
+	mat = mat.transposed();		// Expects floatArray16 to be row-major
 
 	// Flip matrix if necessary
 	if( !y_up )
