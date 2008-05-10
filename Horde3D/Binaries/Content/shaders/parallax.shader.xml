@@ -56,7 +56,7 @@
 					vec3 eye = normalize( eyeTS );
 					for( int i = 0; i < 4; ++i )
 					{
-						vec4 nmap = texture2D( tex1, texCoords.st );
+						vec4 nmap = texture2D( tex1, newCoords.st );
 						float height = nmap.a * plxScale + plxBias;
 						newCoords += (height - newCoords.p) * nmap.z * eye;
 					}
@@ -108,7 +108,7 @@
 				
 				void main( void )
 				{
-					gl_FragDepth = dist + shadowBias;
+					gl_FragDepth =  dist + abs( dFdx( dist ) ) + abs( dFdy( dist ) ) + shadowBias;
 				}
 			]]>
 			</DefCode>
@@ -176,7 +176,7 @@
 					vec3 eye = normalize( eyeTS );
 					for( int i = 0; i < 4; ++i )
 					{
-						vec4 nmap = texture2D( tex1, texCoords.st );
+						vec4 nmap = texture2D( tex1, newCoords.st );
 						float height = nmap.a * plxScale + plxBias;
 						newCoords += (height - newCoords.p) * nmap.z * eye;
 					}
@@ -257,7 +257,7 @@
 					vec3 eye = normalize( eyeTS );
 					for( int i = 0; i < 4; ++i )
 					{
-						vec4 nmap = texture2D( tex1, texCoords.st );
+						vec4 nmap = texture2D( tex1, newCoords.st );
 						float height = nmap.a * plxScale + plxBias;
 						newCoords += (height - newCoords.p) * nmap.z * eye;
 					}
