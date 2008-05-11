@@ -108,7 +108,10 @@
 				
 				void main( void )
 				{
-					gl_FragDepth =  dist + abs( dFdx( dist ) ) + abs( dFdy( dist ) ) + shadowBias;
+					gl_FragDepth = dist + shadowBias;
+					
+					// Clearly better bias but requires SM 3.0
+					// gl_FragDepth =  dist + abs( dFdx( dist ) ) + abs( dFdy( dist ) ) + shadowBias;
 				}
 			]]>
 			</DefCode>
