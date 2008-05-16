@@ -51,7 +51,7 @@ struct DaeImage
 			return false;
 
 		// Extract filename from path
-		fileName = extractFileName( fileName, true );
+		fileName = extractFileName( urlDecode( fileName ), true );
 		
 		return true;
 	}
