@@ -144,7 +144,7 @@ protected:
 	void drawRenderables( const string &shaderContext, const string &theClass, bool debugView,
 		const Frustum *frust1, const Frustum *frust2, RenderingOrder::List order, int occSet );
 	
-	Matrix4f calcLightMat( const Frustum &frustum, bool allowCropping );
+	Matrix4f calcLightMat( const Frustum &frustum );
 	void updateShadowMap();
 	void setupShadowMap( bool noShadows );
 

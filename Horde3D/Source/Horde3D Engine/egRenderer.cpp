@@ -613,44 +613,69 @@ void Renderer::destroyShadowBuffer()
 }
 
 
-Matrix4f Renderer::calcLightMat( const Frustum &frustum, bool allowCropping )
+Matrix4f Renderer::calcLightMat( const Frustum &frustum )
 {
-	float projMat[16];
+	// Find bounding box of visible geometry
+	Modules::sceneMan().updateQueues( frustum, 0x0, RenderingOrder::None, false, true );
+	BoundingBox bBox;
+	for( size_t j = 0, s = Modules::sceneMan().getRenderableQueue().size(); j < s; ++j )
+	{
+		bBox.makeUnion( Modules::sceneMan().getRenderableQueue()[j]->getBBox() ); 
+	}
 	
+	// Get light matrix
+	float projMat[16];
 	glMatrixMode( GL_PROJECTION );
 	glLoadIdentity();
 	myPerspective( _curLight->_fov, 1, _curCamera->_frustNear, _curLight->_radius );
 	glGetFloatv( GL_PROJECTION_MATRIX, projMat );
 	glMatrixMode( GL_MODELVIEW );
 
-	if( !allowCropping ) return Matrix4f( projMat );
-
 	Matrix4f lightMat = Matrix4f( projMat ) * _curLight->_invTrans;
 
-	float minX =  Math::MaxFloat;
-    float minY =  Math::MaxFloat;
-	float minZ =  Math::MaxFloat;
-	float maxX = -Math::MaxFloat;
-    float maxY = -Math::MaxFloat;
-	float maxZ = -Math::MaxFloat;
+	// Get frustum and bounding box extents in post-projective space
+	float frustMinX =  Math::MaxFloat, bbMinX =  Math::MaxFloat;
+    float frustMinY =  Math::MaxFloat, bbMinY =  Math::MaxFloat;
+	float frustMinZ =  Math::MaxFloat, bbMinZ =  Math::MaxFloat;
+	float frustMaxX = -Math::MaxFloat, bbMaxX = -Math::MaxFloat;
+    float frustMaxY = -Math::MaxFloat, bbMaxY = -Math::MaxFloat;
+	float frustMaxZ = -Math::MaxFloat, bbMaxZ = -Math::MaxFloat;
 	
 	for( uint32 i = 0; i < 8; ++i )
 	{
+		// Frustum
 		Vec4f v1 = lightMat * Vec4f( frustum.getCorner( i ) );
 		v1.w = fabs( v1.w );	// Use absolute value to reduce problems with back projection when v1.w < 0
+		v1.x /= v1.w; v1.y /= v1.w; v1.z /= v1.w;
 
-		v1.x /= v1.w;
-		v1.y /= v1.w;
-		v1.z /= v1.w;
+		if( v1.x < frustMinX ) frustMinX = v1.x;
+		if( v1.y < frustMinY ) frustMinY = v1.y;
+		if( v1.z < frustMinZ ) frustMinZ = v1.z;
+		if( v1.x > frustMaxX ) frustMaxX = v1.x;
+		if( v1.y > frustMaxY ) frustMaxY = v1.y;
+		if( v1.z > frustMaxZ ) frustMaxZ = v1.z;
 
-		if( v1.x < minX ) minX = v1.x;
-		if( v1.y < minY ) minY = v1.y;
-		if( v1.z < minZ ) minZ = v1.z;
-		if( v1.x > maxX ) maxX = v1.x;
-		if( v1.y > maxY ) maxY = v1.y;
-		if( v1.z > maxZ ) maxZ = v1.z;
+		// Bounding box
+		v1 = lightMat * Vec4f( bBox.getCorner( i ) );
+		v1.w = fabs( v1.w );
+		v1.x /= v1.w; v1.y /= v1.w; v1.z /= v1.w;
+
+		if( v1.x < bbMinX ) bbMinX = v1.x;
+		if( v1.y < bbMinY ) bbMinY = v1.y;
+		if( v1.z < bbMinZ ) bbMinZ = v1.z;
+		if( v1.x > bbMaxX ) bbMaxX = v1.x;
+		if( v1.y > bbMaxY ) bbMaxY = v1.y;
+		if( v1.z > bbMaxZ ) bbMaxZ = v1.z;
 	}
 
+	// Combine frustum and bounding box
+	float minX = max( frustMinX, bbMinX );
+	float minY = max( frustMinY, bbMinY );
+	float minZ = min( frustMinZ, bbMinZ );
+	float maxX = min( frustMaxX, bbMaxX );
+	float maxY = min( frustMaxY, bbMaxY );
+	float maxZ = min( frustMaxZ, bbMaxZ );
+	
 	// Clamp the min and max values to post projection range [-1, 1]
 	minX = clamp( minX, -1, 1 );
 	minY = clamp( minY, -1, 1 );
@@ -658,9 +683,6 @@ Matrix4f Renderer::calcLightMat( const Frustum &frustum, bool allowCropping )
 	maxX = clamp( maxX, -1, 1 );
 	maxY = clamp( maxY, -1, 1 );
 	maxZ = clamp( maxZ, -1, 1 );
-
-	// Don't change near plane so that shadow casters don't get culled
-	minZ = 0.0f;
 
 	// Zoom in current split and create appropriate matrix
 	Matrix4f cropView;
@@ -701,13 +723,19 @@ void Renderer::updateShadowMap()
 
 	Frustum splitFrust;
 	
+	// Find bounding box of lit geometry
+	_curLight->genFrustum( _lightFrustum );
+	Modules::sceneMan().updateQueues( _lightFrustum, 0x0, RenderingOrder::None, false, true );
+	BoundingBox bBox;
+	for( size_t j = 0, s = Modules::sceneMan().getRenderableQueue().size(); j < s; ++j )
+	{
+		bBox.makeUnion( Modules::sceneMan().getRenderableQueue()[j]->getBBox() ); 
+	}
 	// Adjust camera planes
-	// Node: This can be improved to include solely lit and visible geometry
-	BoundingBox &bb = Modules::sceneMan().getRootNode().getBBox();
 	float minDist = Math::MaxFloat, maxDist = 0.0f;
 	for( uint32 i = 0; i < 8; ++i )
 	{
-		float dist = -(_curCamera->_invTrans * bb.getCorner( i )).z;
+		float dist = -(_curCamera->_invTrans * bBox.getCorner( i )).z;
 		if( dist < minDist ) minDist = dist;
 		if( dist > maxDist ) maxDist = dist;
 	}
@@ -760,9 +788,9 @@ void Renderer::updateShadowMap()
 										_curCamera->_frustBottom, _curCamera->_frustTop,
 										-_splitPlanes[i], -_splitPlanes[i + 1] );
 		}
-	
-		// Build light projection matrix (no cropping for single map)
-		_lightMats[i] = calcLightMat( splitFrust, numMaps > 1 );
+		
+		// Build light projection matrix
+		_lightMats[i] = calcLightMat( splitFrust );
 		glMatrixMode( GL_PROJECTION );
 		glLoadMatrixf( &_lightMats[i].x[0] );
 		
