@@ -276,6 +276,7 @@ void EmitterNode::setMaxParticleCount( uint32 maxParticleCount )
 	delete[] _parColors; _parColors = 0x0;
 	
 	// Initialize particles
+	_particleCount = maxParticleCount;
 	_particles = new ParticleData[_particleCount];
 	_parPositions = new Vec3f[_particleCount];
 	_parSizesANDRotations = new float[_particleCount * 2];
