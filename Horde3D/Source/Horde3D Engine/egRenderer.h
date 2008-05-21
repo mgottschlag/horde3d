@@ -39,29 +39,10 @@ struct ShaderContext;
 
 const uint32 ParticlesPerBatch = 64;	// Warning: The GPU must have enough registers
 
-static const char *vsDefColor =
-	"uniform mat4 worldMat;\n"
-	"varying vec4 color;\n"
-	"void main() {\n"
-	"	color = gl_Color;\n"
-	"	gl_Position = gl_ModelViewProjectionMatrix * worldMat * gl_Vertex;\n"
-	"}\n";
-
-static const char *fsDefColor =
-	"varying vec4 color;\n"
-	"void main() {\n"
-	"	gl_FragColor = color;\n"
-	"}\n";
-
-static const char *vsOccBox =
-	"void main() {\n"
-	"	gl_Position = ftransform();\n"
-	"}\n";
-
-static const char *fsOccBox =
-	"void main() {\n"
-	"	gl_FragColor = vec4( 1, 0, 0, 0 );\n"
-	"}\n";
+extern const char *vsDefColor;
+extern const char *fsDefColor;
+extern const char *vsOccBox;
+extern const char *fsOccBox;	
 	
 
 struct Overlay

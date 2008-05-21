@@ -35,6 +35,30 @@
 
 #include "utDebug.h"
 
+const char *vsDefColor =
+	"uniform mat4 worldMat;\n"
+	"varying vec4 color;\n"
+	"void main() {\n"
+	"	color = gl_Color;\n"
+	"	gl_Position = gl_ModelViewProjectionMatrix * worldMat * gl_Vertex;\n"
+	"}\n";
+
+const char *fsDefColor =
+	"varying vec4 color;\n"
+	"void main() {\n"
+	"	gl_FragColor = color;\n"
+	"}\n";
+
+const char *vsOccBox =
+	"void main() {\n"
+	"	gl_Position = ftransform();\n"
+	"}\n";
+
+const char *fsOccBox =
+	"void main() {\n"
+	"	gl_FragColor = vec4( 1, 0, 0, 0 );\n"
+	"}\n";
+
 
 ShaderContext Renderer::defColorShader;
 ShaderContext Renderer::occShader;

@@ -43,7 +43,7 @@ struct RenderBufferFormats
 
 struct RenderBuffer
 {
-	static const int MaxColorAttachmentCount = 4;
+	static const uint32 MaxColorAttachmentCount = 4;
 
 	uint32	fbo;
 	uint32	width, height;

@@ -34,7 +34,7 @@
 #include "egExtensions.h"
 
 
-static const char *versionString = "Horde3D 1.0.0 Beta1";
+extern const char *versionString;
 
 
 class Modules

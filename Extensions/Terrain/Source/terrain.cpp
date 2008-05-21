@@ -29,6 +29,24 @@
 
 namespace Horde3DTerrain
 {
+	const char *vsTerrainDebugView =
+		"uniform mat4 worldMat;\n"
+		"uniform vec4 terBlockParams;\n"
+		"attribute float terHeight;\n"
+		"varying vec4 color;\n"
+		"void main() {\n"
+		"	color = gl_Color;\n"
+		"	gl_Position = gl_ModelViewProjectionMatrix * worldMat *"
+		"		vec4( gl_Vertex.x * terBlockParams.z + terBlockParams.x, terHeight, "
+		"			  gl_Vertex.z * terBlockParams.z + terBlockParams.y, gl_Vertex.w );\n"
+		"}";
+
+	const char *fsTerrainDebugView =
+		"varying vec4 color;\n"
+		"void main() {\n"
+		"	gl_FragColor = color;\n"
+		"}\n";
+
 	ShaderContext TerrainNode::debugViewShader;
 
 	
