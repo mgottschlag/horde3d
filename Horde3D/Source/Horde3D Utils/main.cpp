@@ -37,6 +37,9 @@
 #include <fstream>
 using namespace std;
 
+#ifdef __MINGW32__
+#undef PLATFORM_WIN
+#endif
 
 namespace Horde3DUtils
 {
@@ -462,7 +465,7 @@ namespace Horde3DUtils
 // *************************************************************************************************
 
 #ifdef PLATFORM_WIN
-BOOL APIENTRY DllMain( HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserved )
+BOOL APIENTRY DllMain( HANDLE /*hModule*/, DWORD ul_reason_for_call, LPVOID /*lpReserved*/ )
 {
    switch( ul_reason_for_call )
 	{

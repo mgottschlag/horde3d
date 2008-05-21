@@ -707,7 +707,7 @@ void RendererBase::beginOccQuery( uint32 queryId )
 }
 
 
-void RendererBase::endOccQuery( uint32 queryId )
+void RendererBase::endOccQuery( uint32 /*queryId*/ )
 {
 	glEndQuery( GL_SAMPLES_PASSED );
 }

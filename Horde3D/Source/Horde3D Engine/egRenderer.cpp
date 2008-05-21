@@ -757,7 +757,7 @@ void Renderer::updateShadowMap()
 	for( uint32 i = 1; i < numMaps; i++ )
 	{
 		float f = i / (float)numMaps;
-		float log = nearDist * powf( farDist / nearDist, f );
+		float log = nearDist * pow( farDist / nearDist, f );
 		float uni = nearDist + (farDist - nearDist) * f;
 		
 		_splitPlanes[i] = t * log + (1 - t) * uni;
@@ -1686,7 +1686,7 @@ void Renderer::drawModels( const string &shaderContext, const string &theClass, 
 
 
 void Renderer::drawParticles( const string &shaderContext, const string &theClass, bool debugView,
-							  const Frustum *frust1, const Frustum *frust2, RenderingOrder::List order,
+							  const Frustum *frust1, const Frustum * /*frust2*/, RenderingOrder::List /*order*/,
 							  int occSet )
 {
 	if( frust1 == 0x0 ) return;

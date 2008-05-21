@@ -94,31 +94,31 @@ const void SceneNode::getTransMatrices( const float **relMat, const float **absM
 }
 
 
-float SceneNode::getParamf( int param )
+float SceneNode::getParamf( int /*param*/ )
 {
 	return Math::NaN;
 }
 
 
-bool SceneNode::setParamf( int param, float value )
+bool SceneNode::setParamf( int /*param*/, float /*value*/ )
 {
 	return false;
 }
 
 
-int SceneNode::getParami( int param )
+int SceneNode::getParami( int /*param*/ )
 {
 	return Math::MinInt32;
 }
 
 
-bool SceneNode::setParami( int param, int value )
+bool SceneNode::setParami( int /*param*/, int /*value*/ )
 {
 	return false;
 }
 
 
-bool SceneNode::canAttach( SceneNode &parent )
+bool SceneNode::canAttach( SceneNode &/*parent*/ )
 {
 	return true;
 }
@@ -207,7 +207,7 @@ bool SceneNode::update()
 }
 
 
-bool SceneNode::checkIntersection( const Vec3f &rayOrig, const Vec3f &rayDir, Vec3f &intsPos ) const
+bool SceneNode::checkIntersection( const Vec3f &/*rayOrig*/, const Vec3f &/*rayDir*/, Vec3f &/*intsPos*/ ) const
 {
 	return false;
 }
@@ -223,12 +223,12 @@ void SceneNode::onPostUpdate()
 }
 
 
-void SceneNode::onAttach( SceneNode &parentNode )
+void SceneNode::onAttach( SceneNode &/*parentNode*/ )
 {
 }
 
 
-void SceneNode::onDetach( SceneNode &parentNode )
+void SceneNode::onDetach( SceneNode &/*parentNode*/ )
 {
 }
 

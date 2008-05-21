@@ -1083,7 +1083,7 @@ namespace Horde3D
 
 
 #ifdef PLATFORM_WIN
-BOOL APIENTRY DllMain( HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserved )
+BOOL APIENTRY DllMain( HANDLE /*hModule*/, DWORD /*ul_reason_for_call*/, LPVOID /*lpReserved*/ )
 {
 	#if defined( _MSC_VER ) && defined( _DEBUG )
 	//_crtBreakAlloc = 1397;

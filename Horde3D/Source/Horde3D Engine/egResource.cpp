@@ -104,25 +104,25 @@ void Resource::unload()
 }
 
 
-int Resource::getParami( int param )
+int Resource::getParami( int /*param*/ )
 {
 	return 0;
 }
 
 
-float Resource::getParamf( int param )
+float Resource::getParamf( int /*param*/ )
 {
 	return 0.0f;
 }
 
 
-const void *Resource::getData( int param )
+const void *Resource::getData( int /*param*/ )
 {
 	return 0x0;
 }
 
 
-bool Resource::updateData( int param, const void *data, int size )
+bool Resource::updateData( int /*param*/, const void * /*data*/, int /*size*/ )
 {
 	return false;
 }

@@ -215,7 +215,7 @@ void MeshNode::onAttach( SceneNode &parentNode )
 }
 
 
-void MeshNode::onDetach( SceneNode &parentNode )
+void MeshNode::onDetach( SceneNode &/*parentNode*/ )
 {
 	if( _parentModel != 0x0 ) _parentModel->markNodeListDirty();
 }
@@ -351,7 +351,7 @@ void JointNode::onAttach( SceneNode &parentNode )
 }
 
 
-void JointNode::onDetach( SceneNode &parentNode )
+void JointNode::onDetach( SceneNode &/*parentNode*/ )
 {
 	if( _parentModel != 0x0 ) _parentModel->markNodeListDirty();
 }

@@ -15,9 +15,9 @@ void OptVertex::updateScore( int cacheIndex )
 	// The constants used here are coming from the paper
 	if( cacheIndex < 0 ) score = 0;				// Not in cache
 	else if( cacheIndex < 3 ) score = 0.75f;	// Among three most recent vertices
-	else score = powf( 1.0f - ((cacheIndex - 3) / MeshOptimizer::OptCacheSize), 1.5f );
+	else score = pow( 1.0f - ((cacheIndex - 3) / MeshOptimizer::OptCacheSize), 1.5f );
 
-	score += 2.0f * powf( (float)faces.size(), -0.5f );
+	score += 2.0f * pow( (float)faces.size(), -0.5f );
 }
 
 
