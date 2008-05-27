@@ -11,7 +11,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Horde3D\readme.txt = Horde3D\readme.txt
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Horde3D Engine", "Horde3D\Source\Horde3D Engine\Horde3D Engine.vcproj", "{1D558D7D-DA57-4908-BCFC-902054FE6B63}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Horde3D Engine", "Horde3D\Source\Horde3DEngine\Horde3D Engine.vcproj", "{1D558D7D-DA57-4908-BCFC-902054FE6B63}"
 	ProjectSection(WebsiteProperties) = preProject
 		Debug.AspNetCompiler.Debug = "True"
 		Release.AspNetCompiler.Debug = "False"
@@ -20,7 +20,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Horde3D Engine", "Horde3D\S
 		{7D7F9530-C61A-4BF2-B1C8-DE9D369880B6} = {7D7F9530-C61A-4BF2-B1C8-DE9D369880B6}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Collada Converter", "Horde3D\Source\Collada Converter\Collada Converter.vcproj", "{17F40F35-7889-4373-AF53-EA87B9009556}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Collada Converter", "Horde3D\Source\ColladaConverter\Collada Converter.vcproj", "{17F40F35-7889-4373-AF53-EA87B9009556}"
 	ProjectSection(WebsiteProperties) = preProject
 		Debug.AspNetCompiler.Debug = "True"
 		Release.AspNetCompiler.Debug = "False"
@@ -62,7 +62,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Sample Terrain", "Extension
 		{AE8EB9B3-D2C2-4372-AB4B-FC980EE69D2D} = {AE8EB9B3-D2C2-4372-AB4B-FC980EE69D2D}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Horde3D Utils", "Horde3D\Source\Horde3D Utils\Horde3D Utils.vcproj", "{AE8EB9B3-D2C2-4372-AB4B-FC980EE69D2D}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Horde3D Utils", "Horde3D\Source\Horde3DUtils\Horde3D Utils.vcproj", "{AE8EB9B3-D2C2-4372-AB4B-FC980EE69D2D}"
 	ProjectSection(WebsiteProperties) = preProject
 		Debug.AspNetCompiler.Debug = "True"
 		Release.AspNetCompiler.Debug = "False"
