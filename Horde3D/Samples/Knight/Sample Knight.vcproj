@@ -40,7 +40,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)../../Bindings/C++&quot;;&quot;$(ProjectDir)../../Dependencies/Include&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)../../Bindings/C++&quot;;&quot;$(ProjectDir)../../Dependencies/glfw/include/GL&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -65,7 +65,7 @@
 				AdditionalDependencies="GLFW.lib OpenGL32.lib Horde3D_vc8.lib Horde3DUtils_vc8.lib"
 				OutputFile="$(OutDir)\$(RootNamespace).exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;$(ProjectDir)../../Bindings/C++&quot;;&quot;$(ProjectDir)../../Dependencies/Libs_VC8&quot;"
+				AdditionalLibraryDirectories="&quot;$(ProjectDir)../../Bindings/C++&quot;;&quot;$(ProjectDir)../../Dependencies/Libs&quot;"
 				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -122,7 +122,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)../../Bindings/C++&quot;;&quot;$(ProjectDir)../../Dependencies/Include&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)../../Bindings/C++&quot;;&quot;$(ProjectDir)../../Dependencies/glfw/include/GL&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"
@@ -145,7 +145,7 @@
 				AdditionalDependencies="GLFW.lib OpenGL32.lib Horde3D_vc8.lib Horde3DUtils_vc8.lib"
 				OutputFile="$(OutDir)\$(RootNamespace).exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;$(ProjectDir)../../Bindings/C++&quot;;&quot;$(ProjectDir)../../Dependencies/Libs_VC8&quot;"
+				AdditionalLibraryDirectories="&quot;$(ProjectDir)../../Bindings/C++&quot;;&quot;$(ProjectDir)../../Dependencies/Libs&quot;"
 				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="true"
 				SubSystem="2"

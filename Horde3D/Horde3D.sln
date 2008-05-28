@@ -29,6 +29,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Sample Chicago", "Samples\C
 		Release.AspNetCompiler.Debug = "False"
 	EndProjectSection
 	ProjectSection(ProjectDependencies) = postProject
+		{2A423B83-D582-49BA-A45F-E27148099850} = {2A423B83-D582-49BA-A45F-E27148099850}
 		{1D558D7D-DA57-4908-BCFC-902054FE6B63} = {1D558D7D-DA57-4908-BCFC-902054FE6B63}
 		{AE8EB9B3-D2C2-4372-AB4B-FC980EE69D2D} = {AE8EB9B3-D2C2-4372-AB4B-FC980EE69D2D}
 	EndProjectSection
@@ -41,6 +42,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Sample Knight", "Samples\Kn
 	ProjectSection(ProjectDependencies) = postProject
 		{AE8EB9B3-D2C2-4372-AB4B-FC980EE69D2D} = {AE8EB9B3-D2C2-4372-AB4B-FC980EE69D2D}
 		{1D558D7D-DA57-4908-BCFC-902054FE6B63} = {1D558D7D-DA57-4908-BCFC-902054FE6B63}
+		{2A423B83-D582-49BA-A45F-E27148099850} = {2A423B83-D582-49BA-A45F-E27148099850}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Horde3D Utils", "Source\Horde3DUtils\Horde3D Utils.vcproj", "{AE8EB9B3-D2C2-4372-AB4B-FC980EE69D2D}"
@@ -50,6 +52,12 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Horde3D Utils", "Source\Hor
 	EndProjectSection
 	ProjectSection(ProjectDependencies) = postProject
 		{1D558D7D-DA57-4908-BCFC-902054FE6B63} = {1D558D7D-DA57-4908-BCFC-902054FE6B63}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "glfw", "Dependencies\glfw\glfw.vcproj", "{2A423B83-D582-49BA-A45F-E27148099850}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
 	EndProjectSection
 EndProject
 Global
@@ -78,6 +86,10 @@ Global
 		{AE8EB9B3-D2C2-4372-AB4B-FC980EE69D2D}.Debug|Win32.Build.0 = Debug|Win32
 		{AE8EB9B3-D2C2-4372-AB4B-FC980EE69D2D}.Release|Win32.ActiveCfg = Release|Win32
 		{AE8EB9B3-D2C2-4372-AB4B-FC980EE69D2D}.Release|Win32.Build.0 = Release|Win32
+		{2A423B83-D582-49BA-A45F-E27148099850}.Debug|Win32.ActiveCfg = Debug|Win32
+		{2A423B83-D582-49BA-A45F-E27148099850}.Debug|Win32.Build.0 = Debug|Win32
+		{2A423B83-D582-49BA-A45F-E27148099850}.Release|Win32.ActiveCfg = Release|Win32
+		{2A423B83-D582-49BA-A45F-E27148099850}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

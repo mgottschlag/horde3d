@@ -18,6 +18,7 @@
 
 #include "Horde3D.h"
 #include <sstream>
+#include <string>
 using namespace std;
 
 
@@ -38,11 +39,13 @@ private:
 	ResHandle		_pipeRes, _fontMatRes, _logoMatRes, _hdrPipeRes, _forwardPipeRes;
 	NodeHandle		_cam, _knight, _particleSys;
 
+	string			_contentDir;
+
 	void keyHandler();
 
 public:
 	
-	Application();
+	Application( const string &contentDir );
 	
 	bool init();
 	void mainLoop( float fps );

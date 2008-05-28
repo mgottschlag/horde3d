@@ -18,6 +18,7 @@
 
 #include "Horde3D.h"
 #include <vector>
+#include <string>
 using namespace std;
 
 
@@ -44,11 +45,13 @@ class CrowdSim
 {
 private:
 
+	string				_contentDir;
 	vector< Particle >	_particles;
 
 	void chooseDestination( Particle &p );
 
 public:
+	CrowdSim( const string& contentDir ) : _contentDir( contentDir ) {}
 
 	void init();
 	void update( float fps );

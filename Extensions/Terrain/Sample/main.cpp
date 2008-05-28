@@ -14,10 +14,8 @@
 // *************************************************************************************************
 
 #include <iostream>
-#define GLFW_DLL
 #include "glfw.h"
 #include "app.h"
-
 
 // Configuration
 const char *caption = "Terrain - Horde3D Extension Sample";
@@ -31,6 +29,17 @@ static bool running;
 static double t0;
 static int mx0, my0;
 static Application *app;
+
+string generatePath(char p[], const string& file) {
+    const string s( p );
+    if ( s.find("/") != string::npos) {
+        return s.substr( 0, s.rfind( "/" ) ) + "/" + file;
+    } else if ( s.find("\\") != string::npos ) {
+        return s.substr( 0, s.rfind( "\\" ) ) + "\\" + file;
+    } else {
+        return file;
+    }
+}
 
 
 int GLFWCALL windowCloseListener()
@@ -139,15 +148,18 @@ bool setupWindow( int width, int height, bool fullscreen )
 	return true;
 }
 
-
-int main()
+int main( int argc, char** argv )
 {
+   
 	// Initialize GLFW
 	glfwInit();
 	if( !setupWindow( appWidth, appHeight, fullScreen ) ) return -1;
 	
 	// Initalize application and engine
-	app = new Application();
+	app = new Application( 
+		generatePath( argv[0], "../Content" ) + "|" + 
+		generatePath(argv[0], "../../../Extensions/Terrain/Sample/Content") );
+
 	if ( !app->init() )
 	{
 		// Fake message box

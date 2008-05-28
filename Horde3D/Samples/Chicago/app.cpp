@@ -27,7 +27,7 @@ inline float degToRad( float f )
 }
 
 
-Application::Application()
+Application::Application( const string &contentDir )
 {
 	for( unsigned int i = 0; i < 320; ++i ) _keys[i] = false;
 
@@ -36,6 +36,8 @@ Application::Application()
 
 	_freeze = false; _showFPS = false; _debugViewMode = false; _wireframeMode = false;
 	_cam = 0;
+
+	_contentDir = contentDir;
 }
 
 
@@ -83,7 +85,7 @@ bool Application::init()
 	ResHandle skyBoxRes = Horde3D::addResource( ResourceTypes::SceneGraph, "skybox.scene.xml", 0 );
 	
 	// Load resources
-	Horde3DUtils::loadResourcesFromDisk( "../Content" );
+	Horde3DUtils::loadResourcesFromDisk( _contentDir.c_str() );
 
 	// Add scene nodes
 	// Add camera
@@ -107,7 +109,7 @@ bool Application::init()
 	Horde3D::setNodeParamf( light, LightNodeParams::Col_G, 0.7f );
 	Horde3D::setNodeParamf( light, LightNodeParams::Col_B, 0.75f );
 
-	_crowdSim = new CrowdSim();
+	_crowdSim = new CrowdSim( _contentDir );
 	_crowdSim->init();
 
 	return true;

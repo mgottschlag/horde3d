@@ -25,16 +25,33 @@
 #include "egExtensions.h"
 
 // Include files for extensions
-#include "Terrain/Source/extension.h"
 
+#ifdef CMAKE
+
+#include "egExtensions_auto_include.h"
+
+#else
+
+#include "Terrain/Source/extension.h"
 // Lib files for extensions
 #pragma comment( lib, "Extension_Terrain.lib" )
+
+#endif
 
 
 bool ExtensionManager::installExtensions()
 {
 	// Install desired extensions here
-	installExtension( Horde3DTerrain::getExtensionName, Horde3DTerrain::initExtension, Horde3DTerrain::releaseExtension );
+
+#ifdef CMAKE
+
+	#include "egExtensions_auto_install.h"
 	
+#else
+	
+	installExtension( Horde3DTerrain::getExtensionName, Horde3DTerrain::initExtension, Horde3DTerrain::releaseExtension );
+
+#endif
+
 	return true;
 }

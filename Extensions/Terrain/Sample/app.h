@@ -18,6 +18,7 @@
 
 #include "Horde3D.h"
 #include <sstream>
+#include <string>
 using namespace std;
 
 
@@ -37,11 +38,13 @@ private:
 	ResHandle		_fontMatRes, _logoMatRes;
 	NodeHandle		_cam;
 
+	string			_contentDir;
+
 	void keyHandler();
 
 public:
 	
-	Application();
+	Application( const string &contentDir );
 	
 	bool init();
 	void mainLoop( float fps );

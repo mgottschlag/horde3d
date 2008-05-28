@@ -27,7 +27,7 @@ inline float degToRad( float f )
 }
 
 
-Application::Application()
+Application::Application( const string &contentDir )
 {
 	for( unsigned int i = 0; i < 320; ++i ) _keys[i] = false;
 
@@ -37,6 +37,8 @@ Application::Application()
 	_freeze = false; _showFPS = false; _debugViewMode = false; _wireframeMode = false;
 	_animTime = 0; _weight = 1.0f;
 	_cam = 0;
+
+	_contentDir = contentDir;
 }
 
 
@@ -86,7 +88,7 @@ bool Application::init()
 	ResHandle particleSysRes = Horde3D::addResource( ResourceTypes::SceneGraph, "particleSys1.scene.xml", 0 );
 	
 	// Load resources
-	Horde3DUtils::loadResourcesFromDisk( "../Content" );
+	Horde3DUtils::loadResourcesFromDisk( _contentDir.c_str() );
 
 	// Add scene nodes
 	// Add camera
