@@ -635,21 +635,21 @@ namespace Horde3DTerrain
 		if( t1 > t2 ) return false;
 
 		float startX = minf( 1, maxf( 0, orig.x + t1 * dir.x ) );
-		float startY = minf( 1, maxf( 0, orig.z + t1 * dir.z ) );
+		float startZ = minf( 1, maxf( 0, orig.z + t1 * dir.z ) );
 		float endX = minf( 1, maxf( 0, orig.x + t2 * dir.x ) );
-		float endY = minf( 1, maxf( 0, orig.z + t2 * dir.z ) );
+		float endZ = minf( 1, maxf( 0, orig.z + t2 * dir.z ) );
 
 		dir /= dir.length();
 
 		int x = (int)(startX * _hmapSize);
-		int y = (int)(startY * _hmapSize);
+		int y = (int)(startZ * _hmapSize);
 
 		// Check heightmap with Bresenham algorithm (code based on http://de.wikipedia.org/wiki/Bresenham-Algorithmus)
 		int t, dx, dy, incX, incY, pdx, pdy, ddx, ddy, err_step_fast, err_step_slow, err;
 
 		// Get deltas in image space
 		dx = (int)((endX - startX) * _hmapSize);
-		dy = (int)((endY - startY) * _hmapSize);
+		dy = (int)((endZ - startZ) * _hmapSize);
 
 		// Check directions
 		incX = (dx > 0) ? 1 : (dx < 0) ? -1 : 0;
@@ -676,8 +676,24 @@ namespace Horde3DTerrain
 		float height1 = _heightData[y * _hmapSize + x] / 65535.0f, height2;
 
 		Vec3f pos;
-		Vec3f prevPos( startX, (dir.y * (startY - orig.z) + dir.z * orig.y) / dir.z, startY );
-
+		Vec3f prevPos;
+		
+		// Check for perpendicular ray
+		if( fabs(dir.z) <= Math::Epsilon && fabs(dir.x) <= Math::Epsilon )
+		{
+			if( (height1 < orig.y && height1 > dir.y) || (height1 > orig.y && height1 < dir.y) )
+			{
+				intsPos = _absTrans * Vec3f(orig.x, height1, orig.z);
+				return true;
+			}
+			else
+				return false;
+		}
+		else if( fabs(dir.z) <= Math::Epsilon)
+			prevPos = Vec3f( startX, (dir.y * (startX - orig.x) + dir.x * orig.y) / dir.x, startZ );
+		else
+			prevPos = Vec3f( startX, (dir.y * (startZ - orig.z) + dir.z * orig.y) / dir.z, startZ );
+				
 		for( t=0; t < err_step_slow; ++t ) // error_step_slow is equal to the number of pixels to be checked
 		{
 			// Update error
@@ -699,7 +715,11 @@ namespace Horde3DTerrain
 
 			pos.x = x / (float)_hmapSize;
 			pos.z = y / (float)_hmapSize;
-			pos.y = (dir.y * (pos.z - orig.z) + dir.z * orig.y) / dir.z;
+			// Calculate y value based on the fraction of the current position on the direction vector						
+			if( fabs(dir.z) <= Math::Epsilon)
+				pos.y = (dir.y * (pos.x - orig.x) + dir.x * orig.y) / dir.x;
+			else
+				pos.y = (dir.y * (pos.z - orig.z) + dir.z * orig.y) / dir.z;
 
 			if( prevPos.y >= pos.y && prevPos.y >= height1 && pos.y <= height2 ) 
 			{

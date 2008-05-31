@@ -15,7 +15,7 @@ set(HORDE3D_EXTENSION_INSTALLS)
 
 
 # terrain extension (check egExtensions.cpp if it's activated)
-option(HORDE3D_BUILD_TERRAIN "Build the terrain extension into Horde3D" OFF)
+option(HORDE3D_BUILD_TERRAIN "Build the terrain extension into Horde3D" ON)
 if(HORDE3D_BUILD_TERRAIN)
 	set(HORDE3D_EXTENSION_SOURCES
 		${HORDE3D_EXTENSION_SOURCES}
