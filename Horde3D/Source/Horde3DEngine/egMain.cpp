@@ -70,7 +70,7 @@ namespace Horde3D
 	
 	DLLEXP bool init()
 	{
-		if( initialized ) return false;
+		if( initialized ) return true;
 		initialized = true;
 	
 		Modules::init();
@@ -152,7 +152,7 @@ namespace Horde3D
 			
 			if( res != 0x0 && res->getType() == ResourceTypes::Pipeline )
 			{
-				((PipelineResource *)res)->resize( width, height );
+				((PipelineResource *)res)->resize();
 			}
 		}
 	}

@@ -186,7 +186,7 @@ public:
 	void initDefault();
 	void release();
 	bool load( const char *data, int size );
-	void resize( int width, int height );
+	void resize();
 
 	bool setStageActivation( const string &stageName, bool enabled );
 	bool getRenderTargetData( const string &target, int bufIndex, int *width, int *height,

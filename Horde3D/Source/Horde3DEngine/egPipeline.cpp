@@ -419,7 +419,7 @@ bool PipelineResource::load( const char *data, int size )
 }
 
 
-void PipelineResource::resize( int width, int height )
+void PipelineResource::resize()
 {
 	// Recreate render targets
 	destroyRenderTargets();
