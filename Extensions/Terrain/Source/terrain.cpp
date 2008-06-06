@@ -610,7 +610,7 @@ namespace Horde3DTerrain
 	
 		float t1 = 0, t2 = 1;
 		// Calculate segment points inside the texture using Liang-Barsky algorithm
-		if( orig.x < orig.x + dir.x )
+		if( orig.x <= orig.x + dir.x )
 		{
 			t1 = maxf( orig.x / -dir.x, t1 );
 			t2 = minf( (1 - orig.x) / dir.x, t2 );
@@ -620,7 +620,7 @@ namespace Horde3DTerrain
 			t1 = maxf( (1 - orig.x) / dir.x , t1 );
 			t2 = minf( orig.x / -dir.x, t2 );
 		}
-		if (orig.z < orig.z + dir.z)
+		if (orig.z <= orig.z + dir.z)
 		{
 			t1 = maxf( orig.z / -dir.z, t1 );
 			t2 = minf( (1 - orig.z) / dir.z, t2 );

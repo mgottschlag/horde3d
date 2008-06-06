@@ -256,6 +256,15 @@ public:
 	explicit Vec4f( Vec3f v ) : x( v.x ), y( v.y ), z( v.z ), w( 1.0f )
 	{
 	}
+
+	Vec4f& operator/=( const float value) 
+	{
+		x /= value;
+		y /= value;
+		z /= value;
+		w /= value;
+		return *this;
+	}
 };
 
 
@@ -713,6 +722,16 @@ public:
 	Vec4f getRow( unsigned int row ) const
 	{
 		return Vec4f( x[row + 0], x[row + 4], x[row + 8], x[row + 12] );
+	}
+
+	Vec3f getScale()
+	{
+		Vec3f scale;
+		// Scale is length of columns
+		scale.x = sqrt( c[0][0] * c[0][0] + c[0][1] * c[0][1] + c[0][2] * c[0][2] );
+		scale.y = sqrt( c[1][0] * c[1][0] + c[1][1] * c[1][1] + c[1][2] * c[1][2] );
+		scale.z = sqrt( c[2][0] * c[2][0] + c[2][1] * c[2][1] + c[2][2] * c[2][2] );
+		return scale;
 	}
 };
 

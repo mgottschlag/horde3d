@@ -55,6 +55,8 @@ float EngineConfig::getOption( EngineOptions::List param )
 	{
 	case EngineOptions::MaxLogLevel:
 		return (float)maxLogLevel;
+	case EngineOptions::MaxNumMessages:
+		return (float)Modules::log().getMaxNumMessages();
 	case EngineOptions::TrilinearFiltering:
 		return trilinearFiltering ? 1.0f : 0.0f;
 	case EngineOptions::AnisotropyFactor:
@@ -87,6 +89,9 @@ bool EngineConfig::setOption( EngineOptions::List param, float value )
 	{
 	case EngineOptions::MaxLogLevel:
 		maxLogLevel = (int)value;
+		return true;
+	case EngineOptions::MaxNumMessages:
+		Modules::log().setMaxNumMessages( (uint32) value );
 		return true;
 	case EngineOptions::TrilinearFiltering:
 		trilinearFiltering = (value != 0);
@@ -146,6 +151,7 @@ bool EngineConfig::setOption( EngineOptions::List param, float value )
 EngineLog::EngineLog()
 {
 	_firstTick = clock();
+	_maxNumMessages = 512;
 }
 
 
@@ -153,7 +159,7 @@ void EngineLog::pushMessage( int level, const char *msg, va_list args )
 {
 	float time = (clock() - _firstTick) / (float)CLOCKS_PER_SEC;
 	
-	if( _messages.size() < MaxNumMessages - 1 )
+	if( _messages.size() < _maxNumMessages - 1 )
 	{
 		#pragma warning( push )
 		#pragma warning( disable:4996 )
@@ -162,7 +168,7 @@ void EngineLog::pushMessage( int level, const char *msg, va_list args )
 
 		_messages.push( LogMessage( _textBuf, level, time ) );
 	}
-	else if( _messages.size() == MaxNumMessages - 1 )
+	else if( _messages.size() == _maxNumMessages - 1 )
 	{
 		_messages.push( LogMessage( "Message queue is full", 1, time ) );
 	}

@@ -153,7 +153,8 @@ void SceneGraphResource::parseNode( XMLNode &xmlNode, SceneNodeTpl *parentTpl )
 	XMLNode xmlNode1 = xmlNode.getChildNode( nodeItr1 );
 	while( !xmlNode1.isEmpty() )
 	{	
-		parseNode( xmlNode1, nodeTpl );
+		if( xmlNode1.getName() == 0x0 || strcmp( xmlNode1.getName(), "Attachment" ) != 0 )			
+			parseNode( xmlNode1, nodeTpl );
 
 		xmlNode1 = xmlNode.getChildNode( ++nodeItr1 );
 	}

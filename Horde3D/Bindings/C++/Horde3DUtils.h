@@ -194,6 +194,25 @@ namespace Horde3DUtils
 	
 	
 	/*	Group: Scene graph */
+	/* 	Function: pickRay
+	 *  	Calculates the ray originating at the specified camera and window coordinates
+		
+		This utility function takes normalized window coordinates (ranging from 0 to 1 with the
+		origin being the bottom left corner of the window) and returns ray origin and direction for the
+		given camera. The function is especially useful for selecting objects by clicking
+		on them.
+		
+		Parameters:
+			cameraNode	- camera used for picking
+			nwx, nwy	- normalized window coordinates
+			ox, oy, oz  - calculated ray origin
+			dx, dy, dz  - calculated ray direction
+			
+		Returns:
+			nothing
+	*/
+	DLL void pickRay(NodeHandle cameraNode, float nwx, float nwy, float *ox, float *oy, float *oz, float *dx, float *dy, float *dz );
+	
 	/* 	Function: pickNode
 			Returns the scene node which is at the specified window coordinates.
 		
@@ -205,13 +224,12 @@ namespace Horde3DUtils
 		Parameters:
 			cameraNode	- camera used for picking
 			nwx, nwy	- normalized window coordinates
-			
+
 		Returns:
 			handle of picked node or 0 if no node was hit
 	*/
 	DLL NodeHandle pickNode(NodeHandle cameraNode, float nwx, float nwy );
-	
-	
+
 	/*	Group: Overlays */
 	/* 	Function: showText
 			Shows text on the screen using a font texture.

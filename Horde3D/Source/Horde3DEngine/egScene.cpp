@@ -657,31 +657,79 @@ int SceneManager::findNodes( SceneNode *startNode, const string &name, int type 
 }
 
 
-SceneNode *SceneManager::castRay( SceneNode *node, const Vec3f &rayOrig, const Vec3f &rayDir, float &minDist )
+void SceneManager::castRayInternal( SceneNode *node )
 {
-	if( !node->_active ) return 0x0;
+	if( !node->_active ) return;
 	
-	static Vec3f intsPos;
-	SceneNode *nearestNode = 0x0;
-
-	if( rayAABBIntersection( rayOrig, rayDir, node->_bBox.getMinCoords(), node->_bBox.getMaxCoords() ) )
+	if( rayAABBIntersection( _rayOrigin, _rayDirection, node->_bBox.getMinCoords(), node->_bBox.getMaxCoords() ) )
 	{
-		if( node->checkIntersection( rayOrig, rayDir, intsPos ) )
+		Vec3f intsPos;
+		if( node->checkIntersection( _rayOrigin, _rayDirection, intsPos ) )
 		{
-			float dist = (intsPos - rayOrig).length();
-			if( dist < minDist )
+			float dist = (intsPos - _rayOrigin).length();
+
+			CastRayResult crr;
+			crr.node = node;
+			crr.distance = dist;
+			crr.intersection = intsPos;
+
+			bool inserted = false;
+			for( vector< CastRayResult >::iterator it = _castRayResults.begin(); it != _castRayResults.end(); ++it )
 			{
-				nearestNode = node;
-				minDist = dist;
+				if( dist < it->distance )
+				{
+					_castRayResults.insert( it, crr );
+					inserted = true;
+					break;
+				}
+			}
+
+			if( !inserted )
+			{
+				_castRayResults.push_back( crr );
+			}
+
+			if( _rayNum > 0 && _castRayResults.size() > _rayNum )
+			{
+				_castRayResults.pop_back();
 			}
 		}
 
 		for( uint32 i = 0; i < node->_children.size(); ++i )
 		{
-			SceneNode *sn = castRay( node->_children[i], rayOrig, rayDir, minDist );
-			if( sn != 0x0 ) nearestNode = sn;
+			castRayInternal( node->_children[i] );
 		}
 	}
-
-	return nearestNode;
 }
+
+
+int SceneManager::castRay( SceneNode *node, const Vec3f &rayOrig, const Vec3f &rayDir, int numNearest )
+{
+	_castRayResults.resize(0); // empty results vector by resizing it to zero (does not release the memory to avoid reallocation)
+
+	if( !node->_active ) return 0;
+
+	_rayOrigin = rayOrig;
+	_rayDirection = rayDir;
+	_rayNum = numNearest;
+
+	castRayInternal( node );
+
+	return _castRayResults.size();
+}
+
+
+bool SceneManager::getCastRayResult( int index, CastRayResult &crr )
+{
+	if( index < _castRayResults.size() )
+	{
+		crr = _castRayResults[index];
+
+		return true;
+	}
+
+	return false;
+}
+
+
+

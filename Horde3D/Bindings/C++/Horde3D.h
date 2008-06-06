@@ -74,6 +74,7 @@ struct EngineOptions
 		
 		MaxLogLevel			- Defines the maximum log level; only messages which are smaller or equal to this value
 							  (hence more important) are published in the message queue. (Default: 4)
+		MaxNumMessages      - Defines the maximum number of messages held in the queue until getMessage is called (Default 512)
 		TrilinearFiltering	- Enables or disables trilinear filtering for textures; only affects textures
 							  that are loaded after setting the option. (Values: 0, 1; Default: 1)
 		AnisotropyFactor	- Sets the quality for anisotropic filtering; only affects textures that
@@ -93,6 +94,7 @@ struct EngineOptions
 	enum List
 	{
 		MaxLogLevel = 1,
+		MaxNumMessages,
 		TrilinearFiltering,
 		AnisotropyFactor,
 		TexCompression,
@@ -1040,6 +1042,7 @@ namespace Horde3D
 	*/
 	DLL NodeHandle getNodeChild( NodeHandle node, int index );
 
+
 	/* 	Function: getNodeAttachmentString
 			Returns the attachment string of a scene node.
 
@@ -1056,6 +1059,22 @@ namespace Horde3D
 			attachment string (can be empty) or empty string in case of failure
 	*/
 	DLL const char *getNodeAttachmentString( NodeHandle node );
+	
+	/* 	Function: setNodeAttachmentString
+			Sets the attachment string of a scene node.
+
+		This function sets the attachment string of a specified scene node. If the node handle
+		is invalid, the function returns false.
+        
+		Parameters:
+			node			- handle to the node to be accessed
+			attachmentData  - attachment string to be set
+
+		Returns:
+			true if node has been found, false otherwise
+	*/
+	DLL bool setNodeAttachmentString( NodeHandle node, const char* attachmentData );
+
 	
 	/* 	Function: addNodes
 			Adds nodes from a SceneGraph resource to the scene.
@@ -1307,20 +1326,37 @@ namespace Horde3D
 			Performs a recursive ray collision query.
 		
 		This function checks recursively if the specified ray intersects the specified node or one of its children.
-        The function finds the nearest intersection relative to the ray origin and returns the handle to the
-        corresponding scene node. The ray is a line segment and is specified by a starting point (the origin) and a
-        finite direction vector which also defines its length. Currently this function is limited to returning
-        intersections with Meshes.
+        The function finds intersections relative to the ray origin and returns the number of intersecting scene
+        nodes. The ray is a line segment and is specified by a starting point (the origin) and a finite direction
+		vector which also defines its length. Currently this function is limited to returning intersections with Meshes.
 		
 		Parameters:
 			node		- node at which intersection check is beginning
 			ox, oy, oz	- ray origin
 			dx, dy, dz	- ray direction vector also specifying ray length
+			numNearest	- maximum number of results to return or 0 for all
 			
 		Returns:
-			 handle to nearest intersected node or 0 if no node was hit
+			number of intersections
+		*/
+	DLL int castRay( NodeHandle node, float ox, float oy, float oz, float dx, float dy, float dz, int numNearest );
+
+
+	/*	Function: getCastRayResult
+			Returns results of a previous castRay query
+
+		This functions copies the results for the specified index into the provided variables.
+
+		Parameters:
+			index			- index in range 0 until return value of castRay exclusive
+			node			- intersecting node
+			distance		- distance from ray origin to intersection
+			intersection	- point of intersection, float[3] array
+
+		Returns:
+			true if index was valid and data could be copied
 	*/
-	DLL NodeHandle castRay( NodeHandle node, float ox, float oy, float oz, float dx, float dy, float dz );
+	DLL bool getCastRayResult( int index, NodeHandle *node, float *distance, float *intersection );
 
 
 	/* Group: Group-specific scene graph functions */

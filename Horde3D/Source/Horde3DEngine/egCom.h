@@ -33,14 +33,12 @@
 using namespace std;
 
 
-const uint32 MaxNumMessages = 512;
-
-
 struct EngineOptions
 {
 	enum List
 	{
 		MaxLogLevel = 1,
+		MaxNumMessages,
 		TrilinearFiltering,
 		AnisotropyFactor,
 		TexCompression,
@@ -99,6 +97,7 @@ protected:
 	
 	unsigned long			_firstTick;
 	char					_textBuf[2048];
+	uint32					_maxNumMessages;
 	queue< LogMessage >		_messages;
 
 	void pushMessage( const string &text, uint32 level );
@@ -114,6 +113,10 @@ public:
 	void writeDebugInfo( const char *msg, ... );
 
 	bool getMessage( LogMessage &msg );
+
+	uint32 getMaxNumMessages() { return _maxNumMessages; }
+	void setMaxNumMessages( uint32 maxNumMessages ) { _maxNumMessages = maxNumMessages; }
+	
 };
 
 #endif // _egCom_H_

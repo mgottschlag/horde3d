@@ -429,7 +429,7 @@ namespace Horde3DUtils
 	}
 
 
-	DLLEXP NodeHandle pickNode( NodeHandle cameraNode, float nwx, float nwy )
+	DLLEXP void pickRay( NodeHandle cameraNode, float nwx, float nwy, float *ox, float *oy, float *oz, float *dx, float *dy, float *dz )
 	{				
 		// Transform from normalized window [0, 1] to normalized device coordinates [-1, 1]
 		float cx( 2.0f * nwx - 1.0f );
@@ -454,8 +454,48 @@ namespace Horde3DUtils
 		p0.x /= p0.w; p0.y /= p0.w; p0.z /= p0.w;
 		p1.x /= p1.w; p1.y /= p1.w; p1.z /= p1.w;
 		
-		return Horde3D::castRay( RootNode, camTrans[12], camTrans[13], camTrans[14],
-								 p1.x - p0.x, p1.y - p0.y, p1.z - p0.z);
+		if( Horde3D::getNodeParami( cameraNode, CameraNodeParams::Orthographic ) == 1 )
+		{
+			float frustumWidth = Horde3D::getNodeParamf( cameraNode, CameraNodeParams::RightPlane) - Horde3D::getNodeParamf( cameraNode, CameraNodeParams::LeftPlane );
+			float frustumHeight = Horde3D::getNodeParamf( cameraNode, CameraNodeParams::TopPlane) - Horde3D::getNodeParamf( cameraNode, CameraNodeParams::BottomPlane );
+			
+			Vec4f p2( cx, cy, 0, 1 );
+
+			p2.x = cx * frustumWidth * 0.5f;
+			p2.y = cy * frustumHeight * 0.5f;
+			viewMat.x[12] = 0; viewMat.x[13] = 0; viewMat.x[14] = 0;
+			p2 = viewMat.inverted() * p2;			
+
+			*ox = camTrans[12] + p2.x;
+			*oy = camTrans[13] + p2.y;
+			*oz = camTrans[14] + p2.z;
+		}
+		else
+		{
+			*ox = camTrans[12];
+			*oy = camTrans[13];
+			*oz = camTrans[14];
+		}
+		*dx = p1.x - p0.x;
+		*dy = p1.y - p0.y;
+		*dz = p1.z - p0.z;
+	}
+
+	DLLEXP NodeHandle pickNode( NodeHandle cameraNode, float nwx, float nwy )
+	{	
+		float ox, oy, oz, dx, dy, dz;
+		pickRay(cameraNode, nwx, nwy, &ox, &oy, &oz, &dx, &dy, &dz);
+		if( Horde3D::castRay(RootNode, ox, oy, oz, dx, dy, dz, 1) == 0 )
+			return 0;
+		else
+		{
+			NodeHandle intersectionNode = 0;
+			if( Horde3D::getCastRayResult(0, &intersectionNode, 0, 0) )
+				return intersectionNode;
+			else
+				return 0;
+		}
+
 	}
 }
 

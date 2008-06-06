@@ -138,6 +138,7 @@ public:
 	Matrix4f &getAbsTrans() { return _absTrans; }
 	BoundingBox &getBBox() { return _bBox; }
 	const string &getAttachmentString() { return _attachment; }
+	void setAttachmentString( const char* attachmentData ) { _attachment = attachmentData; }
 	bool checkTransformFlag( bool reset )
 		{ bool b = _transformed; if( reset ) _transformed = false; return b; }
 
@@ -200,6 +201,13 @@ struct NodeRegEntry
 	NodeTypeRenderFunc		renderFunc;
 };
 
+struct CastRayResult
+{
+	SceneNode *node;
+	float distance;
+	Vec3f intersection;
+};
+
 class SceneManager
 {
 protected:
@@ -209,12 +217,18 @@ protected:
 	vector< SceneNode *>		_lightQueue;
 	vector< SceneNode *>		_renderableQueue;
 	vector< SceneNode * >		_findResults;
+	vector< CastRayResult >     _castRayResults;
+
+	Vec3f                       _rayOrigin;// don't put these values during recursive search on the stack
+	Vec3f                       _rayDirection;// dito
+	int                         _rayNum;// dito
 
 	void updateQueuesRec( const Frustum &frustum1, const Frustum *frustum2, bool sorted, 
 						  SceneNode &node, bool lightQueue, bool renderableQueue );
 	NodeHandle parseNode( SceneNodeTpl &tpl, SceneNode *parent );
 	void removeNodeRec( SceneNode *node );
 
+	void castRayInternal( SceneNode *node );
 public:
 
 	SceneManager();
@@ -238,7 +252,8 @@ public:
 	void clearFindResults() { _findResults.resize( 0 ); }
 	SceneNode *getFindResult( int index ) { return (unsigned)index < _findResults.size() ? _findResults[index] : 0x0; }
 	
-	SceneNode *castRay( SceneNode *node, const Vec3f &rayOrig, const Vec3f &rayDir, float &minDist );
+	int castRay( SceneNode *node, const Vec3f &rayOrig, const Vec3f &rayDir, int numNearest );
+	bool getCastRayResult( int index, CastRayResult &crr );
 
 	SceneNode &getRootNode() { return *_nodes[0]; }
 	SceneNode &getDefCamNode() { return *_nodes[1]; }

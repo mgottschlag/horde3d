@@ -532,6 +532,19 @@ namespace Horde3D
 			return 0;
 	}
 
+	DLLEXP bool setNodeAttachmentString( NodeHandle node, const char* attachmentData )
+	{	
+		SceneNode *sn = Modules::sceneMan().resolveNodeHandle( node );
+		if( sn == 0x0 )
+		{
+			Modules::log().writeDebugInfo( "Invalid node handle %i in setNodeAttachmentString", node );
+			return false;
+		}
+
+		sn->setAttachmentString( attachmentData );
+		return true;
+	}
+
 
 	DLLEXP const char *getNodeAttachmentString( NodeHandle node )
 	{
@@ -782,7 +795,7 @@ namespace Horde3D
 	}
 
 
-	DLLEXP NodeHandle castRay( NodeHandle node, float ox, float oy, float oz, float dx, float dy, float dz )
+	DLLEXP NodeHandle castRay( NodeHandle node, float ox, float oy, float oz, float dx, float dy, float dz, int numNearest )
 	{
 		SceneNode* sn = Modules::sceneMan().resolveNodeHandle( node );
 		if ( sn == 0x0 )
@@ -793,11 +806,28 @@ namespace Horde3D
 
 		Modules::sceneMan().updateNodes();
 		
-		float minDist = Math::MaxFloat;
-		sn = Modules::sceneMan().castRay( sn, Vec3f( ox, oy, oz ), Vec3f( dx, dy, dz ), minDist );
+		return Modules::sceneMan().castRay( sn, Vec3f( ox, oy, oz ), Vec3f( dx, dy, dz ), numNearest );
+	}
 
-		if( sn == 0x0 ) return 0;
-		else return sn->getHandle();
+
+	DLLEXP bool getCastRayResult( int index, NodeHandle *node, float *distance, float *intersection )
+	{
+		CastRayResult crr;
+		if( Modules::sceneMan().getCastRayResult( index, crr ) )
+		{
+			if( node ) *node = crr.node->getHandle();
+			if( distance ) *distance = crr.distance;
+			if( intersection )
+			{
+				intersection[0] = crr.intersection.x;
+				intersection[1] = crr.intersection.y;
+				intersection[2] = crr.intersection.z;
+			}
+
+			return true;
+		}
+
+		return false;
 	}
 
 
