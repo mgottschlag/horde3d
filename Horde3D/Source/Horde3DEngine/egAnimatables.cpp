@@ -223,6 +223,7 @@ void MeshNode::onDetach( SceneNode &/*parentNode*/ )
 
 void MeshNode::onPreUpdate()
 {
+	AnimatableSceneNode::onPreUpdate();
 	// Calculate local bounding box
 	if( _bBoxDirty )
 	{
