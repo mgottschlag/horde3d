@@ -149,6 +149,7 @@ public:
 	Renderer();
 	~Renderer();
 	
+	void initStates();
 	bool init();
 	void resize( int x, int y, int width, int height );
 	void showOverlay( const Overlay &overlay, uint32 matRes );

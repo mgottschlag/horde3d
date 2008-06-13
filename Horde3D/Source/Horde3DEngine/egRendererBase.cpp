@@ -43,9 +43,6 @@ RendererBase::~RendererBase()
 
 bool RendererBase::init()
 {
-	glPixelStorei( GL_PACK_ALIGNMENT, 1 );
-	glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
-
 	return initOpenGLExtensions();
 }
 

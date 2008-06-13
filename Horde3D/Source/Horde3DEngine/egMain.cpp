@@ -70,7 +70,12 @@ namespace Horde3D
 	
 	DLLEXP bool init()
 	{
-		if( initialized ) return true;
+		if( initialized )
+		{	
+			// Init states for additional rendering context
+			Modules::renderer().initStates();
+			return true;
+		}
 		initialized = true;
 	
 		Modules::init();

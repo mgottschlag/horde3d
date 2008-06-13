@@ -87,6 +87,21 @@ Renderer::~Renderer()
 }
 
 
+void Renderer::initStates()
+{
+	glPixelStorei( GL_PACK_ALIGNMENT, 1 );
+	glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
+	glHint( GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST );
+	glDepthFunc( GL_LEQUAL );
+	glShadeModel( GL_SMOOTH );
+	glDisable( GL_MULTISAMPLE );
+	glEnable( GL_DEPTH_TEST );
+	glEnable( GL_CULL_FACE );
+	glClearDepth( 1.0f );
+	glClearColor( 0.0f, 0.0f, 0.0f, 1.0f );	
+}
+
+
 bool Renderer::init()
 {
 	bool failed = false;
@@ -146,14 +161,7 @@ bool Renderer::init()
 	}
 
 	// Init OpenGL states
-	glHint( GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST );
-	glDepthFunc( GL_LEQUAL );
-	glShadeModel( GL_SMOOTH );
-	glDisable( GL_MULTISAMPLE );
-	glEnable( GL_DEPTH_TEST );
-	glEnable( GL_CULL_FACE );
-	glClearDepth( 1.0f );
-	glClearColor( 0.0f, 0.0f, 0.0f, 1.0f );
+	initStates();
 	
 	// Upload default shaders
 	uploadShader( vsDefColor, fsDefColor, defColorShader );
@@ -940,9 +948,12 @@ void Renderer::clear( bool depth, bool buf0, bool buf1, bool buf2, bool buf3,
 	{
 		if( depth ) mask |= GL_DEPTH_BUFFER_BIT;
 		if( buf0 ) mask |= GL_COLOR_BUFFER_BIT;
+		glScissor( _vpX, _vpY, _vpWidth, _vpHeight );
+		glEnable( GL_SCISSOR_TEST );
 	}
 	
 	if( mask != 0 ) glClear( mask );
+	glDisable( GL_SCISSOR_TEST );
 	glPopAttrib();
 }
 
