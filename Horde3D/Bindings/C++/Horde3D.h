@@ -454,8 +454,8 @@ namespace Horde3D
 		
 		This function initializes the graphics engine and makes it ready for use. It has to be the
 		first call to the engine except for getVersionString. In order to successfully initialize
-		the engine the calling application must provide a valid OpenGL context. The function returns
-		true if the initialization succeeded or if the engine is already initialized, otherwise false.
+		the engine the calling application must provide a valid OpenGL context. The function can be
+		called several times on different rendering contexts in order to initialize them.
 		
 		Parameters:
 			none
