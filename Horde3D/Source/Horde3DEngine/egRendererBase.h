@@ -27,6 +27,8 @@
 
 #include "egPrerequisites.h"
 #include "utMath.h"
+#include <cstdlib>
+#include <cstring>
 #include <string>
 using namespace std;
 

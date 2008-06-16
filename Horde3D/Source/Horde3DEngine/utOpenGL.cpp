@@ -23,6 +23,8 @@
 // *************************************************************************************************
 
 #include "utOpenGL.h"
+#include <cstdlib>
+#include <cstring>
 #include <string>
 using namespace std;
 

@@ -26,6 +26,8 @@
 #define _egExtensions_H_
 
 #include "egPrerequisites.h"
+#include <cstdlib>
+#include <cstring>
 #include <string>
 #include <vector>
 using namespace std;

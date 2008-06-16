@@ -31,6 +31,8 @@
 #	include <windows.h>
 #endif
 #include <GL/gl.h>
+#include <cstdlib>
+#include <cstring>
 #include <string>
 #include <vector>
 #include <map>

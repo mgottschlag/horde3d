@@ -27,6 +27,8 @@
 
 #include "egPrerequisites.h"
 #include <time.h>
+#include <cstdlib>
+#include <cstring>
 #include <string>
 #include <queue>
 #include <vector>

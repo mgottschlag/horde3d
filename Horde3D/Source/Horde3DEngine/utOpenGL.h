@@ -31,6 +31,9 @@
 
 #include "utPlatform.h"
 
+#include <cstdlib>
+#include <cstring>
+
 #ifdef PLATFORM_WIN
 #   define WIN32_LEAN_AND_MEAN 1
 #   include <windows.h>

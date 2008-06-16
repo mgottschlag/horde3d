@@ -26,6 +26,8 @@
 #define _utils_H_
 
 #include "utMath.h"
+#include <cstring>
+#include <cstdlib>
 #include <string>
 using namespace std;
 

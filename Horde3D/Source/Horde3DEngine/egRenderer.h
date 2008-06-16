@@ -32,6 +32,7 @@
 #include "egCamera.h"
 #include "egModel.h"
 #include <vector>
+#include <algorithm>
 using namespace std;
 
 class MaterialResource;
