@@ -695,7 +695,7 @@ void SceneManager::castRayInternal( SceneNode *node )
 			}
 		}
 
-		for( uint32 i = 0; i < node->_children.size(); ++i )
+		for( size_t i = 0, s = node->_children.size(); i < s; ++i )
 		{
 			castRayInternal( node->_children[i] );
 		}

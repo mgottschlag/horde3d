@@ -856,8 +856,6 @@ inline bool rayTriangleIntersection( const Vec3f &rayOrig, const Vec3f &rayDir,
 inline bool rayAABBIntersection( const Vec3f &rayOrig, const Vec3f &rayDir, 
 								 const Vec3f &mins, const Vec3f &maxs )
 {
-	// TODO: This routine considers only ray direction and not length
-
 	// SLAB based optimized ray/AABB intersection routine
 	// Idea taken from http://ompf.org/ray/
 	
@@ -876,7 +874,19 @@ inline bool rayAABBIntersection( const Vec3f &rayOrig, const Vec3f &rayDir,
 	lmin = maxf( minf( l1, l2 ), lmin );
 	lmax = minf( maxf( l1, l2 ), lmax );
 
-	return (lmax >= 0.0f) & (lmax >= lmin);
+	if( (lmax >= 0.0f) & (lmax >= lmin) )
+	{
+		// Consider length
+		const Vec3f rayDest = rayOrig + rayDir;
+		Vec3f rayMins( minf( rayDest.x, rayOrig.x), minf( rayDest.y, rayOrig.y ), minf( rayDest.z, rayOrig.z ) );
+		Vec3f rayMaxs( maxf( rayDest.x, rayOrig.x), maxf( rayDest.y, rayOrig.y ), maxf( rayDest.z, rayOrig.z ) );
+		return 
+			(rayMins.x < maxs.x) && (rayMaxs.x > mins.x) &&
+			(rayMins.y < maxs.y) && (rayMaxs.y > mins.y) &&
+			(rayMins.z < maxs.z) && (rayMaxs.z > mins.z);
+	}
+	else
+		return false;
 }
 
 

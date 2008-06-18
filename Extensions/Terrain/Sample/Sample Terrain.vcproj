@@ -40,7 +40,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)../Bindings/C++&quot;;&quot;$(ProjectDir)../../../Horde3D/Bindings/C++&quot;;&quot;$(ProjectDir)../../../Horde3D/Dependencies/glfw/include/GL&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)../Bindings/C++&quot;;&quot;$(ProjectDir)../../../Horde3D/Bindings/C++&quot;;&quot;$(ProjectDir)../../../Horde3D/Dependencies/Include&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -122,7 +122,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)../Bindings/C++&quot;;&quot;$(ProjectDir)../../../Horde3D/Bindings/C++&quot;;&quot;$(ProjectDir)../../../Horde3D/Dependencies/glfw/include/GL&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)../Bindings/C++&quot;;&quot;$(ProjectDir)../../../Horde3D/Bindings/C++&quot;;&quot;$(ProjectDir)../../../Horde3D/Dependencies/Include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"

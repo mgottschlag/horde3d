@@ -1049,7 +1049,7 @@ void Renderer::drawLightGeometry( const string shaderContext, const string &theC
 	_curCamera->genFrustum( _camFrustum );
 	Modules::sceneMan().updateQueues( _camFrustum, 0x0, RenderingOrder::None, true, false );
 	
-	for( uint32 i = 0; i < Modules::sceneMan().getLightQueue().size(); ++i )
+	for( size_t i = 0, s = Modules::sceneMan().getLightQueue().size(); i < s; ++i )
 	{
 		++_curUpdateStamp;
 		_curLight = (LightNode *)Modules::sceneMan().getLightQueue()[i];
@@ -1105,7 +1105,7 @@ void Renderer::drawLightShapes( const string shaderContext, bool noShadows )
 	_curCamera->genFrustum( _camFrustum );
 	Modules::sceneMan().updateQueues( _camFrustum, 0x0, RenderingOrder::None, true, false );
 	
-	for( uint32 i = 0; i < Modules::sceneMan().getLightQueue().size(); ++i )
+	for( size_t i = 0, s = Modules::sceneMan().getLightQueue().size(); i < s; ++i )
 	{
 		++_curUpdateStamp;
 		_curLight = (LightNode *)Modules::sceneMan().getLightQueue()[i];
@@ -1295,7 +1295,7 @@ void Renderer::renderDebugView()
 	// Draw light volumes
 	glColor4f( 1, 1, 0, 0.25f );
 	glLineWidth( 2 );
-	for( uint32 i = 0; i < Modules::sceneMan().getLightQueue().size(); ++i )
+	for( size_t i = 0, s = Modules::sceneMan().getLightQueue().size(); i < s; ++i )
 	{
 		LightNode *lightNode = (LightNode *)Modules::sceneMan().getLightQueue()[i];
 		
@@ -1338,7 +1338,7 @@ void Renderer::renderDebugView()
 	glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 	glColor4f( 1, 1, 1, 0.25f );
 	
-	for( uint32 i = 0; i < Modules::sceneMan().getLightQueue().size(); ++i )
+	for( size_t i = 0, s = Modules::sceneMan().getLightQueue().size(); i < s; ++i )
 	{
 		LightNode *lightNode = (LightNode *)Modules::sceneMan().getLightQueue()[i];
 		lightNode->genFrustum( _lightFrustum );
