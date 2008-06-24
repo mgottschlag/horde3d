@@ -136,7 +136,7 @@
 				AdditionalOptions=" /Zm1000"
 				Optimization="2"
 				InlineFunctionExpansion="2"
-				AdditionalIncludeDirectories=".\Source;.\Source\win32"
+				AdditionalIncludeDirectories=".\;.\win32"
 				PreprocessorDefinitions="WIN32,_WINDOWS,NDEBUG,CMAKE_INTDIR=\&quot;Release\&quot;"
 				ExceptionHandling="0"
 				RuntimeLibrary="0"
