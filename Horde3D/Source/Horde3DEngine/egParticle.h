@@ -174,9 +174,11 @@ public:
 	bool setParami( int param, int value );
 
 	void advanceTime( float timeDelta );
+	bool hasFinished();
 
 	friend class Renderer;
 };
 
 #endif // _egParticle_H_
+
 

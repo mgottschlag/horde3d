@@ -1625,4 +1625,20 @@ namespace Horde3D
 			 true in case of success otherwise false
 	*/
 	DLL bool advanceEmitterTime( NodeHandle emitterNode, float timeDelta );
+
+	/* 	Function: hasEmitterFinished
+			Checks if an Emitter node is still alive.
+		
+		This function checks if a particle system is still active and has living particles or
+		will spawn new particles. The specified node must be an Emitter node. The function can be
+		used to check when a not infinitely running emitter for an effect like an explosion can be
+		removed from the scene.
+		
+		Parameters:
+			emitterNode	- handle to the Emitter node which is checked
+			
+		Returns:
+			 life state of Emitter node or false in case of failure
+	*/
+	DLL bool hasEmitterFinished( NodeHandle emitterNode );
 }

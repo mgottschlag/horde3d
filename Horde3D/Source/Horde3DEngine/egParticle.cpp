@@ -520,3 +520,20 @@ void EmitterNode::advanceTime( float timeDelta )
 
 	markDirty();
 }
+
+
+bool EmitterNode::hasFinished()
+{
+	if( _respawnCount < 0 ) return false;
+
+	for( uint32 i = 0; i < _particleCount; ++i )
+	{	
+		if( _particles[i].life > 0 || (int)_particles[i].respawnCounter < _respawnCount )
+		{
+			return false;
+		}
+	}
+	
+	return true;
+}
+

@@ -1111,6 +1111,21 @@ namespace Horde3D
 			return false;
 		}
 	}
+
+
+	DLLEXP bool hasEmitterFinished( NodeHandle emitterNode )
+	{
+		SceneNode *sn = Modules::sceneMan().resolveNodeHandle( emitterNode );
+		if( sn != 0x0 && sn->getType() == SceneNodeTypes::Emitter )
+		{
+			return ((EmitterNode *)sn)->hasFinished();
+		}
+		else
+		{	
+			Modules::log().writeDebugInfo( "Invalid Emitter node handle %i in hasEmitterFinished", emitterNode );
+			return false;
+		}
+	}
 }
 
 
