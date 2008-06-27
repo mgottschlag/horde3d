@@ -689,7 +689,7 @@ void SceneManager::castRayInternal( SceneNode *node )
 				_castRayResults.push_back( crr );
 			}
 
-			if( _rayNum > 0 && _castRayResults.size() > _rayNum )
+			if( _rayNum > 0 && (int) _castRayResults.size() > _rayNum )
 			{
 				_castRayResults.pop_back();
 			}
@@ -715,13 +715,13 @@ int SceneManager::castRay( SceneNode *node, const Vec3f &rayOrig, const Vec3f &r
 
 	castRayInternal( node );
 
-	return _castRayResults.size();
+	return (int) _castRayResults.size();
 }
 
 
 bool SceneManager::getCastRayResult( int index, CastRayResult &crr )
 {
-	if( index < _castRayResults.size() )
+	if( (uint32) index < _castRayResults.size() )
 	{
 		crr = _castRayResults[index];
 

@@ -43,7 +43,7 @@
 #include <sched.h>
 #include <pthread.h>
 #include <sys/sysctl.h>
-#include "../../Include/glfw.h"
+#include "../../../Include/glfw.h"
 
 
 //========================================================================

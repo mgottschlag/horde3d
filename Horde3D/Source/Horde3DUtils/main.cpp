@@ -30,7 +30,9 @@
 #	define WIN32_LEAN_AND_MEAN 1
 #	include <windows.h>
 #endif
+#ifndef PLATFORM_MAC
 #include <GL/gl.h>
+#endif
 #include <cstdlib>
 #include <cstring>
 #include <string>
@@ -88,7 +90,7 @@ namespace Horde3DUtils
 	DLLEXP bool initOpenGL( int hdc )
 	{
 		#ifdef PLATFORM_WIN
-		hDC = (HDC)hdc;
+		hDC = (HDC)(__int64)hdc;
 		
 		// Init OpenGL rendering context
 		int pixelFormat;

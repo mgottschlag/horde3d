@@ -94,7 +94,9 @@
 #include <memory.h>
 #include <assert.h>
 #include <stdarg.h>
+#if defined(__i386__) || defined(__x86_64__) || defined(_M_IX86)
 #include <emmintrin.h>
+#endif
 
 #ifndef _MSC_VER
 #define __forceinline

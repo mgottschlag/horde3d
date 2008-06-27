@@ -100,10 +100,10 @@ void removeGate( string &s )
 string urlDecode( const string& url )
 {
 	string buffer = "";
-	int len = url.length();
+	size_t len = url.length();
 
-	for (int i = 0; i < len; i++) {
-		int j = i ;
+	for (size_t i = 0; i < len; i++) {
+		size_t j = i ;
 		char ch = url.at(j);
 		if (ch == '%'){
 			char tmpstr[] = "0x0__";

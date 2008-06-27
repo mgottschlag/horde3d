@@ -39,7 +39,7 @@
 // Include files
 #include <windows.h>
 #include <mmsystem.h>
-#include "../../Include/glfw.h"
+#include "../../../Include/glfw.h"
 
 
 //========================================================================
