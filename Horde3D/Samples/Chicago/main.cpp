@@ -33,6 +33,12 @@ static int mx0, my0;
 static Application *app;
 
 string generatePath(char p[], const string& file) {
+#ifdef __APPLE__
+   string s(p);
+   for (int i = 0; i < 4; i++)
+      s = s.substr(0, s.rfind("/"));   
+   return s + "/" + file;
+#else
     const string s( p );
     if ( s.find("/") != string::npos) {
         return s.substr( 0, s.rfind( "/" ) ) + "/" + file;
@@ -41,6 +47,7 @@ string generatePath(char p[], const string& file) {
     } else {
         return file;
     }
+#endif
 }
 
 

@@ -999,11 +999,21 @@ void Converter::writeSGNode( const string &modelName, SceneNode *node, unsigned 
 
 	if( node->children.size() == 0 )
 	{
-		if( !node->typeJoint && ((Mesh *)node)->triGroups.size() > 1 )
+		if( !node->typeJoint )
 		{
-			for( unsigned int j = 0; j < depth + 1; ++j ) outf << "\t";
-			outf << "</Mesh>\n";
-		}
+			switch( ((Mesh *)node)->triGroups.size() ) 
+			{
+			case 0: 
+				break; // Don't close node because there was no open tag when no trigroup exists
+			case 1:
+				outf << " />\n";
+				break;
+			default:
+				for( unsigned int j = 0; j < depth + 1; ++j ) outf << "\t";
+				outf << "</Mesh>\n";	
+				break;
+			}
+		}					 
 		else
 		{
 			outf << " />\n";
