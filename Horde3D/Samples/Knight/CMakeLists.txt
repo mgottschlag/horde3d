@@ -6,7 +6,7 @@ IF(WIN32)
 SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /ENTRY:mainCRTStartup ")
 ENDIF(WIN32)
 
-add_executable(Knight WIN32
+add_executable(Knight WIN32 MACOSX_BUNDLE
 	app.h
 	app.cpp
 	main.cpp

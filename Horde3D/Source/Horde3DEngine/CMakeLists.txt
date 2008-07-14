@@ -76,5 +76,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 endif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-	target_link_libraries(Horde3D GL)
+	FIND_LIBRARY(OPENGL_LIBRARY OpenGL)
+	FIND_LIBRARY(CORE_FOUNDATION_LIBRARY CoreFoundation)
+	target_link_libraries(Horde3D ${OPENGL_LIBRARY} ${CORE_FOUNDATION_LIBRARY})
 endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
