@@ -839,7 +839,7 @@ namespace Horde3D
 			Frees resources that are no longer used.
 		
 		This function releases resources that are no longer used. Unused resources were either told
-		to be released by the user calling egReleaseResource or are no more referenced by any other
+		to be released by the user calling removeResource or are no more referenced by any other
 		engine objects.
 		
 		Parameters:

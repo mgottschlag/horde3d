@@ -166,11 +166,10 @@ Texture2DResource::Texture2DResource( const string &name, int flags ) :
 
 Texture2DResource::Texture2DResource( const string &name, int flags,
 									  uint32 width, uint32 height, bool renderable ) :
-	Resource( ResourceTypes::Texture2D, name, flags )
-{
+	Resource( ResourceTypes::Texture2D, name, flags ), _rendBuf(0x0),
+	_width(width), _height(height), _comps(4), _hdr(false)
+{	
 	_loaded = true;
-	_width = width; _height = height; _comps = 4; _hdr = false;
-	
 	if( !renderable )
 	{
 		_texObject = Modules::renderer().uploadTexture2D( 0x0, _width, _height, _comps, _hdr,
