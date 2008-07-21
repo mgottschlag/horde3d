@@ -110,9 +110,33 @@ int Resource::getParami( int /*param*/ )
 }
 
 
+bool Resource::setParami( int /*param*/, int /*value*/ )
+{
+	return false;
+}
+
+
 float Resource::getParamf( int /*param*/ )
 {
 	return 0.0f;
+}
+
+
+bool Resource::setParamf( int /*param*/, float /*value*/ )
+{
+	return false;
+}
+
+
+const char *Resource::getParamstr( int param )
+{
+	return "";
+}
+
+
+bool Resource::setParamstr( int param, const char *value )
+{
+	return false;
 }
 
 
@@ -326,13 +350,16 @@ void ResourceManager::clear()
 }
 
 
-ResHandle ResourceManager::queryUnloadedResource()
+ResHandle ResourceManager::queryUnloadedResource( int index )
 {
+	int j = 0;
+
 	for( uint32 i = 0; i < _resources.size(); ++i )
 	{
 		if( _resources[i] != 0x0 && !_resources[i]->_loaded && !_resources[i]->_noQuery )
 		{	
-			return _resources[i]->_handle;
+			if( j == index ) return _resources[i]->_handle;
+			else ++j;
 		}
 	}
 

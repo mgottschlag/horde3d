@@ -158,7 +158,8 @@ bool EffectResource::load( const char *data, int size )
 	return true;
 }
 
-float EffectResource::getParamf(int param)
+
+float EffectResource::getParamf( int param )
 {
 	switch( param )
 	{
@@ -166,10 +167,132 @@ float EffectResource::getParamf(int param)
 		return _lifeMin;
 	case EffectResParams::LifeMax:
 		return _lifeMax;
+	case EffectResParams::MoveVelMin:
+		return _moveVel.startMin;
+	case EffectResParams::MoveVelMax:
+		return _moveVel.startMax;
+	case EffectResParams::MoveVelEndRate:
+		return _moveVel.endRate;
+	case EffectResParams::RotVelMin:
+		return _moveVel.startMin;
+	case EffectResParams::RotVelMax:
+		return _moveVel.startMax;
+	case EffectResParams::RotVelEndRate:
+		return _moveVel.endRate;
+	case EffectResParams::SizeMin:
+		return _size.startMin;
+	case EffectResParams::SizeMax:
+		return _size.startMax;
+	case EffectResParams::SizeEndRate:
+		return _size.endRate;
+	case EffectResParams::Col_R_Min:
+		return _colR.startMin;
+	case EffectResParams::Col_R_Max:
+		return _colR.startMax;
+	case EffectResParams::Col_R_EndRate:
+		return _colR.endRate;
+	case EffectResParams::Col_G_Min:
+		return _colG.startMin;
+	case EffectResParams::Col_G_Max:
+		return _colG.startMax;
+	case EffectResParams::Col_G_EndRate:
+		return _colG.endRate;
+	case EffectResParams::Col_B_Min:
+		return _colB.startMin;
+	case EffectResParams::Col_B_Max:
+		return _colB.startMax;
+	case EffectResParams::Col_B_EndRate:
+		return _colB.endRate;
+	case EffectResParams::Col_A_Min:
+		return _colA.startMin;
+	case EffectResParams::Col_A_Max:
+		return _colA.startMax;
+	case EffectResParams::Col_A_EndRate:
+		return _colA.endRate;
 	default:
 		return Resource::getParamf( param );
 	}
 }
+
+
+bool EffectResource::setParamf( int param, float value )
+{
+	switch( param )
+	{
+	case EffectResParams::LifeMin:
+		_lifeMin = value;
+		return true;
+	case EffectResParams::LifeMax:
+		_lifeMax = value;
+		return true;
+	case EffectResParams::MoveVelMin:
+		_moveVel.startMin = value;
+		return true;
+	case EffectResParams::MoveVelMax:
+		_moveVel.startMax = value;
+		return true;
+	case EffectResParams::MoveVelEndRate:
+		_moveVel.endRate = value;
+		return true;
+	case EffectResParams::RotVelMin:
+		_rotVel.startMin = value;
+		return true;
+	case EffectResParams::RotVelMax:
+		_rotVel.startMax = value;
+		return true;
+	case EffectResParams::RotVelEndRate:
+		_rotVel.endRate = value;
+		return true;
+	case EffectResParams::SizeMin:
+		_size.startMin = value;
+		return true;
+	case EffectResParams::SizeMax:
+		_size.startMax = value;
+		return true;
+	case EffectResParams::SizeEndRate:
+		_size.endRate = value;
+		return true;
+	case EffectResParams::Col_R_Min:
+		_colR.startMin = value;
+		return true;
+	case EffectResParams::Col_R_Max:
+		_colR.startMax = value;
+		return true;
+	case EffectResParams::Col_R_EndRate:
+		_colR.endRate = value;
+		return true;
+	case EffectResParams::Col_G_Min:
+		_colG.startMin = value;
+		return true;
+	case EffectResParams::Col_G_Max:
+		_colG.startMax = value;
+		return true;
+	case EffectResParams::Col_G_EndRate:
+		_colG.endRate = value;
+		return true;
+	case EffectResParams::Col_B_Min:
+		_colB.startMin = value;
+		return true;
+	case EffectResParams::Col_B_Max:
+		_colB.startMax = value;
+		return true;
+	case EffectResParams::Col_B_EndRate:
+		_colB.endRate = value;
+		return true;
+	case EffectResParams::Col_A_Min:
+		_colA.startMin = value;
+		return true;
+	case EffectResParams::Col_A_Max:
+		_colA.startMax = value;
+		return true;
+	case EffectResParams::Col_A_EndRate:
+		_colA.endRate = value;
+		return true;
+	default:
+		return Resource::setParamf( param, value );
+	}
+}
+
 
 // *************************************************************************************************
 // EmitterNode

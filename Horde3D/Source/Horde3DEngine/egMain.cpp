@@ -331,6 +331,19 @@ namespace Horde3D
 	}
 
 
+	DLLEXP bool setResourceParami( ResHandle res, int param, int value )
+	{
+		Resource *resObj = Modules::resMan().resolveResHandle( res );
+		if( resObj == 0x0 )
+		{	
+			Modules::log().writeDebugInfo( "Invalid resource handle %i in setResourceParami", res );
+			return false;
+		}
+
+		return resObj->setParami( param, value );
+	}
+
+
 	DLLEXP float getResourceParamf( ResHandle res, int param )
 	{
 		Resource *resObj = Modules::resMan().resolveResHandle( res );
@@ -341,6 +354,51 @@ namespace Horde3D
 		}
 
 		return resObj->getParamf( param );
+	}
+
+
+	DLLEXP bool setResourceParamf( ResHandle res, int param, float value )
+	{
+		Resource *resObj = Modules::resMan().resolveResHandle( res );
+		if( resObj == 0x0 )
+		{	
+			Modules::log().writeDebugInfo( "Invalid resource handle %i in setResourceParamf", res );
+			return false;
+		}
+
+		return resObj->setParamf( param, value );
+	}
+
+	DLLEXP const char *getResourceParamstr( ResHandle res, int param )
+	{
+		static char emptyString = '\0';
+		
+		Resource *resObj = Modules::resMan().resolveResHandle( res );
+		if( resObj == 0x0 )
+		{	
+			Modules::log().writeDebugInfo( "Invalid resource handle %i in getResourceParamstr", res );
+			return &emptyString;
+		}
+
+		return resObj->getParamstr( param );
+	}
+
+
+	DLLEXP bool setResourceParamstr( ResHandle res, int param, const char *value )
+	{
+		Resource *resObj = Modules::resMan().resolveResHandle( res );
+		if( resObj == 0x0 )
+		{	
+			Modules::log().writeDebugInfo( "Invalid resource handle %i in setResourceParamstr", res );
+			return false;
+		}
+		if( value == 0x0 )
+		{
+			Modules::log().writeDebugInfo( "Invalid value for setResourceParamstr: NULL" );
+			return false;
+		}
+		
+		return resObj->setParamstr( param, value );
 	}
 
 
@@ -376,10 +434,10 @@ namespace Horde3D
 		return resObj->updateData( param, data, size );
 	}
 	
-	
-	DLLEXP NodeHandle queryUnloadedResource()
+
+	DLLEXP ResHandle queryUnloadedResource( int index )
 	{
-		return Modules::resMan().queryUnloadedResource();
+		return Modules::resMan().queryUnloadedResource( index );
 	}
 
 
@@ -473,38 +531,6 @@ namespace Horde3D
 	}
 
 
-	DLLEXP const char *getNodeName( NodeHandle node )
-	{
-		static char emptyString = '\0';
-		
-		SceneNode *sn = Modules::sceneMan().resolveNodeHandle( node );
-		
-		if( sn != 0x0 ) return sn->getName().c_str();
-		else
-		{	
-			Modules::log().writeDebugInfo( "Invalid node handle %i in getNodeName", node );
-			return &emptyString;
-		}
-	}
-
-
-	DLLEXP bool setNodeName( NodeHandle node, const char *name )
-	{
-		SceneNode *sn = Modules::sceneMan().resolveNodeHandle( node );
-		
-		if( sn != 0x0 )
-		{	
-			sn->setName( safeStr( name ) );
-			return true;
-		}
-		else
-		{	
-			Modules::log().writeDebugInfo( "Invalid node handle %i in setNodeName", node );
-			return false;
-		}
-	}
-
-
 	DLLEXP NodeHandle getNodeParent( NodeHandle node )
 	{
 		SceneNode *sn = Modules::sceneMan().resolveNodeHandle( node );
@@ -537,34 +563,6 @@ namespace Horde3D
 			return sn->getChildren()[index]->getHandle();
 		else
 			return 0;
-	}
-
-	DLLEXP bool setNodeAttachmentString( NodeHandle node, const char* attachmentData )
-	{	
-		SceneNode *sn = Modules::sceneMan().resolveNodeHandle( node );
-		if( sn == 0x0 )
-		{
-			Modules::log().writeDebugInfo( "Invalid node handle %i in setNodeAttachmentString", node );
-			return false;
-		}
-
-		sn->setAttachmentString( attachmentData );
-		return true;
-	}
-
-
-	DLLEXP const char *getNodeAttachmentString( NodeHandle node )
-	{
-		static char emptyString = '\0';
-		
-		SceneNode *sn = Modules::sceneMan().resolveNodeHandle( node );
-		if( sn == 0x0 )
-		{
-			Modules::log().writeDebugInfo( "Invalid node handle %i in getNodeAttachmentString", node );
-			return &emptyString;
-		}
-		
-		return sn->getAttachmentString().c_str();
 	}
 
 
@@ -750,6 +748,38 @@ namespace Horde3D
 		else
 		{	
 			Modules::log().writeDebugInfo( "Invalid node handle %i in setNodeParami", node );
+			return false;
+		}
+	}
+
+
+	DLLEXP const char *getNodeParamstr( NodeHandle node, int param )
+	{
+		static char emptyString = '\0';
+		
+		SceneNode *sn = Modules::sceneMan().resolveNodeHandle( node );
+		
+		if( sn != 0x0 ) return sn->getParamstr( param );
+		else
+		{	
+			Modules::log().writeDebugInfo( "Invalid node handle %i in getNodeParamstr", node );
+			return &emptyString;
+		}
+	}
+
+
+	DLLEXP bool setNodeParamstr( NodeHandle node, int param, const char *name )
+	{
+		SceneNode *sn = Modules::sceneMan().resolveNodeHandle( node );
+		
+		if( sn != 0x0 )
+		{	
+			sn->setParamstr( param, safeStr( name ).c_str() );
+			return true;
+		}
+		else
+		{	
+			Modules::log().writeDebugInfo( "Invalid node handle %i in setNodeParamstr", node );
 			return false;
 		}
 	}

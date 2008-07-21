@@ -96,29 +96,28 @@ void removeGate( string &s )
 	if( s[0] == '#' ) s = s.substr( 1, s.length() - 1 );
 }
 
-// url decode method based on Code from CgXML by Frédéric Vannière
-string urlDecode( const string& url )
-{
-	string buffer = "";
-	size_t len = url.length();
 
-	for (size_t i = 0; i < len; i++) {
-		size_t j = i ;
-		char ch = url.at(j);
-		if (ch == '%'){
-			char tmpstr[] = "0x0__";
-			int chnum;
-			tmpstr[3] = url.at(j+1);
-			tmpstr[4] = url.at(j+2);
-			chnum = strtol(tmpstr, NULL, 16);	  
-			buffer += chnum;
+string decodeURL( const string &url )
+{
+	string buf = "";
+
+	for( size_t i = 0, len = url.length(); i < len; ++i )
+	{
+		if( url[i] == '%' )
+		{
+			char code[] = { '0', 'x', '0', url.at( i + 1 ), url.at( i + 2 ) };
+			buf += (char)strtol( code, 0x0, 16 );
 			i += 2;
-		} else {
-			buffer += ch;
+		}
+		else
+		{
+			buf += url[i];
 		}
 	}
-	return buffer;
+	
+	return buf;
 }
+
 
 string extractFileName( const string &fullPath, bool extension )
 {

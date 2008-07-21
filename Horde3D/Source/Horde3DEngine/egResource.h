@@ -89,7 +89,12 @@ public:
 	void unload();
 	
 	virtual int getParami( int param );
+	virtual bool setParami( int param, int value );
 	virtual float getParamf( int param );
+	virtual bool setParamf( int param, float value );
+	virtual const char *getParamstr( int param );
+	virtual bool setParamstr( int param, const char *value );
+
 	virtual const void *getData( int param );
 	virtual bool updateData( int param, const void *data, int size );
 
@@ -172,7 +177,7 @@ public:
 	ResHandle cloneResource( ResHandle sourceRes, const string &name );
 	int removeResource( ResHandle handle, bool userCall );
 	void clear();
-	ResHandle queryUnloadedResource();
+	ResHandle queryUnloadedResource( int index );
 	void releaseUnusedResources();
 
 	Resource *resolveResHandle( ResHandle handle )

@@ -30,6 +30,29 @@
 #include "egShader.h"
 
 
+struct MaterialResParams
+{
+	enum List
+	{
+		Class = 400,
+		Link,
+		Shader,
+		TexUnit_0,
+		TexUnit_1,
+		TexUnit_2,
+		TexUnit_3,
+		TexUnit_4,
+		TexUnit_5,
+		TexUnit_6,
+		TexUnit_7,
+		TexUnit_8,
+		TexUnit_9,
+		TexUnit_10,
+		TexUnit_11
+	};	
+};
+
+
 struct TexUnit
 {
 	uint32		unit;
@@ -63,6 +86,8 @@ private:
 	vector< Uniform >				_uniforms;
 	SmartResPtr< MaterialResource >	_matLink;	
 
+	ResHandle getTexUnit( int unit );
+	bool setTexUnit( int unit, ResHandle texRes );
 	bool raiseError( const string &msg, int line = -1 );
 
 public:
@@ -79,6 +104,11 @@ public:
 	bool load( const char *data, int size );
 	bool setUniform( const string &name, float a, float b, float c, float d );
 	bool isOfClass( const string &theClass );
+
+	int getParami( int param );
+	bool setParami( int param, int value );
+	const char *getParamstr( int param );
+	bool setParamstr( int param, const char *value );
 
 	friend class ResourceManager;
 	friend class Renderer;

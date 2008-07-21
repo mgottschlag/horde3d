@@ -210,7 +210,7 @@ namespace Horde3DUtils
 		} while( *c++ != '\0' );
 		
 		// Get the first resource that needs to be loaded
-		int res = Horde3D::queryUnloadedResource();
+		int res = Horde3D::queryUnloadedResource( 0 );
 		
 		while( res != 0 )
 		{
@@ -250,7 +250,7 @@ namespace Horde3DUtils
 				result = false;
 			}
 			// Get next unloaded resource
-			res = Horde3D::queryUnloadedResource();
+			res = Horde3D::queryUnloadedResource( 0 );
 		}
 
 		return result;

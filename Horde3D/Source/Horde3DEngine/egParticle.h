@@ -54,8 +54,29 @@ struct EffectResParams
 {
 	enum List
 	{
-		LifeMin = 400,
-		LifeMax
+		LifeMin = 900,
+		LifeMax,
+		MoveVelMin,
+		MoveVelMax,
+		MoveVelEndRate,
+		RotVelMin,
+		RotVelMax,
+		RotVelEndRate,
+		SizeMin,
+		SizeMax,
+		SizeEndRate,
+		Col_R_Min,
+		Col_R_Max,
+		Col_R_EndRate,
+		Col_G_Min,
+		Col_G_Max,
+		Col_G_EndRate,
+		Col_B_Min,
+		Col_B_Max,
+		Col_B_EndRate,
+		Col_A_Min,
+		Col_A_Max,
+		Col_A_EndRate
 	};
 };
 
@@ -93,6 +114,7 @@ public:
 	bool load( const char *data, int size );
 
 	float getParamf( int param );
+	bool setParamf( int param, float value );
 
 	friend class EmitterNode;
 };
@@ -180,5 +202,4 @@ public:
 };
 
 #endif // _egParticle_H_
-
 

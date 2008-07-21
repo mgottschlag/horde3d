@@ -131,7 +131,7 @@ void ModelNode::updateStageAnimations( uint32 stage, const string &startNode )
 		}
 		
 		if( includeNode )
-			_nodeList[i].animEntities[stage] = anim->findEntity( _nodeList[i].node->getName() );
+			_nodeList[i].animEntities[stage] = anim->findEntity( _nodeList[i].node->getParamstr( SceneNodeParams::Name ) );
 		else
 			_nodeList[i].animEntities[stage] = 0x0;
 	}

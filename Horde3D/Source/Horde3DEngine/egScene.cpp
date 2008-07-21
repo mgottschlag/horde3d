@@ -118,6 +118,36 @@ bool SceneNode::setParami( int /*param*/, int /*value*/ )
 }
 
 
+const char *SceneNode::getParamstr( int param )
+{
+	switch( param )
+	{
+	case SceneNodeParams::Name:
+		return _name.c_str();
+	case SceneNodeParams::AttachmentString:
+		return _attachment.c_str();
+	default:
+		return "";
+	}
+}
+
+
+bool SceneNode::setParamstr( int param, const char *value )
+{
+	switch( param )
+	{
+	case SceneNodeParams::Name:
+		_name = value;
+		return true;
+	case SceneNodeParams::AttachmentString:
+		_attachment = value;
+		return true;
+	default:
+		return false;
+	}
+}
+
+
 bool SceneNode::canAttach( SceneNode &/*parent*/ )
 {
 	return true;
@@ -730,6 +760,4 @@ bool SceneManager::getCastRayResult( int index, CastRayResult &crr )
 
 	return false;
 }
-
-
 

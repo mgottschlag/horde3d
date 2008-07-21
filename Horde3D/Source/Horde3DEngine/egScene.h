@@ -55,6 +55,15 @@ struct SceneNodeTypes
 	};
 };
 
+struct SceneNodeParams
+{
+	enum List
+	{
+		Name = 1,
+		AttachmentString
+	};
+};
+
 struct SceneNodeTpl
 {
 	int							type;
@@ -116,6 +125,8 @@ public:
 	virtual bool setParamf( int param, float value );
 	virtual int getParami( int param );
 	virtual bool setParami( int param, int value );
+	virtual const char *getParamstr( int param );
+	virtual bool setParamstr( int param, const char* value );
 
 	virtual BoundingBox *getLocalBBox() { return 0x0; }
 	virtual bool canAttach( SceneNode &parent );
@@ -132,7 +143,6 @@ public:
 	NodeHandle getHandle() { return _handle; }
 	SceneNode *getParent() { return _parent; }
 	const string &getName() { return _name; }
-	void setName( const string &name ) { _name = name; }
 	vector< SceneNode * > &getChildren() { return _children; }
 	Matrix4f &getRelTrans() { return _relTrans; }
 	Matrix4f &getAbsTrans() { return _absTrans; }

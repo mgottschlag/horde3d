@@ -195,19 +195,60 @@ struct AnimationResParams
 	};
 };
 
-struct EffectResParams
+struct MaterialResParams
 {
-	/*	Enum: EffectResParams
-			The available Effect resource parameters.
-	  
-	   LifeMin   - minimum value for selecting random life time
-	   LifeMax	 - maximum value for selecting random life time
-	*/
+	/*	Enum: MaterialResParams
+			The available Material resource parameters.
+
+		Class   	- Hierarchical class name (Default: empty string);
+					  valid for get-/setResourceParamstr
+		Link	    - Link to other material resource;
+					  valid for get-/setResourceParami
+		Shader      - Shader resource used for rendering;
+					  valid for get-/setResourceParami
+		TexUnit_0	- Texture resource for the first unit;	
+					  valid for get-/setResourceParami
+		TexUnit_1	- Texture resource for the second unit;
+					  valid for get-/setResourceParami
+		TexUnit_2	- Texture resource for the third unit;
+					  valid for get-/setResourceParami
+		TexUnit_3	- Texture resource for the fourth unit;
+					  valid for get-/setResourceParami
+		TexUnit_4	- Texture resource for the fifth unit;
+					  valid for get-/setResourceParami
+		TexUnit_5	- Texture resource for the sixth unit;
+					  valid for get-/setResourceParami
+		TexUnit_6	- Texture resource for the seventh unit;
+					  valid for get-/setResourceParami
+		TexUnit_7	- Texture resource for the eighth unit;
+					  valid for get-/setResourceParami
+		TexUnit_8	- Texture resource for the ninth unit;
+					  valid for get-/setResourceParami
+		TexUnit_9	- Texture resource for the tenth unit;
+					  valid for get-/setResourceParami
+		TexUnit_10	- Texture resource for the eleventh unit;
+					  valid for get-/setResourceParami
+		TexUnit_11	- Texture resource for the twelfth unit;
+					  valid for get-/setResourceParami
+	 */
 	enum List
 	{
-		LifeMin = 400,
-		LifeMax
-	};
+		Class = 400,
+		Link,
+		Shader,
+		TexUnit_0,
+		TexUnit_1,
+		TexUnit_2,
+		TexUnit_3,
+		TexUnit_4,
+		TexUnit_5,
+		TexUnit_6,
+		TexUnit_7,
+		TexUnit_8,
+		TexUnit_9,
+		TexUnit_10,
+		TexUnit_11
+	};	
 };
 
 struct TextureResParams
@@ -229,6 +270,84 @@ struct TextureResParams
 		Height,
 		Comps,
 		HDR
+	};
+};
+
+struct EffectResParams
+{
+	/*	Enum: EffectResParams
+			The available Effect resource parameters.
+	  
+	   LifeMin          - Minimum value for selecting random life time; valid for get-/setResourceParamf
+	   LifeMax	        - Maximum value for selecting random life time; valid for get-/setResourceParamf
+	   MoveVelMin       - Minimum value for selecting random initial value of velocity defining 
+						  how many units per second particle is moving; valid for get-/setResourceParamf 
+	   MoveVelMax       - Maximum value for selecting random initial value of velocity defining 
+						  how many units per second particle is moving; valid for get-/setResourceParamf
+	   MoveVelEndRate   - Percentage of the initial translation velocity value when particle is dying;
+						  valid for get-/setResourceParamf
+	   RotVelMin        - Minimum value for selecting random initial value of velocity defining 
+						  how many degrees per second particle is rotating; valid for get-/setResourceParamf
+	   RotVelMax        - Maximum value for selecting random initial value of velocity defining 
+					  	  how many degrees per second particle is rotating; valid for get-/setResourceParamf
+	   RotVelEndRate    - Percentage of the initial rotation velocity value when particle is dying;		
+						  valid for get-/setResourceParamf
+	   SizeVelMin       - Minimum value for selecting random initial size value; 
+	                      valid for get-/setResourceParamf
+	   SizeVelMax       - Maximum value for selecting random initial size value; 
+						  valid for get-/setResourceParamf					      
+	   SizeVelEndRate   - Percentage of the initial size value when particle is dying;
+						  valid for get-/setResourceParamf					      
+	   Col_R_Min        - Minimum value for selecting random initial red color value;					     
+						  valid for get-/setResourceParamf					      
+	   Col_R_Max        - Maximum value for selecting random initial red color value;					      
+						  valid for get-/setResourceParamf					      
+	   Col_R_EndRate    - Percentage of the initial red value when particle is dying;	   
+						  valid for get-/setResourceParamf					      
+	   Col_G_Min        - Minimum value for selecting random initial green color value;
+						  valid for get-/setResourceParamf					      
+	   Col_G_Max        - Maximum value for selecting random initial green color value;
+						  valid for get-/setResourceParamf					      
+	   Col_G_EndRate    - Percentage of the initial green value when particle is dying;
+						  valid for get-/setResourceParamf					      
+	   Col_B_Min        - Minimum value for selecting random initial blue color value;
+						  valid for get-/setResourceParamf					      
+	   Col_B_Max        - Maximum value for selecting random initial blue color value;
+						  valid for get-/setResourceParamf					      
+	   Col_B_EndRate    - Percentage of the initial blue value when particle is dying;
+						  valid for get-/setResourceParamf					      
+	   Col_A_Min        - Minimum value for selecting random initial alpha color value;
+						  valid for get-/setResourceParamf					      
+	   Col_A_Max        - Maximum value for selecting random initial alpha color value;
+						  valid for get-/setResourceParamf					      
+	   Col_A_EndRate    - Percentage of the initial alpha value when particle is dying;
+						  valid for get-/setResourceParamf					      
+	*/
+	enum List
+	{
+		LifeMin = 900,
+		LifeMax,
+		MoveVelMin,
+		MoveVelMax,
+		MoveVelEndRate,
+		RotVelMin,
+		RotVelMax,
+		RotVelEndRate,
+		SizeMin,
+		SizeMax,
+		SizeEndRate,
+		Col_R_Min,
+		Col_R_Max,
+		Col_R_EndRate,
+		Col_G_Min,
+		Col_G_Max,
+		Col_G_EndRate,
+		Col_B_Min,
+		Col_B_Max,
+		Col_B_EndRate,
+		Col_A_Min,
+		Col_A_Max,
+		Col_A_EndRate
 	};
 };
 
@@ -256,6 +375,26 @@ struct SceneNodeTypes
 		Light,
 		Camera,
 		Emitter
+	};
+};
+
+struct SceneNodeParams
+{
+	/*  Enum: SceneNodeParams
+	        The available Scene node parameters.
+
+			Name				- The name of a scene node; used e.g. to find a node which 
+								  handle may not known to the application [type: string]
+		    AttachmentString    - Optional XML data of an 'Attachment' node attached to a scene node [type: string]
+
+	        *Important Note: The pointer is const and allows only read access to the data. Do never try to modify the
+					         data of the pointer since that can corrupt the engine's internal states!*
+
+	*/
+	enum List
+	{
+		Name = 1,
+		AttachmentString
 	};
 };
 
@@ -763,6 +902,22 @@ namespace Horde3D
 	*/
 	DLL int getResourceParami( ResHandle res, int param );
 
+	/* 	Function: setResourceParami
+			Sets a property of a resource.
+		
+		This function sets a specified property of the specified resource to a specified value.
+		The property must be of the type int.
+ 		
+		Parameters:
+			node	- handle to the node to be modified
+			param	- parameter to be modified
+			value	- new value for the specified parameter
+			
+		Returns:
+			 true in case of success otherwise false
+	*/
+	DLL bool setResourceParami( ResHandle res, int param, int value );
+
 	/* 	Function: getResourceParamf
 			Gets a property of a resource.
 		
@@ -777,6 +932,53 @@ namespace Horde3D
 			value of the parameter
 	*/
 	DLL float getResourceParamf( ResHandle res, int param );
+
+	/* 	Function: setResourceParamf
+			Sets a property of a resource.
+		
+		This function sets a specified property of the specified resource to a specified value.
+		The property must be of the type float.
+ 		
+		Parameters:
+			node	- handle to the node to be modified
+			param	- parameter to be modified
+			value	- new value for the specified parameter
+			
+		Returns:
+			 true in case of success otherwise false
+	*/
+	DLL bool setResourceParamf( ResHandle res, int param, float value );
+
+	/* 	Function: getResourceParamstr
+			Gets a property of a resource.
+		
+		This function returns a specified property of the specified resource.
+		The property must be of the type string (const char *).
+ 		
+		Parameters:
+			res		- handle to the resource to be accessed
+			param	- parameter to be accessed
+			
+		Returns:
+			value of the property or empty string if no such property exists
+	*/
+	DLL const char *getResourceParamstr( ResHandle res, int param );
+
+	/* 	Function: setResourceParamstr
+			Sets a property of a resource.
+		
+		This function sets a specified property of the specified resource to a specified value.
+		The property must be of the type string (const char *).
+ 		
+		Parameters:
+			node	- handle to the node to be modified
+			param	- parameter to be modified
+			value	- new value for the specified parameter
+			
+		Returns:
+			 true in case of success otherwise false
+	*/
+	DLL bool setResourceParamstr( ResHandle res, int param, const char *value );
 
 	/* 	Function: getResourceData
 			Gives access to resource data.
@@ -825,15 +1027,16 @@ namespace Horde3D
 			Returns handle to an unloaded resource.
 		
 		This function looks for a resource that is not yet loaded and returns its handle.
-        If there are no unloaded resources, 0 is returned.
+        If there are no unloaded resources or the zero based index specified is greater than the number
+		of the currently unloaded resources, 0 is returned.
 		
 		Parameters:
-			none
+			index    - index of unloaded resource within the internal list of unloaded resources (starting with 0) 
 			
 		Returns:
 			handle to an unloaded resource or 0
 	*/
-	DLL ResHandle queryUnloadedResource();
+	DLL ResHandle queryUnloadedResource( int index );
 	
 	/* 	Function: releaseUnusedResources
 			Frees resources that are no longer used.
@@ -964,38 +1167,7 @@ namespace Horde3D
 			type of the scene node
 	*/
 	DLL int getNodeType( NodeHandle node );
-	
-	/* 	Function: getNodeName
-			Returns the name of a scene node.
 		
-		This function returns a pointer to the name of a specified scene node. If the node handle is invalid,
-        the function returns an empty string.
-
-        *Important Note: The pointer is const and allows only read access to the data. Do never try to modify the
-        data of the pointer since that can corrupt the engine's internal states!*
-		
-		Parameters:
-			node	- handle to the scene node
-			
-		Returns:
-			name of the scene node or empty string in case of failure
-	*/
-	DLL const char *getNodeName( NodeHandle node );
-	
-	/* 	Function: setNodeName
-			Sets the name of a scene node.
-		
-		This function sets the name of the specified scene node to the specified value.
-		
-		Parameters:
-			node	- handle to the scene node
-			name	- new name of the scene node
-			
-		Returns:
-			true in case of success, otherwise false
-	*/
-	DLL bool setNodeName( NodeHandle node, const char *name );
-	
 	/* 	Function: getNodeParent
 			Returns the parent of a scene node.
 		
@@ -1042,38 +1214,6 @@ namespace Horde3D
 	*/
 	DLL NodeHandle getNodeChild( NodeHandle node, int index );
 
-
-	/* 	Function: getNodeAttachmentString
-			Returns the attachment string of a scene node.
-
-		This function returns a pointer to the attachment string of a specified scene node. If the node handle
-		is invalid or if the node does not have an attachment, the function returns an empty string.
-
-        *Important Note: The pointer is const and allows only read access to the data. Do never try to modify the
-        data of the pointer since that can corrupt the engine's internal states!*
-
-		Parameters:
-			node	- handle to the node to be accessed
-
-		Returns:
-			attachment string (can be empty) or empty string in case of failure
-	*/
-	DLL const char *getNodeAttachmentString( NodeHandle node );
-	
-	/* 	Function: setNodeAttachmentString
-			Sets the attachment string of a scene node.
-
-		This function sets the attachment string of a specified scene node. If the node handle
-		is invalid, the function returns false.
-        
-		Parameters:
-			node			- handle to the node to be accessed
-			attachmentData  - attachment string to be set
-
-		Returns:
-			true if node has been found, false otherwise
-	*/
-	DLL bool setNodeAttachmentString( NodeHandle node, const char* attachmentData );
 
 	
 	/* 	Function: addNodes
@@ -1271,7 +1411,39 @@ namespace Horde3D
 			 true in case of success otherwise false
 	*/
 	DLL bool setNodeParami( NodeHandle node, int param, int value );
+
+	/* 	Function: getNodeParamstr
+			Gets a property of a scene node.
+		
+		This function returns a specified property of the specified node.
+		The property must be of the type string (const char *).
+		
+		Parameters:
+			node	- handle to the node to be accessed
+			param	- parameter to be accessed
+			
+		Returns:
+			 value of the property or empty string if no such property exists
+	*/
+	DLL const char *getNodeParamstr( NodeHandle node, int param );
 	
+	/* 	Function: setNodeParamstr
+			Sets a property of a scene node.
+		
+		This function sets a specified property of the specified node to a specified value.
+		The property must be of the type string (const char *).
+		
+		Parameters:
+			node	- handle to the node to be modified
+			param	- parameter to be modified
+			value	- new value for the specified parameter
+			
+		Returns:
+			 true in case of success otherwise false
+	*/
+	DLL bool setNodeParamstr( NodeHandle node, int param, const char *value );
+
+
 	/* 	Function: getNodeAABB
 			Gets the bounding box of a scene node.
 		
