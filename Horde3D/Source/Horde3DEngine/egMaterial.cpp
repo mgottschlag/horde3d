@@ -88,13 +88,16 @@ ResHandle MaterialResource::getTexUnit( int unit )
 
 bool MaterialResource::setTexUnit( int unit, ResHandle texRes )
 {
-	Resource *res = Modules::resMan().resolveResHandle( texRes );
-
-	if( res == 0x0 || 
-		(res->getType() != ResourceTypes::Texture2D &&
-		 res->getType() != ResourceTypes::TextureCube) )
+	Resource *res = 0x0;
+	if( texRes != 0 )
 	{
-		return false;
+		res = Modules::resMan().resolveResHandle( texRes );
+		if( res == 0x0 || 
+			(res->getType() != ResourceTypes::Texture2D &&
+			 res->getType() != ResourceTypes::TextureCube) )
+		{
+			return false;
+		}
 	}
 
 	// Try to find existing texture unit
@@ -102,7 +105,10 @@ bool MaterialResource::setTexUnit( int unit, ResHandle texRes )
 	{
 		if( _texUnits[i].unit == unit )
 		{
-			_texUnits[i].texRes = res;
+			if( res != 0x0 )
+				_texUnits[i].texRes = res;
+			else
+				_texUnits.erase( _texUnits.begin() + i );
 			return true;
 		}
 	}
