@@ -17,7 +17,6 @@
 #define _app_H_
 
 #include "Horde3D.h"
-#include <sstream>
 #include <string>
 using namespace std;
 
@@ -29,10 +28,9 @@ private:
 	bool			_keys[320];
 	float			_x, _y, _z, _rx, _ry;	// Viewer position and orientation
 	float			_velocity;				// Velocity for movement
-	float			_curFPS, _timer;
-	stringstream	_fpsText;
+	float			_curFPS;
 
-	bool			_freeze, _showFPS, _debugViewMode, _wireframeMode;
+	bool			_freeze, _showStats, _debugViewMode, _wireframeMode;
 	
 	// Engine objects
 	ResHandle		_fontMatRes, _logoMatRes;

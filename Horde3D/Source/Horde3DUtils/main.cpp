@@ -31,14 +31,16 @@
 #	include <windows.h>
 #endif
 #ifndef PLATFORM_MAC
-#include <GL/gl.h>
+#	include <GL/gl.h>
 #endif
 #include <cstdlib>
 #include <cstring>
 #include <string>
+#include <sstream>
 #include <vector>
 #include <map>
 #include <fstream>
+#include <iomanip>
 using namespace std;
 
 #ifdef __MINGW32__
@@ -379,13 +381,50 @@ namespace Horde3DUtils
 			float u0 = 0.0625f * (ch % 16);
 			float v0 = 1.0f - 0.0625f * (ch / 16);
 
-			Horde3D::showOverlay( x + size * pos, y, u0, v0 - 0.0625f,
-								  x + size * pos + size, y, u0 + 0.0625f,v0 - 0.0625f,
-								  x + size * pos + size, y + size, u0 + 0.0625f, v0,
-								  x + size * pos, y + size, u0, v0,
+			Horde3D::showOverlay( x + size * 0.55f * pos, y, u0, v0 - 0.0625f,
+								  x + size * 0.55f * pos + size, y, u0 + 0.0625f,v0 - 0.0625f,
+								  x + size * 0.55f * pos + size, y + size, u0 + 0.0625f, v0,
+								  x + size * 0.55f * pos, y + size, u0, v0,
 								  layer, fontMaterialRes );
 			++pos;
 		} while ( *text );
+	}
+
+
+	DLLEXP void showFrameStats( ResHandle fontMaterialRes, float curFPS )
+	{
+		static stringstream text;
+		static float timer = 0;
+		static float fps = curFPS, minFPS = 10000, maxFPS = 0;
+		
+		// FPS (current, worst, best)
+		timer += 1.0f / curFPS;
+		if( timer > 0.3f )
+		{
+			if( curFPS < minFPS ) minFPS = curFPS;
+			if( curFPS > maxFPS ) maxFPS = curFPS;
+			fps = curFPS;
+			timer = 0;
+		}
+		text.str( "" );
+		text << "FPS     " << fixed << setprecision( 2 ) << fps;
+		text << setprecision( 1 ) << " [" << minFPS << ", " << maxFPS << "]";
+		Horde3DUtils::showText( text.str().c_str(), 0, 0.95f, 0.03f, 0, fontMaterialRes );
+
+		// Triangle count
+		text.str( "" );
+		text << "Tris    " << (int)Horde3D::getStat( EngineStats::TriCount, true );
+		Horde3DUtils::showText( text.str().c_str(), 0, 0.91f, 0.03f, 0, fontMaterialRes );
+
+		// Number of batches
+		text.str( "" );
+		text << "Batches " << (int)Horde3D::getStat( EngineStats::BatchCount, true );
+		Horde3DUtils::showText( text.str().c_str(), 0, 0.88f, 0.03f, 0, fontMaterialRes );
+
+		// Number of lighting passes
+		text.str( "" );
+		text << "Lights  " << (int)Horde3D::getStat( EngineStats::LightPassCount, true );
+		Horde3DUtils::showText( text.str().c_str(), 0, 0.85f, 0.03f, 0, fontMaterialRes );
 	}
 
 

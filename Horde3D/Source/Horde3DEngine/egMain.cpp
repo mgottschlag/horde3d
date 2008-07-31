@@ -204,6 +204,12 @@ namespace Horde3D
 	}
 
 
+	DLLEXP float getStat( EngineStats::List param, bool reset )
+	{
+		return Modules::renderer().getStat( param, reset );
+	}
+
+
 	DLLEXP void showOverlay( float x_ll, float y_ll, float u_ll, float v_ll,
 							 float x_lr, float y_lr, float u_lr, float v_lr,
 							 float x_ur, float y_ur, float u_ur, float v_ur,

@@ -29,10 +29,10 @@ private:
 	bool			_keys[320];
 	float			_x, _y, _z, _rx, _ry;	// Viewer position and orientation
 	float			_velocity;				// Velocity for movement
-	float			_curFPS, _timer;
-	stringstream	_fpsText;
+	float			_curFPS;
+	stringstream	_text;
 
-	bool			_freeze, _showFPS, _debugViewMode, _wireframeMode;
+	bool			_freeze, _showStats, _debugViewMode, _wireframeMode;
 	float			_animTime, _weight;
 	
 	// Engine objects

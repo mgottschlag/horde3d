@@ -107,6 +107,23 @@ struct EngineOptions
 	};
 };
 
+struct EngineStats
+{
+	/*	Enum: EngineStats
+			The available engine statistic parameters.
+		
+		TriCount		- Number of triangles that were pushed to the renderer
+		BatchCount		- Number of batches (draw calls)
+		LightPassCount	- Number of lighting passes
+	*/
+	enum List
+	{
+		TriCount = 100,
+		BatchCount,
+		LightPassCount
+	};
+};
+
 struct ResourceTypes
 {
 	/*	Enum: ResourceTypes
@@ -708,6 +725,21 @@ namespace Horde3D
 			true if the option could be set to the specified value, otherwise false
 	*/
 	DLL bool setOption( EngineOptions::List param, float value );
+
+	/* 	Function: getStat
+			Gets a statistic value of the engine.
+		
+		This function returns the value of the specified statistic. The reset flag makes it possible
+		to reset the statistic value after reading.
+		
+		Parameters:
+			param	- statistic parameter
+			reset	- flag specifying whether statistic value should be reset
+			
+		Returns:
+			current value of the specified statistic parameter
+	*/
+	DLL float getStat( EngineStats::List param, bool reset );
 	
 	/* 	Function: showOverlay
 			Shows an overlay on the screen.

@@ -32,9 +32,9 @@ Application::Application( const string &contentDir )
 	for( unsigned int i = 0; i < 320; ++i ) _keys[i] = false;
 
 	_x = 5; _y = 3; _z = 19; _rx = 7; _ry = 15; _velocity = 10.0f;
-	_curFPS = 30; _timer = 0;
+	_curFPS = 30;
 
-	_freeze = false; _showFPS = false; _debugViewMode = false; _wireframeMode = false;
+	_freeze = false; _showStats = false; _debugViewMode = false; _wireframeMode = false;
 	_animTime = 0; _weight = 1.0f;
 	_cam = 0;
 
@@ -131,7 +131,6 @@ bool Application::init()
 void Application::mainLoop( float fps )
 {
 	_curFPS = fps;
-	_timer += 1 / fps;
 
 	keyHandler();
 	
@@ -155,22 +154,14 @@ void Application::mainLoop( float fps )
 	// Set camera parameters
 	Horde3D::setNodeTransform( _cam, _x, _y, _z, _rx ,_ry, 0, 1, 1, 1 );
 	
-	if( _showFPS )
+	if( _showStats )
 	{
-		// Avoid updating FPS text every frame to make it readable
-		if( _timer > 0.3f )
-		{
-			_fpsText.str( "" );
-			_fpsText << "FPS: " << fixed << setprecision( 2 ) << _curFPS;
-			_timer = 0;
-		}
-		
-		// Show text
-		Horde3DUtils::showText( _fpsText.str().c_str(), 0, 0.95f, 0.03f, 0, _fontMatRes );
+		Horde3DUtils::showFrameStats( _fontMatRes, _curFPS );
 
-		stringstream text;
-		text << "Weight: " << _weight;
-		Horde3DUtils::showText( text.str().c_str(), 0, 0.91f, 0.03f, 0, _fontMatRes );
+		// Display weight
+		_text.str( "" );
+		_text << fixed << setprecision( 2 ) << "Weight: " << _weight;
+		Horde3DUtils::showText( _text.str().c_str(), 0, 0.78f, 0.03f, 0, _fontMatRes );
 	}
 
 	// Show logo
@@ -226,7 +217,7 @@ void Application::keyPressEvent( int key )
 		_wireframeMode = !_wireframeMode;
 	
 	if( key == 266 )	// F9
-		_showFPS = !_showFPS;
+		_showStats = !_showStats;
 }
 
 

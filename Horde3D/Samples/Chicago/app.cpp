@@ -32,9 +32,9 @@ Application::Application( const string &contentDir )
 	for( unsigned int i = 0; i < 320; ++i ) _keys[i] = false;
 
 	_x = 15; _y = 3; _z = 20; _rx = -10; _ry = 60; _velocity = 10.0f;
-	_curFPS = 30; _timer = 0;
+	_curFPS = 30;
 
-	_freeze = false; _showFPS = false; _debugViewMode = false; _wireframeMode = false;
+	_freeze = false; _showStats = false; _debugViewMode = false; _wireframeMode = false;
 	_cam = 0;
 
 	_contentDir = contentDir;
@@ -119,7 +119,6 @@ bool Application::init()
 void Application::mainLoop( float fps )
 {
 	_curFPS = fps;
-	_timer += 1 / fps;
 
 	keyHandler();
 	
@@ -134,18 +133,9 @@ void Application::mainLoop( float fps )
 	// Set camera parameters
 	Horde3D::setNodeTransform( _cam, _x, _y, _z, _rx ,_ry, 0, 1, 1, 1 );
 	
-	if( _showFPS )
+	if( _showStats )
 	{
-		// Avoid updating FPS text every frame to make it readable
-		if( _timer > 0.3f )
-		{
-			_fpsText.str( "" );
-			_fpsText << "FPS: " << fixed << setprecision( 2 ) << _curFPS;
-			_timer = 0;
-		}
-		
-		// Show text
-		Horde3DUtils::showText( _fpsText.str().c_str(), 0, 0.95f, 0.03f, 0, _fontMatRes );
+		Horde3DUtils::showFrameStats( _fontMatRes, _curFPS );
 	}
 
 	// Show logo
@@ -203,7 +193,7 @@ void Application::keyPressEvent( int key )
 		_wireframeMode = !_wireframeMode;
 	
 	if( key == 266 )	// F9
-		_showFPS = !_showFPS;
+		_showStats = !_showStats;
 }
 
 

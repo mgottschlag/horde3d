@@ -63,7 +63,7 @@ Input:
 	F1 sets fullscreen mode.
 	F7 toggles debug view.
 	F8 toggles wireframe mode.
-	F9 toggles FPS display.
+	F9 toggles frame stats display.
 	ESC quits the application.
 
 Notes on content:

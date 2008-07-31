@@ -70,7 +70,7 @@ Input:
 	F3 switches between forward and deferred shading.
 	F7 toggles debug view.
 	F8 toggles wireframe mode.
-	F9 toggles FPS display.
+	F9 toggles frame stats display.
 	ESC quits the application.
 
 Notes on content:
@@ -101,7 +101,7 @@ Input:
 	F3 switches between hdr and standard forward lighting.
 	F7 toggles debug view.
 	F8 toggles wireframe mode.
-	F9 toggles FPS and information display.
+	F9 toggles frame stats and information display.
 	ESC quits the application.
 
 Notes on content:

@@ -210,6 +210,8 @@ bool Renderer::init()
 		(float *)parVerts, ParticlesPerBatch * 4 * sizeof( ParticleVert ) );
 
 	_overlays.reserve( 100 );
+
+	_statTriCount = 0; _statBatchCount = 0; _statLightPassCount = 0;
 	
 	return true;
 }
@@ -219,6 +221,47 @@ void Renderer::resize( int x, int y, int width, int height )
 {
 	RendererBase::resize( x, y, width, height );
 	setRenderBuffer( _curRendBuf );
+}
+
+
+float Renderer::getStat( int param, bool reset )
+{
+	float value;	
+	
+	switch( param )
+	{
+	case EngineStats::TriCount:
+		value = (float)_statTriCount;
+		if( reset ) _statTriCount = 0;
+		return value;
+	case EngineStats::BatchCount:
+		value = (float)_statBatchCount;
+		if( reset ) _statBatchCount = 0;
+		return value;
+	case EngineStats::LightPassCount:
+		value = (float)_statLightPassCount;
+		if( reset ) _statLightPassCount = 0;
+		return value;
+	default:
+		return 0;
+	}
+}
+
+
+void Renderer::incStat( int param, float value )
+{
+	switch( param )
+	{
+	case EngineStats::TriCount:
+		_statTriCount += (int)value;
+		break;
+	case EngineStats::BatchCount:
+		_statBatchCount += (int)value;
+		break;
+	case EngineStats::LightPassCount:
+		_statLightPassCount += (int)value;
+		break;
+	}
 }
 
 
@@ -1084,6 +1127,7 @@ void Renderer::drawLightGeometry( const string shaderContext, const string &theC
 		Modules::sceneMan().updateQueues( _camFrustum, &_lightFrustum, RenderingOrder::None, false, true );
 		setupViewMatrices( _curCamera );
 		drawRenderables( context, theClass, false, &_camFrustum, &_lightFrustum, order, occSet );
+		incStat( EngineStats::LightPassCount, 1 );
 
 		// Reset
 		glDisable( GL_SCISSOR_TEST );
@@ -1144,6 +1188,7 @@ void Renderer::drawLightShapes( const string shaderContext, bool noShadows )
 		glTexCoord2f( bbx + bbw, bby + bbh ); glVertex2f( bbx + bbw, bby + bbh );
 		glTexCoord2f( bbx, bby + bbh ); glVertex2f( bbx, bby + bbh );
 		glEnd();
+		incStat( EngineStats::LightPassCount, 1 );
 
 		// Reset
 		glEnable( GL_DEPTH_TEST );
@@ -1708,6 +1753,8 @@ void Renderer::drawModels( const string &shaderContext, const string &theClass, 
 								 curGeoRes->_16BitIndices ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT,
 								 (char *)0 + meshNode->getBatchStart() *
 								 (curGeoRes->_16BitIndices ? sizeof( short ) : sizeof( int )) );
+			Modules::renderer().incStat( EngineStats::BatchCount, 1 );
+			Modules::renderer().incStat( EngineStats::TriCount, meshNode->getBatchCount() / 3.0f );
 		}
 
 		if( occCulling )
@@ -1835,6 +1882,8 @@ void Renderer::drawParticles( const string &shaderContext, const string &theClas
 				glUniform4fv( curShader->uni_parColorArray, ParticlesPerBatch, (float *)emitter->_parColors + j*ParticlesPerBatch*4 );
 
 			glDrawArrays( GL_QUADS, 0, ParticlesPerBatch * 4 );
+			Modules::renderer().incStat( EngineStats::BatchCount, 1 );
+			Modules::renderer().incStat( EngineStats::TriCount, ParticlesPerBatch * 2.0f );
 		}
 
 		uint32 count = emitter->_particleCount % ParticlesPerBatch;
@@ -1863,6 +1912,8 @@ void Renderer::drawParticles( const string &shaderContext, const string &theClas
 				glUniform4fv( curShader->uni_parColorArray, count, (float *)emitter->_parColors + offset*4 );
 			
 			glDrawArrays( GL_QUADS, 0, count * 4 );
+			Modules::renderer().incStat( EngineStats::BatchCount, 1 );
+			Modules::renderer().incStat( EngineStats::TriCount, count * 2.0f );
 		}
 
 		if( occCulling )

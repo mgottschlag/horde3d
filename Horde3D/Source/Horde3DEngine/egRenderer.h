@@ -46,6 +46,17 @@ extern const char *vsOccBox;
 extern const char *fsOccBox;	
 	
 
+struct EngineStats
+{
+	enum List
+	{
+		TriCount = 100,
+		BatchCount,
+		LightPassCount
+	};
+};
+
+
 struct Overlay
 {
 	float				x_ll, y_ll, u_ll, v_ll;		// Lower left corner
@@ -114,6 +125,8 @@ protected:
 	vector< char >		_occSets;	// Actually bool
 	vector< Overlay >	_overlays;
 
+	int					_statTriCount, _statBatchCount, _statLightPassCount;
+
 	static bool nodeFrontToBackOrder( NodeListEntry e1, NodeListEntry e2 )
 		{ return ((MeshNode *)e1.node)->tmpSortValue < ((MeshNode *)e2.node)->tmpSortValue; }
 	static bool nodeBackToFrontOrder( NodeListEntry e1, NodeListEntry e2 )
@@ -153,6 +166,8 @@ public:
 	void initStates();
 	bool init();
 	void resize( int x, int y, int width, int height );
+	float getStat( int param, bool reset );
+	void incStat( int param, float value );
 	void showOverlay( const Overlay &overlay, uint32 matRes );
 	void clearOverlays();
 
