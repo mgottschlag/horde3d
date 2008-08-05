@@ -116,15 +116,11 @@
 //
 //     stbi_is_hdr(char *filename);
 
-
 #ifndef STBI_NO_STDIO
 #include <stdio.h>
 #endif
 
-#ifndef STBI_NO_HDR
-#include <math.h>  // ldexp
-#include <string.h> // strcmp
-#endif
+#define STBI_VERSION 1
 
 enum
 {
@@ -179,7 +175,8 @@ extern void   stbi_ldr_to_hdr_scale(float scale);
 #endif // STBI_NO_HDR
 
 // get a VERY brief reason for failure
-extern char    *stbi_failure_reason  (void);
+// NOT THREADSAFE
+extern char    *stbi_failure_reason  (void); 
 
 // free the loaded image -- this is just free()
 extern void     stbi_image_free      (void *retval_from_stbi_load);
@@ -195,7 +192,7 @@ extern int      stbi_is_hdr_from_file(FILE *f);
 
 // ZLIB client - used by PNG, available for other purposes
 
-extern char *stbi_zlib_decode_malloc_guesssize(int initial_size, int *outlen);
+extern char *stbi_zlib_decode_malloc_guesssize(const char *buffer, int len, int initial_size, int *outlen);
 extern char *stbi_zlib_decode_malloc(const char *buffer, int len, int *outlen);
 extern int   stbi_zlib_decode_buffer(char *obuffer, int olen, const char *ibuffer, int ilen);
 
@@ -217,8 +214,6 @@ extern stbi_uc *stbi_jpeg_load_from_file  (FILE *f,                  int *x, int
 extern int      stbi_jpeg_info            (char const *filename,     int *x, int *y, int *comp);
 extern int      stbi_jpeg_info_from_file  (FILE *f,                  int *x, int *y, int *comp);
 #endif
-
-extern int      stbi_jpeg_dc_only; // only decode DC component
 
 // is it a png?
 extern int      stbi_png_test_memory      (stbi_uc const *buffer, int len);
@@ -286,6 +281,7 @@ typedef struct
 
 // register a loader by filling out the above structure (you must defined ALL functions)
 // returns 1 if added or already added, 0 if not added (too many loaders)
+// NOT THREADSAFE
 extern int stbi_register_loader(stbi_loader *loader);
 
 // define faster low-level operations (typically SIMD support)
