@@ -177,9 +177,9 @@ namespace Horde3DTerrain
 					if( u == 0 ) s = 0.0f; else if( u == size - 1 ) s = 1.0f;	// Skirt
 					
 					float *vertHeight = &terrain->_heightArray[v * size + u];
-					const float newU = (s * scale + minU) * (terrain->_hmapSize - 1) + 0.5f;
-					const float newV = (t * scale + minV) * (terrain->_hmapSize - 1) + 0.5f;
-					uint32 index = ((int)newV * terrain->_hmapSize + (int)newU );
+					const float newU = (s * scale + minU) * (terrain->_hmapSize) + 0.5f;
+					const float newV = (t * scale + minV) * (terrain->_hmapSize) + 0.5f;
+					uint32 index = ((int)newV * (terrain->_hmapSize + 1) + (int)newU );
 					
 					*vertHeight = terrain->_heightData[index] / 65535.0f;
 					
@@ -314,7 +314,7 @@ namespace Horde3DTerrain
 			hmap.getWidth() == 2048 || hmap.getWidth() == 4096 || hmap.getWidth() == 8192) )
 		{
 			_hmapSize = hmap.getWidth();
-			_heightData = new unsigned short[_hmapSize * _hmapSize];
+			_heightData = new unsigned short[(_hmapSize + 1) * (_hmapSize + 1)];
 			
 			float *pixels = hmap.downloadImageData();
 			
@@ -328,9 +328,23 @@ namespace Horde3DTerrain
 					height = (unsigned short)(clamp( pixels[(i * _hmapSize + j) * 4], 0, 1 ) * 255 * 256 +
 						clamp( pixels[(i * _hmapSize + j) * 4 + 1], 0, 1 ) * 255);
 					
-					_heightData[i * _hmapSize + j] = height;
+					_heightData[i * (_hmapSize + 1) + j] = height;
 				}
-			}
+			}                                                                                                     
+            // Fill in last rows (just repeat last texture pixels)                                               
+            for( uint32 i = 0; i < _hmapSize; ++i )                                                               
+			{                                                                                                     
+				unsigned short height;                                                                       
+				// Decode 16 bit data from red and green channels                                             
+				height = (unsigned short)(clamp( pixels[(i * _hmapSize + _hmapSize - 1) * 4], 0, 1 ) * 255 * 256 +
+							clamp( pixels[(i * _hmapSize + _hmapSize - 1) * 4 + 1], 0, 1 ) * 255);                                                                                                                         
+				_heightData[i * (_hmapSize + 1) + _hmapSize] = height;                                           
+			}                                                                                                         
+                                                                                                                      
+			for( uint32 i = 0; i < _hmapSize + 1; ++i )                                                               
+			{                                                                                                         
+				_heightData[_hmapSize * (_hmapSize + 1) + i] = _heightData[(_hmapSize - 1) * (_hmapSize + 1) + i];
+			}                             
 
 			delete[] pixels;
 			return true;
@@ -339,8 +353,8 @@ namespace Horde3DTerrain
 		{
 			// Init default data
 			_hmapSize = 32;
-			_heightData = new unsigned short[_hmapSize * _hmapSize];
-			memset( _heightData, 0, _hmapSize * _hmapSize );
+			_heightData = new unsigned short[ (_hmapSize + 1) * (_hmapSize + 1)];
+			memset( _heightData, 0, (_hmapSize + 1) * (_hmapSize + 1) );
 			Modules::log().writeDebugInfo( "Invalid heightmap data in Terrain node %i", _handle );
 			return false;
 		}
@@ -643,15 +657,15 @@ namespace Horde3DTerrain
 
 		dir /= dir.length();
 
-		int x = (int)(startX * _hmapSize);
-		int y = (int)(startZ * _hmapSize);
+		int x = (int)(startX * (_hmapSize + 1) );
+		int y = (int)(startZ * (_hmapSize + 1) );
 
 		// Check heightmap with Bresenham algorithm (code based on http://de.wikipedia.org/wiki/Bresenham-Algorithmus)
 		int t, dx, dy, incX, incY, pdx, pdy, ddx, ddy, err_step_fast, err_step_slow, err;
 
 		// Get deltas in image space
-		dx = (int)((endX - startX) * _hmapSize);
-		dy = (int)((endZ - startZ) * _hmapSize);
+		dx = (int)((endX - startX) * (_hmapSize + 1) );
+		dy = (int)((endZ - startZ) * (_hmapSize + 1) );
 
 		// Check directions
 		incX = (dx > 0) ? 1 : (dx < 0) ? -1 : 0;
@@ -675,7 +689,7 @@ namespace Horde3DTerrain
 		// Init error
 		err = err_step_slow / 2;		
 		
-		float height1 = _heightData[y * _hmapSize + x] / 65535.0f, height2;
+		float height1 = _heightData[y * (_hmapSize + 1) + x] / 65535.0f, height2;
 
 		Vec3f pos;
 		Vec3f prevPos;
@@ -713,7 +727,7 @@ namespace Horde3DTerrain
 				x += pdx;
 				y += pdy;
 			}					
-			height2 = _heightData[y * _hmapSize + x] / 65535.0f;
+			height2 = _heightData[y * (_hmapSize + 1) + x] / 65535.0f;
 
 			pos.x = x / (float)_hmapSize;
 			pos.z = y / (float)_hmapSize;
@@ -812,9 +826,9 @@ namespace Horde3DTerrain
 					float s = (u - 1) * invScale;
 					if( u == 0 ) s = 0.0f; else if( u == size - 1 ) s = 1.0f;	// Skirt
 
-					const float newU = (s * scale + minU) * (_hmapSize - 1) + 0.4f;
-					const float newV = (t * scale + minV) * (_hmapSize - 1) + 0.4f;
-					uint32 index = (int)newV * _hmapSize + (int)newU;
+					const float newU = (s * scale + minU) * _hmapSize + 0.5f;
+					const float newV = (t * scale + minV) * _hmapSize + 0.5f;
+					uint32 index = (int)newV * (_hmapSize + 1) + (int)newU;
 
 					*vertData++ = (s * scale + minU);
 
