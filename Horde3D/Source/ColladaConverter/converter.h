@@ -142,6 +142,7 @@ private:
 	unsigned int			_frameCount;
 
 
+	Matrix4f getNodeTransform( ColladaDocument &doc, DaeNode &node, unsigned int frame );
 	SceneNode *processNode( ColladaDocument &doc, DaeNode &node, SceneNode *parentNode,
 							Matrix4f transAccum, vector< Matrix4f > animTransAccum );
 	void calcTangentSpaceBasis( vector< Vertex > &vertices );

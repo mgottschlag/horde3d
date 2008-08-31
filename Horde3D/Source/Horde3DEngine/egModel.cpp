@@ -491,6 +491,7 @@ void ModelNode::onPostUpdate()
 				if( ae != 0x0 && !ae->frames.empty() )
 				{
 					uint32 frame = (uint32)_animStages[firstStage]->animTime % ae->frames.size();
+					if( ae->frames.size() == 1 ) frame = 0;		// Animation compression
 					_nodeList[i].node->getRelTrans() = ae->frames[frame].bakedTransMat;
 				}
 			}
@@ -520,6 +521,7 @@ void ModelNode::onPostUpdate()
 						if( Modules::config().fastAnimation )
 						{
 							uint32 f0 = (int)curStage.animTime % numFrames;
+							if( numFrames == 1 ) f0 = 0;	// Animation compression
 							Frame &frame = _nodeList[j].animEntities[i]->frames[f0];
 							
 							// Check if this is the first stage affecting the node
@@ -567,6 +569,8 @@ void ModelNode::onPostUpdate()
 							f0 = f0 % numFrames;
 							uint32 f1 = f0 + 1;
 							if( f1 > numFrames - 1 ) f1 = numFrames - 1;
+
+							if( numFrames == 1 ) f0 = f1 = 0;	// Animation compression
 							
 							Frame &frame0 = _nodeList[j].animEntities[i]->frames[f0];
 							Frame &frame1 = _nodeList[j].animEntities[i]->frames[f1];

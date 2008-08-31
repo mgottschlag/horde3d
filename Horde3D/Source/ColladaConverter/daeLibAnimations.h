@@ -100,7 +100,7 @@ struct DaeAnimation
 	}
 
 
-	bool parse( const XMLNode &animNode, unsigned int &maxFrameCount )
+	bool parse( const XMLNode &animNode, unsigned int &maxFrameCount, float &maxAnimTime )
 	{
 		id = animNode.getAttribute( "id", "" );
 		if( id == "" ) return false;
@@ -149,8 +149,13 @@ struct DaeAnimation
 			if( sampler.input == 0x0 || sampler.output == 0x0 )
 				samplers.pop_back();
 			else
-				maxFrameCount = max( maxFrameCount,
-					(unsigned int)sampler.input->floatArray.size() / sampler.input->elemsPerEntry );
+			{
+				unsigned int frameCount = (unsigned int)sampler.input->floatArray.size();
+				maxFrameCount = max( maxFrameCount, frameCount );
+				
+				for( unsigned int i = 0; i < frameCount; ++i )
+					maxAnimTime = max( maxAnimTime, sampler.input->floatArray[i] );
+			}
 
 			node1 = animNode.getChildNode( "sampler", ++nodeItr1 );
 		}
@@ -243,7 +248,7 @@ struct DaeAnimation
 		while( !node1.isEmpty() )
 		{
 			DaeAnimation *anim = new DaeAnimation();
-			if( anim->parse( node1, maxFrameCount ) ) children.push_back( anim );
+			if( anim->parse( node1, maxFrameCount, maxAnimTime ) ) children.push_back( anim );
 			else delete anim;
 
 			node1 = animNode.getChildNode( "animation", ++nodeItr1 );
@@ -258,6 +263,7 @@ struct DaeLibAnimations
 {
 	vector< DaeAnimation * >	animations;
 	unsigned int				maxFrameCount;
+	float						maxAnimTime;
 	
 
 	~DaeLibAnimations()
@@ -290,7 +296,7 @@ struct DaeLibAnimations
 		while( !node2.isEmpty() )
 		{
 			DaeAnimation *anim = new DaeAnimation();
-			if( anim->parse( node2, maxFrameCount ) ) animations.push_back( anim );
+			if( anim->parse( node2, maxFrameCount, maxAnimTime ) ) animations.push_back( anim );
 			else delete anim;
 
 			node2 = node1.getChildNode( "animation", ++nodeItr2 );

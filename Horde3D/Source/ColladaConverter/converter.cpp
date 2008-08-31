@@ -56,6 +56,58 @@ Converter::~Converter()
 }
 
 
+Matrix4f Converter::getNodeTransform( ColladaDocument &doc, DaeNode &node, unsigned int frame )
+{
+	// Note: Function assumes sampled animation data
+	
+	for( unsigned int i = 0; i < node.transStack.size(); ++i )
+	{
+		int compIndex;
+		DaeSampler *sampler = doc.libAnimations.findAnimForTarget( node.id, node.transStack[i].sid, &compIndex );
+
+		if( sampler != 0x0 )
+		{
+			if( compIndex >= 0 )	// Handle animation of single components like X or ANGLE
+			{
+				if( sampler->output->floatArray.size() != _frameCount )
+					log( "Warning: Use animation sampling for export!" );
+				else
+					node.transStack[i].animValues[compIndex] = sampler->output->floatArray[frame];	
+			}
+			else
+			{
+				unsigned int size = 0;
+				switch( node.transStack[i].type )
+				{
+				case DaeTransformation::MATRIX:
+					size = 16;
+					break;
+				// Note: Routine assumes that order is X, Y, Z, ANGLE
+				case DaeTransformation::SCALE:
+				case DaeTransformation::TRANSLATION:
+					size = 3;
+					break;
+				case DaeTransformation::ROTATION:
+					size = 4;
+					break;
+				}					
+				if( sampler->output->floatArray.size() != _frameCount * size )
+					log( "Warning: Use animation sampling for export!" );	
+				else
+					memcpy( node.transStack[i].animValues, &sampler->output->floatArray[frame * size], size * sizeof( float ) );
+			}
+		}
+		else
+		{
+			// If no animation data is found, use standard transformation
+			memcpy( node.transStack[i].animValues, node.transStack[i].values, 16 * sizeof( float ) );	
+		}
+	}
+
+	return makeMatrix4f( node.assembleAnimMatrix().transposed().x, doc.y_up );
+}
+
+
 SceneNode *Converter::processNode( ColladaDocument &doc, DaeNode &node, SceneNode *parentNode,
 								   Matrix4f transAccum, vector< Matrix4f > animTransAccum )
 {
@@ -163,49 +215,10 @@ SceneNode *Converter::processNode( ColladaDocument &doc, DaeNode &node, SceneNod
 	if( oNode != 0x0 ) transAccum = Matrix4f();
 	else transAccum = relMat;
 
-	// Animation (assume sampled data)
+	// Animation
 	for( unsigned int i = 0; i < _frameCount; ++i )
 	{
-		for( unsigned int j = 0; j < node.transStack.size(); ++j )
-		{
-			int index;
-			DaeSampler *sampler = doc.libAnimations.findAnimForTarget( node.id, node.transStack[j].sid, &index );
-
-			if( sampler != 0x0 )
-			{
-				if( index >= 0 )
-				{
-					if( sampler->output->floatArray.size() != _frameCount )
-						log( "Warning: Use animation sampling for export!" );
-					else
-						node.transStack[j].animValues[index] = sampler->output->floatArray[i];
-				}
-				else
-				{
-					unsigned int size = 0;
-					switch( node.transStack[j].type )
-					{
-					case DaeTransformation::MATRIX:
-						size = 16;
-						break;
-					// Note: Routine assumes that order is X, Y, Z, ANGLE
-					case DaeTransformation::SCALE:
-					case DaeTransformation::TRANSLATION:
-						size = 3;
-						break;
-					case DaeTransformation::ROTATION:
-						size = 4;
-						break;
-					}					
-					if( sampler->output->floatArray.size() != _frameCount * size )
-						log( "Warning: Use animation sampling for export!" );
-					else
-						memcpy( node.transStack[j].animValues, &sampler->output->floatArray[i * size], size * sizeof( float ) );
-				}
-			}
-		}
-
-		Matrix4f mat = animTransAccum[i] * makeMatrix4f( node.assembleAnimMatrix().transposed().x, doc.y_up );
+		Matrix4f mat = animTransAccum[i] * getNodeTransform( doc, node, i );
 		if( oNode != 0x0 )
 		{
 			oNode->frames.push_back( mat );
@@ -1130,7 +1143,25 @@ void Converter::writeAnimFrames( SceneNode &node, FILE *f )
 {
 	fwrite( &node.name, 256, 1, f );
 		
-	for( unsigned int i = 0; i < node.frames.size(); ++i )
+	// Animation compression: just store a single frame if all frames are equal
+	char canCompress = 0;
+	if( node.frames.size() > 1 )
+	{
+		canCompress = 1;
+
+		// Check if all frames are equal
+		for( unsigned int i = 1; i < node.frames.size(); ++i )
+		{
+			if( memcmp( node.frames[0].x, node.frames[i].x, 16 * sizeof( float ) ) != 0 )
+			{
+				canCompress = 0;
+				break;
+			}
+		}
+	}
+	fwrite( &canCompress, sizeof( char ), 1, f );
+	
+	for( size_t i = 0; i < (canCompress ? 1 : node.frames.size()); ++i )
 	{
 		Vec3f transVec, rotVec, scaleVec;
 		node.frames[i].decompose( transVec, rotVec, scaleVec );
@@ -1155,9 +1186,9 @@ bool Converter::writeAnimation( const string &name )
 	FILE *f = fopen( (name + ".anim").c_str(), "wb" );
 
 	// Write header
-	unsigned int version = 2;
+	unsigned int version = 3;
 	fwrite( "H3DA", 4, 1, f );
-	fwrite( &version, sizeof( int ), 1, f ); 
+	fwrite( &version, sizeof( int ), 1, f );
 	
 	// Write number of nodes
 	unsigned int count = 0;

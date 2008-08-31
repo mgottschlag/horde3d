@@ -1056,7 +1056,7 @@ The file format is based on streams. The streams are written in that order:
 
 The animation resource consists of sampled animation data for the joints and meshes of a model.
 <br /><br />
-<h3>Version 2</h3>
+<h3>Version 3</h3>
 
 <div class="syntaxbox">
 <table>
@@ -1072,7 +1072,7 @@ The animation resource consists of sampled animation data for the joints and mes
 				<tr>
 					<td><b>version</b></td>
 					<td><b>int</b></td>
-					<td>version number: 2</td>
+					<td>version number: 3</td>
 				</tr>
 				<tr>
 					<td><b>numAnimations</b></td>
@@ -1090,12 +1090,21 @@ The animation resource consists of sampled animation data for the joints and mes
 
 	<tr>
         <td><b>Animation data</b></td>
-		<td>Animation data, just after header repeated <b>numFrames</b> times. Animations must be written first for all joints. Loop through all joints beginning at index zero towards the end skipping all joints with zero frames and write their animation data. Now do the same for all meshes.
+		<td>Animation data, just after header repeated <b>numAnimations</b> times for all animated nodes. Nodes
+		that have no animation don't need to be stored in the animation file. Animation data is sampled,
+		meaning that all nodes must have the same number of frames, namely <b>numFrames</b>. The format supports a
+		simple compression scheme for nodes that have the same transformation for all frames. If the compression flag
+		is set to 1, only one single transformation is stored for the corresponing animated node.
 			<table>
 				<tr>
 					<td><b>nodeName</b></td>
 					<td>256 <b>char</b>s</td>
 					<td>node name, must be null terminated</td>
+				</tr>
+				<tr>
+					<td><b>compressed</b></td>
+					<td>1 <b>char</b></td>
+					<td>compression flag: 0 for no compression, 1 for compression</td>
 				</tr>
 				<tr>
 					<td><b>rotation</b></td>

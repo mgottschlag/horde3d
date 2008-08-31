@@ -93,7 +93,7 @@ bool AnimationResource::load( const char *data, int size )
 	
 	uint32 version;
 	memcpy( &version, myData, sizeof( uint32 ) ); myData += sizeof( uint32 );
-	if( version != 2 )
+	if( version != 2 && version != 3 )
 		return raiseError( "Unsupported version of animation resource" );
 	
 	// Load animation data
@@ -105,14 +105,20 @@ bool AnimationResource::load( const char *data, int size )
 
 	for( uint32 i = 0; i < numEntities; ++i )
 	{
-		char name[256];
+		char name[256], compressed = 0;
 		AnimResEntity &entity = _entities[i];
 		
 		memcpy( name, myData, 256 ); myData += 256;
 		entity.name = name;
+		
+		// Animation compression
+		if( version == 3 )
+		{
+			memcpy( &compressed, myData, sizeof( char ) ); myData += sizeof( char ); 
+		}
 
-		entity.frames.resize( _numFrames );
-		for( uint32 j = 0; j < _numFrames; ++j )
+		entity.frames.resize( compressed ? 1 : _numFrames );
+		for( uint32 j = 0; j < (compressed ? 1 : _numFrames); ++j )
 		{
 			Frame &frame = entity.frames[j];
 
