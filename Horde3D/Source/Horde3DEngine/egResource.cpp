@@ -63,6 +63,7 @@ Resource::~Resource()
 
 Resource *Resource::clone()
 {
+	Modules::log().writeDebugInfo( "Resource cloning not implemented for type %i", _type );
 	return 0x0;
 }
 

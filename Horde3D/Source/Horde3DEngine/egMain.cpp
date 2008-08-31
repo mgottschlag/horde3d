@@ -293,6 +293,19 @@ namespace Horde3D
 	}
 
 
+	DLLEXP bool isResourceLoaded( ResHandle res )
+	{
+		Resource *resObj = Modules::resMan().resolveResHandle( res );
+		if( resObj == 0x0 )
+		{	
+			Modules::log().writeDebugInfo( "Invalid resource handle %i in isResourceLoaded", res );
+			return false;
+		}
+		
+		return resObj->isLoaded();
+	}
+
+	
 	DLLEXP bool loadResource( ResHandle res, const char *data, int size )
 	{
 		Resource *resObj = Modules::resMan().resolveResHandle( res );
@@ -585,6 +598,12 @@ namespace Horde3D
 		if( res == 0x0 || res->getType() != ResourceTypes::SceneGraph )
 		{
 			Modules::log().writeDebugInfo( "Invalid SceneGraph resource handle %i in addNodes", sceneGraphRes );
+			return 0;
+		}
+		
+		if( !res->isLoaded() )
+		{
+			Modules::log().writeDebugInfo( "Unloaded SceneGraph resource specified for addNodes (handle: %i)", sceneGraphRes );
 			return 0;
 		}
 		

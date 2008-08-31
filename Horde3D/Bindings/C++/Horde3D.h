@@ -186,7 +186,7 @@ struct GeometryResParams
 		   The available Geometry resource parameters.	  
 	   
 		VertexCount	- Number of vertices; valid for getResourceParami
-		IndexCount	- Number of vertices; valid for getResourceParami
+		IndexCount	- Number of triangle indices; valid for getResourceParami
 		VertexData	- Vertex positon data (pointer to float); valid for getResourceData
 		IndexData	- Triangle indices (pointer to uint); valid for getResourceData
 	 */
@@ -884,17 +884,32 @@ namespace Horde3D
 	*/
 	DLL int removeResource( ResHandle res );
 	
+	/* 	Function: isResourceLoaded
+			Checks if a resource is loaded.
+		
+		This function checks if the specified resource has been successfully loaded.
+		
+		Parameters:
+			res		- handle to the resource to be checked
+			
+		Returns:
+			true if resource is loaded, otherwise or in case of failure false
+	*/
+	DLL bool isResourceLoaded( ResHandle res );
+	
 	/* 	Function: loadResource
 			Loads a resource.
 		
 		This function loads data for a resource that was previously added to the resource manager.
-        If data is a NULL-pointer the resource manager is told that the resource doesn't have any data.
-        This function can only be called once for every resource.
-        
+        If data is a NULL-pointer the resource manager is told that the resource doesn't have any data
+		(e.g. the corresponding file was not found). In this case, the resource remains in the unloaded state
+		but is no more returned when querying unloaded resources. When the specified resource is already loaded,
+		the function returns false.
+		
         *Important Note: XML-data must be NULL-terminated*
 		
 		Parameters:
-			res		- handle to the resource for which data is loaded
+			res		- handle to the resource for which data will be loaded
 			data	- pointer to the data to be loaded
 			size	- size of the data block
 			
@@ -1252,13 +1267,12 @@ namespace Horde3D
 			Adds nodes from a SceneGraph resource to the scene.
 		
 		This function creates several new nodes as described in a SceneGraph resource and
-        attaches them to a specified parent node.
-
-        *Important Note: The SceneGraph resource needs to be loaded!*
+        attaches them to a specified parent node. If an invalid scenegraph resource is specified
+		or the scenegraph resource is unloaded, the function returns 0.
 		
 		Parameters:
 			parent			- handle to parent node to which the root of the new nodes will be attached
-			sceneGraphRes	- handle to SceneGraph resource
+			sceneGraphRes	- handle to loaded SceneGraph resource
 			
 		Returns:
 			handle to the root of the created nodes or 0 in case of failure
@@ -1279,7 +1293,7 @@ namespace Horde3D
 	DLL bool removeNode( NodeHandle node );
 	
 	/* 	Function: setNodeActivation
-			Sets the activation state of a node.
+			Sets the activation (visibility) state of a node.
 		
 		This function sets the activation state of the specified node to active or inactive. Inactive
         nodes with all their children are excluded from rendering.
@@ -1842,7 +1856,7 @@ namespace Horde3D
 			emitterNode	- handle to the Emitter node which is checked
 			
 		Returns:
-			 life state of Emitter node or false in case of failure
+			 true if Emitter will no more emit any particles, otherwise or in case of failure false
 	*/
 	DLL bool hasEmitterFinished( NodeHandle emitterNode );
 }
