@@ -26,6 +26,7 @@
 #define _egCom_H_
 
 #include "egPrerequisites.h"
+#include <stdarg.h>
 #include <time.h>
 #include <cstdlib>
 #include <cstring>

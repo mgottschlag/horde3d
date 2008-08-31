@@ -1,9 +1,9 @@
 
 include_directories(../Bindings/C++ ../../../Horde3D/Bindings/C++ ../../../Horde3D/Dependencies/Include)
 
-IF(WIN32)
+IF(MSVC)
 SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /ENTRY:mainCRTStartup ")
-ENDIF(WIN32)
+ENDIF(MSVC)
 
 add_executable(Terrain WIN32 MACOSX_BUNDLE
 	app.h

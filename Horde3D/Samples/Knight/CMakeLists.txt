@@ -2,9 +2,9 @@
 include_directories(../../Bindings/C++)
 include_directories(../../Dependencies/Include)
 
-IF(WIN32)
+IF(MSVC)
 SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /ENTRY:mainCRTStartup ")
-ENDIF(WIN32)
+ENDIF(MSVC)
 
 add_executable(Knight WIN32 MACOSX_BUNDLE
 	app.h
