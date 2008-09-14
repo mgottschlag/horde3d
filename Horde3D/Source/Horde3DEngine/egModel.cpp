@@ -504,6 +504,9 @@ void ModelNode::onPostUpdate()
 				
 				AnimStage &curStage = *_animStages[i];
 				
+				// Ignore stages with a blend weight near zero
+				if( curStage.blendWeight < 0.0001f && !curStage.additive ) continue;
+				
 				for( size_t j = 0, s = _nodeList.size(); j < s; ++j )
 				{
 					if( _nodeList[j].animEntities[i] == 0x0 ) continue;
@@ -514,7 +517,6 @@ void ModelNode::onPostUpdate()
 						AnimatableSceneNode &node = *_nodeList[j].node;
 
 						float weight = curStage.blendWeight;
-						if( weight == 0.0f ) weight = 0.0001f;	// Avoid division by zero
 						if( node._weightAccum + weight > 1.0f ) weight = 1.0f - node._weightAccum;
 
 						// Fast animation with sampled frame data

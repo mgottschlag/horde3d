@@ -74,7 +74,7 @@ struct EngineOptions
 		
 		MaxLogLevel			- Defines the maximum log level; only messages which are smaller or equal to this value
 							  (hence more important) are published in the message queue. (Default: 4)
-		MaxNumMessages      - Defines the maximum number of messages held in the queue until getMessage is called (Default 512)
+		MaxNumMessages      - Defines the maximum number of messages that can be stored in the message queue (Default: 512)
 		TrilinearFiltering	- Enables or disables trilinear filtering for textures; only affects textures
 							  that are loaded after setting the option. (Values: 0, 1; Default: 1)
 		AnisotropyFactor	- Sets the quality for anisotropic filtering; only affects textures that
@@ -398,15 +398,11 @@ struct SceneNodeTypes
 struct SceneNodeParams
 {
 	/*  Enum: SceneNodeParams
-	        The available Scene node parameters.
+	        The available scene node parameters.
 
-			Name				- The name of a scene node; used e.g. to find a node which 
-								  handle may not known to the application [type: string]
-		    AttachmentString    - Optional XML data of an 'Attachment' node attached to a scene node [type: string]
-
-	        *Important Note: The pointer is const and allows only read access to the data. Do never try to modify the
-					         data of the pointer since that can corrupt the engine's internal states!*
-
+			Name				- Name of the scene node [type: string]
+		    AttachmentString    - Optional application-specific meta data for a node
+								  encapsulated in an 'Attachment' XML string [type: string]
 	*/
 	enum List
 	{
@@ -1001,6 +997,9 @@ namespace Horde3D
 		
 		This function returns a specified property of the specified resource.
 		The property must be of the type string (const char *).
+
+		*Important Note: The pointer is const and allows only read access to the data. Do never try to modify the
+        data of the pointer since that can corrupt the engine's internal states!*
  		
 		Parameters:
 			res		- handle to the resource to be accessed
@@ -1463,6 +1462,9 @@ namespace Horde3D
 		
 		This function returns a specified property of the specified node.
 		The property must be of the type string (const char *).
+
+		*Important Note: The pointer is const and allows only read access to the data. Do never try to modify the
+        data of the pointer since that can corrupt the engine's internal states!*
 		
 		Parameters:
 			node	- handle to the node to be accessed
@@ -1552,7 +1554,7 @@ namespace Horde3D
 			node		- node at which intersection check is beginning
 			ox, oy, oz	- ray origin
 			dx, dy, dz	- ray direction vector also specifying ray length
-			numNearest	- maximum number of results to return or 0 for all
+			numNearest	- maximum number of intersection points to be stored (0 for all)
 			
 		Returns:
 			number of intersections
@@ -1561,18 +1563,19 @@ namespace Horde3D
 
 
 	/*	Function: getCastRayResult
-			Returns results of a previous castRay query
+			Returns a result of a previous castRay query.
 
-		This functions copies the results for the specified index into the provided variables.
+		This functions is used to access the results of a previous castRay query. The index is used to access
+		a specific result. The intersection data is copied to the specified variables.
 
 		Parameters:
-			index			- index in range 0 until return value of castRay exclusive
-			node			- intersecting node
-			distance		- distance from ray origin to intersection
-			intersection	- point of intersection, float[3] array
+			index			- index of result to be accessed (range: 0 to number of results returned by castRay)
+			node			- handle of intersected node
+			distance		- distance from ray origin to intersection point
+			intersection	- coordinates of intersection point (float[3] array)
 
 		Returns:
-			true if index was valid and data could be copied
+			true if index was valid and data could be copied, otherwise false
 	*/
 	DLL bool getCastRayResult( int index, NodeHandle *node, float *distance, float *intersection );
 

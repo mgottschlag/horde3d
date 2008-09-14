@@ -53,6 +53,8 @@ SceneNode::~SceneNode()
 
 void SceneNode::getTransform( Vec3f &trans, Vec3f &rot, Vec3f &scale )
 {
+	if( _dirty ) Modules::sceneMan().updateNodes();
+	
 	_relTrans.decompose( trans, rot, scale );
 	rot.x = radToDeg( rot.x );
 	rot.y = radToDeg( rot.y );
@@ -62,6 +64,12 @@ void SceneNode::getTransform( Vec3f &trans, Vec3f &rot, Vec3f &scale )
 
 void SceneNode::setTransform( Vec3f trans, Vec3f rot, Vec3f scale )
 {
+	// Hack to avoid making setTransform virtual
+	if( _type == SceneNodeTypes::Joint || _type == SceneNodeTypes::Mesh )
+	{
+		((AnimatableSceneNode *)this)->_ignoreAnim = true;
+	}
+	
 	_relTrans = Matrix4f();
 	_relTrans.scale( scale.x, scale.y, scale.z );
 	_relTrans.rotate( degToRad( rot.x ), degToRad( rot.y ), degToRad( rot.z ) );
@@ -73,6 +81,12 @@ void SceneNode::setTransform( Vec3f trans, Vec3f rot, Vec3f scale )
 
 void SceneNode::setTransform( const Matrix4f &mat )
 {
+	// Hack to avoid making setTransform virtual
+	if( _type == SceneNodeTypes::Joint || _type == SceneNodeTypes::Mesh )
+	{
+		((AnimatableSceneNode *)this)->_ignoreAnim = true;
+	}
+	
 	_relTrans = mat;
 	
 	markDirty();
@@ -83,12 +97,13 @@ const void SceneNode::getTransMatrices( const float **relMat, const float **absM
 {
 	if( relMat != 0x0 )
 	{
+		if( _dirty ) Modules::sceneMan().updateNodes();
 		*relMat = &_relTrans.x[0];
 	}
 	
 	if( absMat != 0x0 )
 	{
-		Modules::sceneMan().updateNodes();
+		if( _dirty ) Modules::sceneMan().updateNodes();
 		*absMat = &_absTrans.x[0];
 	}
 }
@@ -760,4 +775,5 @@ bool SceneManager::getCastRayResult( int index, CastRayResult &crr )
 
 	return false;
 }
+
 

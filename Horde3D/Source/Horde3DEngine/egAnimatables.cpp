@@ -34,7 +34,11 @@
 
 void AnimatableSceneNode::onPreUpdate()
 {
-	if( _animUpdateStamp != 0 )		// Node was updated by animation
+	if( _ignoreAnim )
+	{
+		_ignoreAnim = false;
+	}
+	else if( _animUpdateStamp != 0 )		// Node was updated by animation
 	{
 		_animUpdateStamp = 0;
 		_weightAccum = 0;

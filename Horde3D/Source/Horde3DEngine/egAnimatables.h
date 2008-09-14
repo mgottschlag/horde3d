@@ -37,6 +37,8 @@ class AnimatableSceneNode : public SceneNode
 {
 protected:
 
+	ModelNode		*_parentModel;
+	bool			_ignoreAnim;
 	uint32			_animUpdateStamp;
 	float			_weightAccum;
 	Quaternion		_rotQuat;
@@ -45,12 +47,13 @@ protected:
 public:
 
 	AnimatableSceneNode( const SceneNodeTpl &tpl ) :
-		SceneNode( tpl ), _animUpdateStamp( 0 ), _weightAccum( 0 )
+		SceneNode( tpl ), _parentModel( 0x0 ), _ignoreAnim( false ), _animUpdateStamp( 0 ), _weightAccum( 0 )
 	{
 	}
 
 	virtual void onPreUpdate();
 
+	friend class SceneNode;
 	friend class ModelNode;
 };
 
@@ -90,7 +93,6 @@ protected:
 	uint32				_batchStart, _batchCount;
 	uint32				_vertRStart, _vertREnd;
 	
-	ModelNode			*_parentModel;
 	BoundingBox			_localBBox;
 
 	MeshNode( const MeshNodeTpl &meshTpl );
@@ -116,7 +118,6 @@ public:
 	uint32 getBatchCount() { return _batchCount; }
 	uint32 getVertRStart() { return _vertRStart; }
 	uint32 getVertREnd() { return _vertREnd; }
-	ModelNode *getParentModel() { return _parentModel; }
 
 	friend class ModelNode;
 };
@@ -144,7 +145,6 @@ class JointNode : public AnimatableSceneNode
 {
 protected:
 
-	ModelNode	*_parentModel;
 	uint32		_jointIndex;
 	Matrix4f	_relModelMat;		// Transformation relative to parent model
 
