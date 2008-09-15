@@ -30,7 +30,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Horde3D .NET wrapper")]
 [assembly: AssemblyDescription(".NET Framework 2.0 wrapper for Horde3D")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("pyropix")]
+[assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Horde3D .NET wrapper")]
 [assembly: AssemblyCopyright("Copyright ©  2007 Martin Burkhard")]
 [assembly: AssemblyTrademark("")]
