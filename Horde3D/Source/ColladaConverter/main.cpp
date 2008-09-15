@@ -35,7 +35,7 @@
 int main( int argc, char **argv )
 {
 	log( "Horde3D Collada Converter" );
-	log( "Version 1.0.0 Beta1" );
+	log( "Version 1.0.0 Beta2" );
 	log( "" );
 	
 	if( argc < 2 )

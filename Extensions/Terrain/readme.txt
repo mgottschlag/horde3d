@@ -44,7 +44,13 @@ sample shader.
 ChangeLog
 ---------
 
+0.2.0	- Disabled texture compression for height map
+		- Fixed culling issues
+		- Fixed intersection calculation
+		- Fixed visible gaps in terrain (thanks to phoenix64)
+		
 0.1.1	- Fixed culling issues and simplified installation
+
 0.1.0	- Initial release
 
 

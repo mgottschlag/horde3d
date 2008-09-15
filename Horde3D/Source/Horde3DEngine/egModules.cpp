@@ -25,7 +25,7 @@
 #include "egModules.h"
 #include "utDebug.h"
 
-const char *versionString = "Horde3D 1.0.0 Beta1";
+const char *versionString = "Horde3D 1.0.0 Beta2";
 
 EngineConfig		*Modules::_engineConfig = 0x0;
 EngineLog			*Modules::_engineLog = 0x0;

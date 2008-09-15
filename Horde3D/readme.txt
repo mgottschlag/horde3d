@@ -6,10 +6,10 @@ Horde3D
 		-S D K-
 		-------
 		
-		Version 1.0.0 Beta1
+		Version 1.0.0 Beta2
 		
 
-Copyright (C) 2006-2008 Nicolas Schulz
+Copyright (C) 2006-2008 Nicolas Schulz and the Horde3D Team
 
 http://www.horde3d.org
 
@@ -31,17 +31,17 @@ The source code of the engine and tools is included in the SDK. It has the follo
 	- GLFW 2.6 for window management in samples
 		http://glfw.sourceforge.net/
 		
-These libraries are included directly as code or precomplied binaries in the SDK.
+These libraries are included directly as code in the SDK.
 
 
 Release Notes:
 	
-	This is another major release which finally brings Horde3D to a stable version. A
-	plenty of new features have been added: occlusion culling, API-based render-to-texture
-	for reflections and other effects which require several cameras, software skinning,
-	stereo rendering, sorting of scene nodes by depth and orthographic camera projections.
-	Besides these new features, many smaller improvements and optimizations were done and
-	the usage guide has been rewritten to provide more detailed information.
+	The Beta2 release contains many bugfixes and smaller updates reported and contributed
+	by the community. Besides these, it brings some noticeable improvements like
+	increased shadow quality and extended occlusion culling. A further important
+	enhancement is the expanded support for dynamic resource updates. On the Collada
+	side, the compatibility was improved by supporting non-baked animation data. Finally,
+	the previous makefile system has been replaced by CMake-based build scripts.
 
 
 Special thanks go to the University of Augsburg for supporting this project!

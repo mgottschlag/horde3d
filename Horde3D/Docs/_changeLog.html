@@ -13,6 +13,38 @@
 <p>Here you can see what has changed in the Horde3D SDK releases.</p>
 
 
+<h3>Version [1.0.0] Beta2</h3>
+<ul>
+	<li>Implemented simple animation compression scheme and updated animation format to version 3.</li>
+	<li>Reduced shadow map aliasing by taking into account exclusively visible geometry when calculating PSSM crop matrix.</li>
+	<li>Implemented occlusion culling for light sources (light sources can be completely occluded by geometry).</li>
+	<li>Fixeded several bugs in scene graph and animation system.</li>
+	<li>Integrated several smaller fixes to improve cross-platform compatibility (especially thanks to Codepoet).</li>
+	<li>Did a few other smaller bug fixes and code improvements.</li>
+	<li>Replaced makefiles by CMake build scripts (thanks to Codepoet and swiftcoder).</li>
+	<li>Added API function getStat and EngineStats enum for reading statistic values like triangle and batch count.</li>
+	<li>Added utility function showFrameStats to display frame statistics.</li>
+	<li>Added API functions setResourceParami, setResourceParamf, getResourceParamstr and setResourceParamstr.</li>
+	<li>Added EffectResParams enum and MaterialResParams enum to query and modify resource parameters.</li>
+	<li>Added MaxNumMessages to EngineOptions enum for setting the maximum number of log messages.</li>
+	<li>Modified castRay API function (and added getCastRayResult) to support querying several intersection points (thanks to CodePoet).</li>	
+	<li>Added API function hasEmitterFinished to check if an emitter is no longer active.</li>
+	<li>Modified API function queryUnloadedResource to take an index for querying the n-th unloaded resource.</li>
+	<li>Added API function isResourceLoaded to check if a resource has been loaded.</li>
+	<li>Added API functions getNodeParamstr and setNodeParamstr.</li>
+	<li>Added SceneNodeParams enum.</li>
+	<li>Removed API functions getNodeName, setNodeName, getNodeAttachmentString (replaced by get/setNodeParamstr with SceneNodeParams enum).</li>
+	<li>Changed API function addNodes to return 0 when an unloaded scenegraph resource is specified.</li>
+	<li>Changed return value of API function init to true if engine is already initialized.</li>
+	<li>Added GLFW source to SDK distribution.</li>
+	<li>Added support for non baked transformation data in ColladaConv.</li>
+	<li>Fixed serious texture seam bug and other smaller issues in ColladaConv.</li>
+	<li>Improved font rendering and updated sample font texture.</li>
+	<li>Added enhanced shadow map bias calculation to sample shaders (commented out by default since it requires SM3).</li>
+	<li>Fixed bug in sample parallax mapping shader.</li>
+	<li>Updated documentation with geometry and animation format specifications (thanks to Codepoet).</li>
+</ul>
+
 <h3>Version [1.0.0] Beta1</h3>
 <ul>
 	<li>Implemented occlusion culling for models and emitters.</li>
