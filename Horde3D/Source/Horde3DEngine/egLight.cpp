@@ -43,6 +43,16 @@ LightNode::LightNode( const LightNodeTpl &lightTpl ) :
 }
 
 
+LightNode::~LightNode()
+{
+	for( uint32 i = 0; i < _occQueries.size(); ++i )
+	{
+		if( _occQueries[i] != 0 )
+			Modules::renderer().destroyOccQuery( _occQueries[i] );
+	}
+}
+
+
 SceneNodeTpl *LightNode::parsingFunc( map< string, string > &attribs )
 {
 	bool result = true;

@@ -1100,6 +1100,54 @@ void Renderer::drawLightGeometry( const string shaderContext, const string &theC
 
 		// Check if light is not visible
 		if( _camFrustum.cullFrustum( _lightFrustum ) ) continue;
+
+		setupViewMatrices( _curCamera );
+
+		// Check if light is occluded
+		if( occSet >= 0 )
+		{
+			if( occSet > (int)_curLight->_occQueries.size() - 1 )
+			{
+				_curLight->_occQueries.resize( occSet + 1, 0 );
+				_curLight->_lastVisited.resize( occSet + 1, 0 );
+			}
+			if( _curLight->_occQueries[occSet] == 0 )
+			{
+				_curLight->_occQueries[occSet] = Modules::renderer().createOccQuery();
+				_curLight->_lastVisited[occSet] = 0;
+			}
+			else
+			{
+				if( _curLight->_lastVisited[occSet] != Modules::renderer().getFrameID() )
+				{
+					_curLight->_lastVisited[occSet] = Modules::renderer().getFrameID();
+				
+					Vec3f mins, maxs;
+					_lightFrustum.calcAABB( mins, maxs );
+					
+					// Check that viewer is outside light bounds
+					if( nearestDistToAABB( _camFrustum.getOrigin(), mins, maxs ) )
+					{
+						// Draw occlusion box
+						glColorMask( 0, 0, 0, 0 );
+						glDepthMask( 0 );
+						Modules::renderer().beginOccQuery( _curLight->_occQueries[occSet] );
+						Modules::renderer().setShader( &Modules::renderer().occShader );
+						Modules::renderer().drawAABB( mins, maxs );
+						Modules::renderer().endOccQuery( _curLight->_occQueries[occSet] );
+						Modules::renderer().setMaterial( 0x0, "" );
+						glDepthMask( 1 );
+						glColorMask( 1, 1, 1, 1 );
+
+						// Check query result from previous frame
+						if( Modules::renderer().getOccQueryResult( _curLight->_occQueries[occSet] ) < 1 )
+						{
+							continue;
+						}
+					}
+				}
+			}
+		}
 	
 		// Calculate light screen space position
 		float bbx, bby, bbw, bbh;
@@ -1140,7 +1188,7 @@ void Renderer::drawLightGeometry( const string shaderContext, const string &theC
 }
 
 
-void Renderer::drawLightShapes( const string shaderContext, bool noShadows )
+void Renderer::drawLightShapes( const string shaderContext, bool noShadows, int occSet )
 {
 	if( _curCamera == 0x0 ) return;
 	
@@ -1157,6 +1205,54 @@ void Renderer::drawLightShapes( const string shaderContext, bool noShadows )
 		
 		// Check if light is not visible
 		if( _camFrustum.cullFrustum( _lightFrustum ) ) continue;
+
+		setupViewMatrices( _curCamera );
+		
+		// Check if light is occluded
+		if( occSet >= 0 )
+		{
+			if( occSet > (int)_curLight->_occQueries.size() - 1 )
+			{
+				_curLight->_occQueries.resize( occSet + 1, 0 );
+				_curLight->_lastVisited.resize( occSet + 1, 0 );
+			}
+			if( _curLight->_occQueries[occSet] == 0 )
+			{
+				_curLight->_occQueries[occSet] = Modules::renderer().createOccQuery();
+				_curLight->_lastVisited[occSet] = 0;
+			}
+			else
+			{
+				if( _curLight->_lastVisited[occSet] != Modules::renderer().getFrameID() )
+				{
+					_curLight->_lastVisited[occSet] = Modules::renderer().getFrameID();
+				
+					Vec3f mins, maxs;
+					_lightFrustum.calcAABB( mins, maxs );
+					
+					// Check that viewer is outside light bounds
+					if( nearestDistToAABB( _camFrustum.getOrigin(), mins, maxs ) )
+					{
+						// Draw occlusion box
+						glColorMask( 0, 0, 0, 0 );
+						glDepthMask( 0 );
+						Modules::renderer().beginOccQuery( _curLight->_occQueries[occSet] );
+						Modules::renderer().setShader( &Modules::renderer().occShader );
+						Modules::renderer().drawAABB( mins, maxs );
+						Modules::renderer().endOccQuery( _curLight->_occQueries[occSet] );
+						Modules::renderer().setMaterial( 0x0, "" );
+						glDepthMask( 1 );
+						glColorMask( 1, 1, 1, 1 );
+
+						// Check query result from previous frame
+						if( Modules::renderer().getOccQueryResult( _curLight->_occQueries[occSet] ) < 1 )
+						{
+							continue;
+						}
+					}
+				}
+			}
+		}
 		
 		// Calculate light screen space position
 		float bbx, bby, bbw, bbh;
@@ -1525,7 +1621,8 @@ bool Renderer::render( CameraNode *camNode )
 				break;
 
 			case PipelineCommands::DoDeferredLightLoop:
-				drawLightShapes( ((PCStringParam *)pc.valParams[0])->get(), ((PCBoolParam *)pc.valParams[1])->get() );
+				drawLightShapes( ((PCStringParam *)pc.valParams[0])->get(), ((PCBoolParam *)pc.valParams[1])->get(),
+					_curCamera->_occSet );
 				break;
 
 			case PipelineCommands::SetUniform:

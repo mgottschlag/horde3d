@@ -193,3 +193,20 @@ bool Frustum::cullFrustum( const Frustum &frust )
 
 	return false;
 }
+
+
+void Frustum::calcAABB( Vec3f &mins, Vec3f &maxs )
+{
+	mins.x = Math::MaxFloat; mins.y = Math::MaxFloat; mins.z = Math::MaxFloat;
+	maxs.x = -Math::MaxFloat; maxs.y = -Math::MaxFloat; maxs.z = -Math::MaxFloat;
+	
+	for( uint32 i = 0; i < 8; ++i )
+	{
+		if( _corners[i].x < mins.x ) mins.x = _corners[i].x;
+		if( _corners[i].y < mins.y ) mins.y = _corners[i].y;
+		if( _corners[i].z < mins.z ) mins.z = _corners[i].z;
+		if( _corners[i].x > maxs.x ) maxs.x = _corners[i].x;
+		if( _corners[i].y > maxs.y ) maxs.y = _corners[i].y;
+		if( _corners[i].z > maxs.z ) maxs.z = _corners[i].z;
+	}
+}

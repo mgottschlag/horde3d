@@ -80,9 +80,13 @@ private:
 	uint32				_shadowMapCount;
 	float				_shadowSplitLambda, _shadowMapBias;
 
+	vector< uint32 >	_occQueries;
+	vector< uint32 >	_lastVisited;
+
 	void onPostUpdate();
 
 	LightNode( const LightNodeTpl &lightTpl );
+	~LightNode();
 
 public:
 	

@@ -84,4 +84,35 @@
 			</DefCode>
 		</FragmentShader>
 	</Context>
+	
+	
+	<Context id="COPY_DEPTH">
+		<VertexShader>
+			<DefCode>
+			<![CDATA[
+				varying vec2 texCoord;
+				
+				void main( void )
+				{
+					texCoord = gl_MultiTexCoord0.st; 
+					gl_Position = gl_ProjectionMatrix * gl_Vertex;
+				}
+			]]>
+			</DefCode>
+		</VertexShader>
+		
+		<FragmentShader>
+			<DefCode>
+			<![CDATA[
+				uniform sampler2D tex8;
+				varying vec2 texCoord;
+				
+				void main( void )
+				{
+					gl_FragDepth = texture2D( tex8, texCoord ).r;
+				}
+			]]>
+			</DefCode>
+		</FragmentShader>
+	</Context>
 </Shader>

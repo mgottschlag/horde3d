@@ -147,6 +147,8 @@ public:
 	bool cullSphere( Vec3f pos, float rad );
 	bool cullBox( BoundingBox &b ) const;
 	bool cullFrustum( const Frustum &frust );
+
+	void calcAABB( Vec3f &mins, Vec3f &maxs );
 };
 
 #endif // _egPrimitives_H_

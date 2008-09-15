@@ -151,7 +151,7 @@ protected:
 					   RenderingOrder::List order, int occSet );
 	void drawLightGeometry( const string shaderContext, const string &theClass,
 							bool noShadows, RenderingOrder::List order, int occSet );
-	void drawLightShapes( const string shaderContext, bool noShadows );
+	void drawLightShapes( const string shaderContext, bool noShadows, int occSet );
 	void renderDebugView();
 	void finishRendering();
 

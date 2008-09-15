@@ -507,7 +507,28 @@ materials if the ambient lighting is changed.
 <br /><br />
 
 For more information see the <a href="_pipeline.html">pipeline documentation</a>.
+</p>
 <br /><br />
+
+
+<h3>Occlusion Culling</h3>
+<p>
+Occlusion culling is an optimization technique that makes it possible to cull objects that are not visible since they are hidden/occluded
+by other objects. Horde3D uses hardware occlusion queries for its occlusion culling implementation. These queries have a delay of one
+frame to avoid stalls that would happen when waiting for the query result directly. The drawback of this approach is that some slight
+popping can occur when an object that was hidden in the previous frame becomes visible in the current frame. The implementation uses the
+depth buffer to check for occlusion of objects, so occlusion culling is only working if the rendering pass has proper scene depth
+information.
+<br /><br />
+Horde3D supports multiple occlusion sets for different cameras. Enabling occlusion culling for a camera is basically very simple
+and works by setting a Camera node parameter. But in order that occlusion culling works efficiently, the scene needs to be sorted
+in front-to-back order. In Horde3D this sorting can be achieved through a special parameter in the pipeline drawing commands.
+<br /><br />
+All renderable objects act automatically as occluders. Occludees (objects that can be culled because of occlusion) are currently
+models and particle emitters. Meshes of a model can occlude other models but a single mesh cannot occlude a mesh of the same Model node.
+Light sources can also be occluded by other geometry which can be very useful in indoor scenes. Again, this only works if a proper
+depth buffer is available which usually requires special care for deferred shading.
+</p>
 
 <div id="copy">Copyright &copy; 2006-2008 Nicolas Schulz</div>
 </div>
