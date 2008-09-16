@@ -80,7 +80,7 @@ namespace Horde3DNET.Samples.ChicagoNET
 	        Horde3D.setOption( Horde3D.EngineOptions.TexCompression, 0 );
 	        Horde3D.setOption( Horde3D.EngineOptions.AnisotropyFactor, 8 );
 	        Horde3D.setOption( Horde3D.EngineOptions.ShadowMapSize, 2048 );
-            Horde3D.setOption( Horde3D.EngineOptions.FastAnimation, 0 );
+            Horde3D.setOption( Horde3D.EngineOptions.FastAnimation, 1 );
 
             // Add resources
  	        // Pipelines
@@ -138,7 +138,7 @@ namespace Horde3DNET.Samples.ChicagoNET
             _timer += 1 / fps;
             
 	        Horde3D.setOption( Horde3D.EngineOptions.WireframeMode, _wireframeMode ? 1.0f : 0.0f );
-            Horde3D.setOption(Horde3D.EngineOptions.DebugViewMode, _debugViewMode ? 1.0f : 0.0f);
+            Horde3D.setOption( Horde3D.EngineOptions.DebugViewMode, _debugViewMode ? 1.0f : 0.0f );
         	
 	        if( !_freeze )
 	        {
@@ -194,8 +194,19 @@ namespace Horde3DNET.Samples.ChicagoNET
                     _freeze = !_freeze;
                     break;
 
+                case Keys.F3:
+                    if(  Horde3D.getNodeParami( _cam, (int) Horde3D.CameraNodeParams.PipelineRes ) == _forwardPipeRes )
+                        Horde3D.setNodeParami(_cam, (int) Horde3D.CameraNodeParams.PipelineRes, _deferredPipeRes);
+                    else
+                        Horde3D.setNodeParami(_cam, (int) Horde3D.CameraNodeParams.PipelineRes, _forwardPipeRes);
+                    break;
+
                 case Keys.F7:
                     _debugViewMode = !_debugViewMode;
+                    break;
+
+                case Keys.F8:
+                    _wireframeMode = !_wireframeMode;
                     break;
 
                 case Keys.F9:

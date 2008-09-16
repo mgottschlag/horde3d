@@ -79,7 +79,7 @@ namespace Horde3DNET.Samples.KnightNET
             Horde3DUtils.setResourcePath(Horde3D.ResourceTypes.Texture2D, "textures");
             Horde3DUtils.setResourcePath(Horde3D.ResourceTypes.TextureCube, "textures");
             Horde3DUtils.setResourcePath(Horde3D.ResourceTypes.Effect, "effects");
-            Horde3DUtils.setResourcePath(Horde3D.ResourceTypes.Pipeline, "pipelines"); //horde3d 1.0
+            Horde3DUtils.setResourcePath(Horde3D.ResourceTypes.Pipeline, "pipelines");
 
 	        // Set options
 	        Horde3D.setOption( Horde3D.EngineOptions.LoadTextures, 1 );
@@ -114,7 +114,7 @@ namespace Horde3DNET.Samples.KnightNET
 
             // horde3d 1.0
 	        // Add camera
-            _cam = Horde3D.addCameraNode(Horde3D.RootNode, "Camera", _forwardPipeRes);
+            _cam = Horde3D.addCameraNode(Horde3D.RootNode, "Camera", _hdrPipeRes);
             /////////////
             // Add scene nodes
             // Add environment
@@ -234,7 +234,6 @@ namespace Horde3DNET.Samples.KnightNET
                 case Keys.Space:
                     _freeze = !_freeze;
                     break;
-
 	            case Keys.F3:
 	                if( Horde3D.getNodeParami( _cam, (int) Horde3D.CameraNodeParams.PipelineRes ) == _hdrPipeRes )
                         Horde3D.setNodeParami(_cam, (int) Horde3D.CameraNodeParams.PipelineRes, _forwardPipeRes);
@@ -244,11 +243,11 @@ namespace Horde3DNET.Samples.KnightNET
                 case Keys.F7:
                     _debugViewMode = !_debugViewMode;
                     break;
+                case Keys.F8:
+                    _wireframeMode = !_wireframeMode;
+                    break;
                 case Keys.F9:
                     _showStats = !_showStats;
-                    break;
-                case Keys.F5:
-                    _wireframeMode = !_wireframeMode;
                     break;
             }
         }
