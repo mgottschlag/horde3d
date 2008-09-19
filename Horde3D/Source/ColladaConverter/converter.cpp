@@ -856,8 +856,8 @@ bool Converter::writeGeometry( const string &name )
 			streamElemSize = 2 * sizeof( float ); fwrite( &streamElemSize, sizeof( int ), 1, f );
 			for( unsigned int j = 0; j < count; ++j )
 			{
-				fwrite( &_vertices[j].texCoords[0].x, sizeof( float ), 1, f );
-				fwrite( &_vertices[j].texCoords[0].y, sizeof( float ), 1, f );
+				fwrite( &_vertices[j].texCoords[1].x, sizeof( float ), 1, f );
+				fwrite( &_vertices[j].texCoords[1].y, sizeof( float ), 1, f );
 			}
 			break;
 		}
