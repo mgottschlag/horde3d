@@ -31,13 +31,13 @@
 #include "utMath.h"
 #include <string>
 #include <vector>
-using namespace std;
+
 
 
 struct DaeVSource
 {
-	string		id;
-	string		posSourceId;
+	std::string	id;
+	std::string	posSourceId;
 	DaeSource	*posSource;
 
 
@@ -82,14 +82,14 @@ struct IndexEntry
 
 struct DaeTriGroup
 {
-	string						vSourceId;
+	std::string					vSourceId;
 	DaeVSource					*vSource;
-	string						normSourceId;
+	std::string					normSourceId;
 	DaeSource					*normSource;
-	string						texSourceId[4];
+	std::string					texSourceId[4];
 	DaeSource					*texSource[4];
-	string						matId;
-	vector< IndexEntry >		indices;
+	std::string					matId;
+	std::vector< IndexEntry >	indices;
 
 
 	DaeTriGroup()
@@ -261,14 +261,14 @@ struct DaeTriGroup
 
 struct DaeGeometry
 {
-	string					id;
-	string					name;
-	vector< DaeSource >		sources;
-	vector< DaeVSource >	vsources;
-	vector< DaeTriGroup >	triGroups;
+	std::string					id;
+	std::string					name;
+	std::vector< DaeSource >	sources;
+	std::vector< DaeVSource >	vsources;
+	std::vector< DaeTriGroup >	triGroups;
 
 
-	DaeSource *findSource( const string &id )
+	DaeSource *findSource( const std::string &id )
 	{
 		if( id == "" ) return 0x0;
 		
@@ -281,7 +281,7 @@ struct DaeGeometry
 	}
 
 
-	DaeVSource *findVSource( const string &id )
+	DaeVSource *findVSource( const std::string &id )
 	{
 		if( id == "" ) return 0x0;
 		
@@ -388,7 +388,7 @@ struct DaeLibGeometries
 {
 public:
 
-	vector< DaeGeometry* >	geometries;
+	std::vector< DaeGeometry* >	geometries;
 
 	
 	~DaeLibGeometries()
@@ -397,7 +397,7 @@ public:
 	}
 	
 
-	DaeGeometry *findGeometry( const string &id )
+	DaeGeometry *findGeometry( const std::string &id )
 	{
 		if( id == "" ) return 0x0;
 		

@@ -26,6 +26,7 @@
 #include "utXMLParser.h"
 #include "utils.h"
 
+using namespace std;
 
 bool ColladaDocument::parseFile( const string &fileName )
 {

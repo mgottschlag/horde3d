@@ -59,7 +59,7 @@ public:
 	}
 	
 	
-	bool parseFile( const string &fileName );
+	bool parseFile( const std::string &fileName );
 };
 
 #endif // _daeMain_H_

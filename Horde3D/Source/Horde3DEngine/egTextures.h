@@ -41,7 +41,7 @@ public:
 
 	static uint32 loadImage( const char *data, uint32 size, bool makePOT,
 							 void *&pixels, int &width, int &height, int &comps, bool &hdr );
-	static string getErrorString();
+	static std::string getErrorString();
 };
 
 
@@ -66,7 +66,7 @@ protected:
 	uint32			_texObject;
 	RenderBuffer	*_rendBuf;	// Used when texture is renderable
 
-	bool raiseError( const string &msg );
+	bool raiseError( const std::string &msg );
 
 public:
 	
@@ -74,11 +74,11 @@ public:
 
 	static void initializationFunc();
 	static void releaseFunc();
-	static Resource *factoryFunc( const string &name, int flags )
+	static Resource *factoryFunc( const std::string &name, int flags )
 		{ return new Texture2DResource( name, flags ); }
 	
-	Texture2DResource( const string &name, int flags );
-	Texture2DResource( const string &name, int flags,
+	Texture2DResource( const std::string &name, int flags );
+	Texture2DResource( const std::string &name, int flags,
 					   uint32 width, uint32 height, bool renderable );
 	~Texture2DResource();
 	
@@ -111,7 +111,7 @@ protected:
 	bool	_hdr;
 	uint32	_texObject;
 
-	bool raiseError( const string &msg );
+	bool raiseError( const std::string &msg );
 
 public:
 	
@@ -119,10 +119,10 @@ public:
 
 	static void initializationFunc();
 	static void releaseFunc();
-	static Resource *factoryFunc( const string &name, int flags )
+	static Resource *factoryFunc( const std::string &name, int flags )
 		{ return new TextureCubeResource( name, flags ); }
 	
-	TextureCubeResource( const string &name, int flags );
+	TextureCubeResource( const std::string &name, int flags );
 	~TextureCubeResource();
 	
 	void initDefault();

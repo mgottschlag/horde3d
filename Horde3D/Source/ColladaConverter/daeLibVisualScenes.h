@@ -30,13 +30,12 @@
 #include <string>
 #include <vector>
 #include <map>
-using namespace std;
 
 
 struct DaeTransformation
 {
 	enum Type { MATRIX, TRANSLATION, ROTATION, SCALE };
-	string					sid;
+	std::string				sid;
 	unsigned int			type;
 	float					values[16];
 	float					animValues[16];		// Temporary animation values
@@ -45,20 +44,20 @@ struct DaeTransformation
 
 struct DaeInstance
 {
-	string					url;
-	map< string, string >	materialBindings;
+	std::string					url;
+	std::map< std::string, std::string >	materialBindings;
 };
 
 
 struct DaeNode
 {
-	string						id, sid;
-	string						name;
-	bool						joint;
+	std::string	id, sid;
+	std::string	name;
+	bool		joint;
 	
-	vector< DaeTransformation >	transStack;
-	vector< DaeNode * >			children;
-	vector< DaeInstance >		instances;
+	std::vector< DaeTransformation >	transStack;
+	std::vector< DaeNode * >			children;
+	std::vector< DaeInstance >			instances;
 	
 
 	bool parse( const XMLNode &nodeNode )
@@ -157,7 +156,7 @@ struct DaeNode
 			if( strcmp( node1.getName(), "instance_geometry" ) == 0 ||
 				strcmp( node1.getName(), "instance_controller" ) == 0 )
 			{
-				string url = node1.getAttribute( "url", "" );
+				std::string url = node1.getAttribute( "url", "" );
 				removeGate( url );
 
 				if( url != "" )
@@ -178,7 +177,7 @@ struct DaeNode
 							XMLNode node4 = node3.getChildNode( "instance_material", nodeItr4 );
 							while( !node4.isEmpty() )
 							{
-								string s = node4.getAttribute( "target", "" );
+								std::string s = node4.getAttribute( "target", "" );
 								removeGate( s );
 								inst.materialBindings[node4.getAttribute( "symbol", "" )] = s;
 
@@ -271,8 +270,8 @@ struct DaeNode
 
 struct DaeVisualScene
 {
-	string					id;
-	vector< DaeNode * >		nodes;
+	std::string					id;
+	std::vector< DaeNode * >	nodes;
 
 	
 	~DaeVisualScene()
@@ -304,7 +303,7 @@ struct DaeVisualScene
 
 struct DaeLibVisScenes
 {
-	vector< DaeVisualScene * >	visScenes;
+	std::vector< DaeVisualScene * >	visScenes;
 
 
 	~DaeLibVisScenes()
@@ -313,7 +312,7 @@ struct DaeLibVisScenes
 	}
 	
 
-	DaeVisualScene *findVisualScene( const string &id )
+	DaeVisualScene *findVisualScene( const std::string &id )
 	{
 		if( id == "" ) return 0x0;
 		

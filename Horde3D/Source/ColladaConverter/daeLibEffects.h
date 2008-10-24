@@ -29,14 +29,14 @@
 #include "daeLibImages.h"
 #include <string>
 #include <vector>
-using namespace std;
+
 
 
 struct DaeEffect
 {
-	string		id;
-	string		name;
-	string		diffuseMapId;
+	std::string	id;
+	std::string	name;
+	std::string	diffuseMapId;
 	DaeImage	*diffuseMap;
 
 
@@ -69,7 +69,7 @@ struct DaeEffect
 		XMLNode node5 = node4.getChildNode( "texture" );
 		if( node5.isEmpty() ) return true;
 
-		string samplerId = node5.getAttribute( "texture", "" );
+		std::string samplerId = node5.getAttribute( "texture", "" );
 		if( samplerId == "" )return true;
 
 		// This is a hack to support files that don't completely respect the COLLADA standard
@@ -81,7 +81,7 @@ struct DaeEffect
 		}
 		
 		// Find sampler
-		string surfaceId;
+		std::string surfaceId;
 		int nodeItr2 = 0;
 		node2 = node1.getChildNode( "newparam", nodeItr2 );
 		while( !node2.isEmpty() )
@@ -137,7 +137,7 @@ struct DaeEffect
 
 struct DaeLibEffects
 {
-	vector< DaeEffect * >	effects;
+	std::vector< DaeEffect * >	effects;
 
 	
 	~DaeLibEffects()
@@ -146,7 +146,7 @@ struct DaeLibEffects
 	}
 	
 
-	DaeEffect *findEffect( const string &id )
+	DaeEffect *findEffect( const std::string &id )
 	{
 		if( id == "" ) return 0x0;
 		

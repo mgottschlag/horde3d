@@ -44,10 +44,10 @@ private:
 
 public:
 
-	static Resource *factoryFunc( const string &name, int flags )
+	static Resource *factoryFunc( const std::string &name, int flags )
 		{ return new SceneGraphResource( name, flags ); }
 	
-	SceneGraphResource( const string &name, int flags );
+	SceneGraphResource( const std::string &name, int flags );
 	~SceneGraphResource();
 	
 	void initDefault();
@@ -66,7 +66,7 @@ struct ReferenceNodeTpl : public SceneNodeTpl
 {
 	PSceneGraphResource		sgRes;
 
-	ReferenceNodeTpl( const string &name, SceneGraphResource *sgRes ) :
+	ReferenceNodeTpl( const std::string &name, SceneGraphResource *sgRes ) :
 		SceneNodeTpl( 0, name ), sgRes( sgRes )
 	{
 	}

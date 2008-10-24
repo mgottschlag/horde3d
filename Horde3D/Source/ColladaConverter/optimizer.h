@@ -27,7 +27,7 @@
 
 #include <vector>
 #include <set>
-using namespace std;
+
 
 struct TriGroup;
 struct Vertex;
@@ -36,9 +36,9 @@ struct OptFace;
 
 struct OptVertex
 {
-	unsigned int		index;		// Index in vertex array
-	float				score;
-	set< OptFace * >	faces;		// Faces that are using this vertex
+	unsigned int			index;		// Index in vertex array
+	float					score;
+	std::set< OptFace * >	faces;		// Faces that are using this vertex
 
 	void updateScore( int cacheIndex );
 };
@@ -56,12 +56,12 @@ public:
 
 	static const int OptCacheSize = 32;
 	
-	static unsigned int removeDegeneratedTriangles( TriGroup &triGroup, vector< Vertex > &vertices,
-													vector< unsigned int > &indices );
-	static void optimizeIndexOrderNV( TriGroup &triGroup, vector< Vertex > &vertices,
-									  vector< unsigned int > &indices );
-	static void optimizeIndexOrder( TriGroup &triGroup, vector< Vertex > &vertices,
-									 vector< unsigned int > &indices );
+	static unsigned int removeDegeneratedTriangles( TriGroup &triGroup, std::vector< Vertex > &vertices,
+													std::vector< unsigned int > &indices );
+	static void optimizeIndexOrderNV( TriGroup &triGroup, std::vector< Vertex > &vertices,
+									  std::vector< unsigned int > &indices );
+	static void optimizeIndexOrder( TriGroup &triGroup, std::vector< Vertex > &vertices,
+									 std::vector< unsigned int > &indices );
 };
 
 #endif	// _optimizer_H_

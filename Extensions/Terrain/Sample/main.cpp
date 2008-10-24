@@ -18,6 +18,8 @@
 #include "glfw.h"
 #include "app.h"
 
+using namespace std;
+
 // Configuration
 const char *caption = "Terrain - Horde3D Extension Sample";
 const int appWidth = 800;

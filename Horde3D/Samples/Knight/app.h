@@ -19,7 +19,7 @@
 #include "Horde3D.h"
 #include <sstream>
 #include <string>
-using namespace std;
+
 
 
 class Application
@@ -30,7 +30,7 @@ private:
 	float			_x, _y, _z, _rx, _ry;	// Viewer position and orientation
 	float			_velocity;				// Velocity for movement
 	float			_curFPS;
-	stringstream	_text;
+	std::stringstream	_text;
 
 	bool			_freeze, _showStats, _debugViewMode, _wireframeMode;
 	float			_animTime, _weight;
@@ -39,13 +39,13 @@ private:
 	ResHandle		_pipeRes, _fontMatRes, _logoMatRes, _hdrPipeRes, _forwardPipeRes;
 	NodeHandle		_cam, _knight, _particleSys;
 
-	string			_contentDir;
+	std::string			_contentDir;
 
 	void keyHandler();
 
 public:
 	
-	Application( const string &contentDir );
+	Application( const std::string &contentDir );
 	
 	bool init();
 	void mainLoop( float fps );

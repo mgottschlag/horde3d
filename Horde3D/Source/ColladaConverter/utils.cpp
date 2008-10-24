@@ -32,6 +32,7 @@ using namespace std;
 #	include <windows.h>
 #endif
 
+using namespace std;
 
 bool parseString( char *s, unsigned int &pos, string &token )
 {
@@ -160,7 +161,7 @@ string extractFilePath( const string &fullPath )
 }
 
 
-void log( const string &msg )
+void log( const std::string &msg )
 {
 	cout << msg << endl;
 	

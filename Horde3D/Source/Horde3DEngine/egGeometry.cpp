@@ -29,6 +29,7 @@
 
 #include "utDebug.h"
 
+using namespace std;
 
 uint32 GeometryResource::defVertBuffer = 0;
 uint32 GeometryResource::defIndexBuffer = 0;

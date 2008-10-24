@@ -49,7 +49,7 @@ struct ModelNodeParams
 
 struct Morpher	// Morph modifier
 {
-	string		name;
+	std::string	name;
 	uint32		index;		// Index of morph target in Geometry resource
 	float		weight;
 };
@@ -57,7 +57,7 @@ struct Morpher	// Morph modifier
 struct AnimStage
 {
 	PAnimationResource			anim;
-	string						startNode;
+	std::string					startNode;
 	bool						additive;
 	float						animTime;
 	float						blendWeight;
@@ -88,7 +88,7 @@ struct ModelNodeTpl : public SceneNodeTpl
 	PGeometryResource	geoRes;
 	bool				softwareSkinning;
 
-	ModelNodeTpl( const string &name, GeometryResource *geoRes ) :
+	ModelNodeTpl( const std::string &name, GeometryResource *geoRes ) :
 		SceneNodeTpl( SceneNodeTypes::Model, name ), geoRes( geoRes ), softwareSkinning( false )
 	{
 	}
@@ -100,11 +100,11 @@ protected:
 
 	GeometryResource			*_geometryRes;
 	GeometryResource			*_baseGeoRes;
-	vector< Vec4f >				_skinMatRows;
+	std::vector< Vec4f >		_skinMatRows;
 	bool						_softwareSkinning;
 	
 	bool						_morpherUsed, _morpherDirty;
-	vector< Morpher >			_morphers;
+	std::vector< Morpher >		_morphers;
 	
 	AnimStage					*_animStages[MaxNumAnimStages];
 	bool						_animDirty;				// Animation has changed		
@@ -112,27 +112,27 @@ protected:
 	uint32						_animTimeStamp;
 
 	uint32						_meshCount;			// Number of meshes in _animatedNodes
-	vector< NodeListEntry >		_nodeList;			// List of the model's meshes followed by joints
+	std::vector< NodeListEntry >_nodeList;			// List of the model's meshes followed by joints
 
-	vector< uint32 >			_occQueries;
-	vector< uint32 >			_lastVisited;
+	std::vector< uint32 >		_occQueries;
+	std::vector< uint32 >		_lastVisited;
 
 	ModelNode( const ModelNodeTpl &modelTpl );
 	void recreateNodeListRec( SceneNode *node, bool firstCall );
-	void updateStageAnimations( uint32 stage, const string &startNode );
+	void updateStageAnimations( uint32 stage, const std::string &startNode );
 	void markMeshBBoxesDirty();
 
 public:
 
 	~ModelNode();
 	
-	static SceneNodeTpl *parsingFunc( map< string, string > &attribs );
+	static SceneNodeTpl *parsingFunc( std::map< std::string, std::string > &attribs );
 	static SceneNode *factoryFunc( const SceneNodeTpl &nodeTpl );
 
 	void recreateNodeList();
-	bool setupAnimStage( int stage, uint32 animRes, const string &startNode, bool additive );
+	bool setupAnimStage( int stage, uint32 animRes, const std::string &startNode, bool additive );
 	bool setAnimParams( int stage, float time, float weight );
-	bool setMorphParam( const string &targetName, float weight );
+	bool setMorphParam( const std::string &targetName, float weight );
 
 	int getParami( int param );
 	bool setParami( int param, int value );

@@ -26,6 +26,7 @@
 #include "terrain.h"
 #include "egModules.h"
 
+using namespace std;
 
 namespace Horde3DTerrain
 {

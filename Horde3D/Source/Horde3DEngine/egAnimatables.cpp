@@ -27,6 +27,7 @@
 #include "egModules.h"
 #include "utDebug.h"
 
+using namespace std;
 
 // *************************************************************************************************
 // Class AnimatableSceneNode

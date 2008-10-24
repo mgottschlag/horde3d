@@ -60,7 +60,7 @@ struct CameraNodeTpl : public SceneNodeTpl
 	bool				orthographic;
 	bool				occlusionCulling;
 
-	CameraNodeTpl( const string &name, PipelineResource *pipelineRes ) :
+	CameraNodeTpl( const std::string &name, PipelineResource *pipelineRes ) :
 		SceneNodeTpl( SceneNodeTypes::Camera, name ), pipeRes( pipelineRes ),
 		outputTex( 0x0 ), outputBufferIndex( 0 ),
 		// Default params: fov=45, aspect=4/3
@@ -92,7 +92,7 @@ public:
 	
 	~CameraNode();
 
-	static SceneNodeTpl *parsingFunc( map< string, string > &attribs );
+	static SceneNodeTpl *parsingFunc( std::map< std::string, std::string > &attribs );
 	static SceneNode *factoryFunc( const SceneNodeTpl &nodeTpl );
 	
 	float getParamf( int param );

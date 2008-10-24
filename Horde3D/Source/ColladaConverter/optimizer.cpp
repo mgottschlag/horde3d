@@ -3,6 +3,7 @@
 #include <list>
 #include <algorithm>
 
+using namespace std;
 
 void OptVertex::updateScore( int cacheIndex )
 {

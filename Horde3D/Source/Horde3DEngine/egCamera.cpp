@@ -27,6 +27,7 @@
 
 #include "utDebug.h"
 
+using namespace std;
 
 CameraNode::CameraNode( const CameraNodeTpl &cameraTpl ) :
 	SceneNode( cameraTpl )

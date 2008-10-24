@@ -29,6 +29,7 @@
 
 #include "utDebug.h"
 
+using namespace std;
 
 SceneGraphResource::SceneGraphResource( const string &name, int flags ) :
 	Resource( ResourceTypes::SceneGraph, name, flags )

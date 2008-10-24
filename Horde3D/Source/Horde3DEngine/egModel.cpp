@@ -28,6 +28,7 @@
 
 #include "utDebug.h"
 
+using namespace std;
 
 ModelNode::ModelNode( const ModelNodeTpl &modelTpl ) :
 	SceneNode( modelTpl ), _geometryRes( modelTpl.geoRes ), _baseGeoRes( 0x0 ),

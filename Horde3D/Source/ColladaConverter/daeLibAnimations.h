@@ -30,12 +30,11 @@
 #include "utils.h"
 #include <string>
 #include <vector>
-using namespace std;
 
 
 struct DaeSampler
 {
-	string			id;
+	std::string		id;
 	DaeSource		*input;			// Time values
 	DaeSource		*output;		// Transformation data
 };
@@ -44,19 +43,19 @@ struct DaeSampler
 struct DaeChannel
 {
 	DaeSampler		*source;
-	string			nodeId;				// Target node
-	string			transSid;			// Target transformation channel
+	std::string		nodeId;				// Target node
+	std::string		transSid;			// Target transformation channel
 	int				transValuesIndex;	// Index in values of node transformation (-1 for no index)
 };
 
 
 struct DaeAnimation
 {
-	string						id;
-	vector< DaeSource >			sources;
-	vector< DaeSampler >		samplers;
-	vector< DaeChannel >		channels;
-	vector< DaeAnimation * >	children;
+	std::string						id;
+	std::vector< DaeSource >		sources;
+	std::vector< DaeSampler >		samplers;
+	std::vector< DaeChannel >		channels;
+	std::vector< DaeAnimation * >	children;
 
 
 	~DaeAnimation()
@@ -65,7 +64,7 @@ struct DaeAnimation
 	}
 
 
-	DaeSource *findSource( const string &id )
+	DaeSource *findSource( const std::string &id )
 	{
 		if( id == "" ) return 0x0;
 
@@ -78,7 +77,7 @@ struct DaeAnimation
 	}
 
 	
-	DaeSampler *findAnimForTarget( const string &nodeId, const string &transSid, int *transValuesIndex )
+	DaeSampler *findAnimForTarget( const std::string &nodeId, const std::string &transSid, int *transValuesIndex )
 	{
 		for( unsigned int i = 0; i < channels.size(); ++i )
 		{
@@ -132,13 +131,13 @@ struct DaeAnimation
 			{
 				if( strcmp( node2.getAttribute( "semantic", "" ), "INPUT" ) == 0x0 )
 				{
-					string id = node2.getAttribute( "source", "" );
+					std::string id = node2.getAttribute( "source", "" );
 					removeGate( id );
 					sampler.input = findSource( id );
 				}
 				else if( strcmp( node2.getAttribute( "semantic", "" ), "OUTPUT" ) == 0x0 )
 				{
-					string id = node2.getAttribute( "source", "" );
+					std::string id = node2.getAttribute( "source", "" );
 					removeGate( id );
 					sampler.output = findSource( id );
 				}
@@ -151,10 +150,10 @@ struct DaeAnimation
 			else
 			{
 				unsigned int frameCount = (unsigned int)sampler.input->floatArray.size();
-				maxFrameCount = max( maxFrameCount, frameCount );
+				maxFrameCount = std::max( maxFrameCount, frameCount );
 				
 				for( unsigned int i = 0; i < frameCount; ++i )
-					maxAnimTime = max( maxAnimTime, sampler.input->floatArray[i] );
+					maxAnimTime = std::max( maxAnimTime, sampler.input->floatArray[i] );
 			}
 
 			node1 = animNode.getChildNode( "sampler", ++nodeItr1 );
@@ -170,37 +169,37 @@ struct DaeAnimation
 			channel.transValuesIndex = -1;
 
 			// Parse target
-			string s = node1.getAttribute( "target", "" );
+			std::string s = node1.getAttribute( "target", "" );
 			size_t pos = s.find( "/" );
-			if( pos != string::npos && pos != s.length() - 1 )
+			if( pos != std::string::npos && pos != s.length() - 1 )
 			{
 				channel.nodeId = s.substr( 0, pos );
 				channel.transSid = s.substr( pos + 1, s.length() - pos );				
-				if( channel.transSid.find( ".X" ) != string::npos )
+				if( channel.transSid.find( ".X" ) != std::string::npos )
 				{
 					channel.transValuesIndex = 0;
 					channel.transSid = channel.transSid.substr( 0, channel.transSid.find(".") );
 				}
-				else if( channel.transSid.find( ".Y" ) != string::npos )
+				else if( channel.transSid.find( ".Y" ) != std::string::npos )
 				{
 					channel.transValuesIndex = 1;
 					channel.transSid = channel.transSid.substr( 0, channel.transSid.find(".") );
 				}
-				else if( channel.transSid.find( ".Z" ) != string::npos )
+				else if( channel.transSid.find( ".Z" ) != std::string::npos )
 				{
 					channel.transValuesIndex = 2;
 					channel.transSid = channel.transSid.substr( 0, channel.transSid.find(".") );
 				}
-				else if( channel.transSid.find( ".ANGLE" ) != string::npos )
+				else if( channel.transSid.find( ".ANGLE" ) != std::string::npos )
 				{
 					channel.transValuesIndex = 3;
 					channel.transSid = channel.transSid.substr( 0, channel.transSid.find(".") );
 				}
-				else if( channel.transSid.find( '(' ) != string::npos )
+				else if( channel.transSid.find( '(' ) != std::string::npos )
 				{
 					size_t index1 = channel.transSid.find( '(' );
 					size_t index2 = channel.transSid.find( '(', index1 + 1 );
-					if( index2 == string::npos ) // we got a vector index
+					if( index2 == std::string::npos ) // we got a vector index
 					{
 						channel.transValuesIndex = atoi( 
 							channel.transSid.substr( index1 + 1, channel.transSid.find(')', index1) - ( index1 + 1) ).c_str() );
@@ -261,7 +260,7 @@ struct DaeAnimation
 
 struct DaeLibAnimations
 {
-	vector< DaeAnimation * >	animations;
+	std::vector< DaeAnimation * >	animations;
 	unsigned int				maxFrameCount;
 	float						maxAnimTime;
 	
@@ -272,7 +271,7 @@ struct DaeLibAnimations
 	}
 	
 
-	DaeSampler *findAnimForTarget( const string &nodeId, string const &transSid, int *index )
+	DaeSampler *findAnimForTarget( const std::string &nodeId, std::string const &transSid, int *index )
 	{
 		for( unsigned int i = 0; i < animations.size(); ++i )
 		{

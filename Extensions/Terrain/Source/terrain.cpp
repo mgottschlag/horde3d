@@ -26,6 +26,7 @@
 #include "egMaterial.h"
 #include "utOpenGL.h"
 
+using namespace std;
 
 namespace Horde3DTerrain
 {

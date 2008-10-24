@@ -29,15 +29,15 @@
 #include "utils.h"
 #include <string>
 #include <vector>
-using namespace std;
+
 
 
 struct DaeSource
 {
-	string				id;
-	vector< float >		floatArray;
-	vector< string >	stringArray;
-	unsigned int		elemsPerEntry;
+	std::string					id;
+	std::vector< float >		floatArray;
+	std::vector< std::string >	stringArray;
+	unsigned int				elemsPerEntry;
 
 
 	bool parse( const XMLNode &sourceNode )
@@ -83,7 +83,7 @@ struct DaeSource
 			}
 			else
 			{
-				string name;
+				std::string name;
 				parseString( s, pos, name );
 				stringArray.push_back( name );
 			}

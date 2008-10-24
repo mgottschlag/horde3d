@@ -29,18 +29,18 @@
 #include <cstring>
 #include <cstdlib>
 #include <string>
-using namespace std;
 
 
-bool parseString( char *s, unsigned int &pos, string &token );
+
+bool parseString( char *s, unsigned int &pos, std::string &token );
 bool parseFloat( char *s, unsigned int &pos, float &value );
 bool parseUInt( char *s, unsigned int &pos, unsigned int &value );
-void removeGate( string &s );
-string decodeURL( const string &url );
-string extractFileName( const string &fullPath, bool extension );
-string extractFilePath( const string &fullPath );
+void removeGate( std::string &s );
+std::string decodeURL( const std::string &url );
+std::string extractFileName( const std::string &fullPath, bool extension );
+std::string extractFilePath( const std::string &fullPath );
 
-void log( const string &msg );
+void log( const std::string &msg );
 
 Matrix4f makeMatrix4f( float *floatArray16, bool y_up );
 

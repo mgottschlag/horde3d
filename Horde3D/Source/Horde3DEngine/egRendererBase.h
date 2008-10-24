@@ -30,7 +30,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <string>
-using namespace std;
+
 
 
 struct RenderBufferFormats
@@ -70,7 +70,7 @@ protected:
 
 	int				_vpX, _vpY, _vpWidth, _vpHeight;
 	int				_fbWidth, _fbHeight;
-	string			_shaderLog;
+	std::string			_shaderLog;
 	RenderBuffer	*_curRendBuf;
 	int				_outputBufferIndex;	// Left and right eye for stereo rendering
 
@@ -110,7 +110,7 @@ public:
 	// Shader functions
 	virtual uint32 uploadShader( const char *vertexShader, const char *fragmentShader );
 	void unloadShader( uint32 shaderId );
-	string &getShaderLog() { return _shaderLog; }
+	std::string &getShaderLog() { return _shaderLog; }
 
 	// Render buffer functions
 	RenderBuffer createRenderBuffer( uint32 width, uint32 height, RenderBufferFormats::List format,

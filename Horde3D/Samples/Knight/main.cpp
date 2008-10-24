@@ -33,17 +33,17 @@ static int mx0, my0;
 static Application *app;
 
 
-string generatePath(char p[], const string& file) {
+std::string generatePath(char p[], const std::string& file) {
 #ifdef __APPLE__
    string s(p);
    for (int i = 0; i < 4; i++)
       s = s.substr(0, s.rfind("/"));   
    return s + "/" + file;
 #else
-    const string s( p );
-    if ( s.find("/") != string::npos) {
+    const std::string s( p );
+    if ( s.find("/") != std::string::npos) {
         return s.substr( 0, s.rfind( "/" ) ) + "/" + file;
-    } else if ( s.find("\\") != string::npos ) {
+    } else if ( s.find("\\") != std::string::npos ) {
         return s.substr( 0, s.rfind( "\\" ) ) + "\\" + file;
     } else {
         return file;

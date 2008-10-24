@@ -65,7 +65,7 @@ struct TexUnit
 
 struct Uniform
 {
-	string			name;
+	std::string			name;
 	float			values[4];	
 
 
@@ -80,30 +80,30 @@ class MaterialResource : public Resource
 {
 private:
 
-	string							_class;
+	std::string						_class;
 	PShaderResource					_shaderRes;
-	vector< TexUnit >				_texUnits;
-	vector< Uniform >				_uniforms;
+	std::vector< TexUnit >			_texUnits;
+	std::vector< Uniform >			_uniforms;
 	SmartResPtr< MaterialResource >	_matLink;	
 
 	ResHandle getTexUnit( int unit );
 	bool setTexUnit( int unit, ResHandle texRes );
-	bool raiseError( const string &msg, int line = -1 );
+	bool raiseError( const std::string &msg, int line = -1 );
 
 public:
 
-	static Resource *factoryFunc( const string &name, int flags )
+	static Resource *factoryFunc( const std::string &name, int flags )
 		{ return new MaterialResource( name, flags ); }
 	
-	MaterialResource( const string &name, int flags );
+	MaterialResource( const std::string &name, int flags );
 	~MaterialResource();
 	Resource *clone();
 	
 	void initDefault();
 	void release();
 	bool load( const char *data, int size );
-	bool setUniform( const string &name, float a, float b, float c, float d );
-	bool isOfClass( const string &theClass );
+	bool setUniform( const std::string &name, float a, float b, float c, float d );
+	bool isOfClass( const std::string &theClass );
 
 	int getParami( int param );
 	bool setParami( int param, int value );

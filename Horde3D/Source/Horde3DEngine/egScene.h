@@ -31,7 +31,6 @@
 #include "egResource.h"
 #include "egPipeline.h"
 #include <map>
-using namespace std;
 
 struct SceneNodeTpl;
 class SceneGraphResource;
@@ -66,13 +65,13 @@ struct SceneNodeParams
 
 struct SceneNodeTpl
 {
-	int							type;
-	string						name;
-	Vec3f						trans, rot, scale;
-	string						attachmentString;
-	vector< SceneNodeTpl * >	children;
+	int								type;
+	std::string						name;
+	Vec3f							trans, rot, scale;
+	std::string						attachmentString;
+	std::vector< SceneNodeTpl * >	children;
 
-	SceneNodeTpl( int type, const string &name ) :
+	SceneNodeTpl( int type, const std::string &name ) :
 		type( type ), name( name ), scale( Vec3f ( 1, 1, 1 ) )
 	{
 	}
@@ -87,19 +86,19 @@ class SceneNode
 {
 protected:
 	
-	int						_type;
-	string					_name;
-	bool					_renderable;
-	bool					_active;
-	NodeHandle				_handle;
-	bool					_dirty;
-	bool					_transformed;
-	Matrix4f				_relTrans, _absTrans;			// Transformation matrices
-	BoundingBox				_bBox;							// AABB in world space
+	int							_type;
+	std::string					_name;
+	bool						_renderable;
+	bool						_active;
+	NodeHandle					_handle;
+	bool						_dirty;
+	bool						_transformed;
+	Matrix4f					_relTrans, _absTrans;			// Transformation matrices
+	BoundingBox					_bBox;							// AABB in world space
 
-	SceneNode				*_parent;		// Parent node
-	vector< SceneNode * >	_children;		// Child nodes
-	string					_attachment;	// User defined data
+	SceneNode					*_parent;		// Parent node
+	std::vector< SceneNode * >	_children;		// Child nodes
+	std::string					_attachment;	// User defined data
 	
 	void markChildrenDirty();
 
@@ -142,12 +141,12 @@ public:
 	int getType() { return _type; };
 	NodeHandle getHandle() { return _handle; }
 	SceneNode *getParent() { return _parent; }
-	const string &getName() { return _name; }
-	vector< SceneNode * > &getChildren() { return _children; }
+	const std::string &getName() { return _name; }
+	std::vector< SceneNode * > &getChildren() { return _children; }
 	Matrix4f &getRelTrans() { return _relTrans; }
 	Matrix4f &getAbsTrans() { return _absTrans; }
 	BoundingBox &getBBox() { return _bBox; }
-	const string &getAttachmentString() { return _attachment; }
+	const std::string &getAttachmentString() { return _attachment; }
 	void setAttachmentString( const char* attachmentData ) { _attachment = attachmentData; }
 	bool checkTransformFlag( bool reset )
 		{ bool b = _transformed; if( reset ) _transformed = false; return b; }
@@ -170,7 +169,7 @@ struct GroupNodeTpl : public SceneNodeTpl
 {
 	float	minDist, maxDist;
 
-	GroupNodeTpl( const string &name ) :
+	GroupNodeTpl( const std::string &name ) :
 		SceneNodeTpl( SceneNodeTypes::Group, name )
 	{
 	}
@@ -186,7 +185,7 @@ protected:
 
 public:
 
-	static SceneNodeTpl *parsingFunc( map< string, string > &attribs );
+	static SceneNodeTpl *parsingFunc( std::map< std::string, std::string > &attribs );
 	static SceneNode *factoryFunc( const SceneNodeTpl &nodeTpl );
 
 	float getParamf( int param );
@@ -197,15 +196,15 @@ public:
 };
 
 
-typedef SceneNodeTpl *(*NodeTypeParsingFunc)( map< string, string > &attribs );
+typedef SceneNodeTpl *(*NodeTypeParsingFunc)( std::map< std::string, std::string > &attribs );
 typedef SceneNode *(*NodeTypeFactoryFunc)( const SceneNodeTpl &tpl );
-typedef void (*NodeTypeRenderFunc)( const string &shaderContext, const string &theClass, bool debugView,
+typedef void (*NodeTypeRenderFunc)( const std::string &shaderContext, const std::string &theClass, bool debugView,
 								    const Frustum *frust1, const Frustum *frust2, RenderingOrder::List order,
 								    int occSet );
 
 struct NodeRegEntry
 {
-	string					typeString;
+	std::string				typeString;
 	NodeTypeParsingFunc		parsingFunc;
 	NodeTypeFactoryFunc		factoryFunc;
 	NodeTypeRenderFunc		renderFunc;
@@ -222,12 +221,12 @@ class SceneManager
 {
 protected:
 
-	map< int, NodeRegEntry >	_registry;		// Registry of node types
-	vector< SceneNode *>		_nodes;			// _nodes[0] is root node
-	vector< SceneNode *>		_lightQueue;
-	vector< SceneNode *>		_renderableQueue;
-	vector< SceneNode * >		_findResults;
-	vector< CastRayResult >     _castRayResults;
+	std::map< int, NodeRegEntry >	_registry;		// Registry of node types
+	std::vector< SceneNode *>		_nodes;			// _nodes[0] is root node
+	std::vector< SceneNode *>		_lightQueue;
+	std::vector< SceneNode *>		_renderableQueue;
+	std::vector< SceneNode * >		_findResults;
+	std::vector< CastRayResult >     _castRayResults;
 
 	Vec3f                       _rayOrigin;// don't put these values during recursive search on the stack
 	Vec3f                       _rayDirection;// dito
@@ -244,10 +243,10 @@ public:
 	SceneManager();
 	~SceneManager();
 
-	void registerType( int type, const string &typeString, NodeTypeParsingFunc pf,
+	void registerType( int type, const std::string &typeString, NodeTypeParsingFunc pf,
 					   NodeTypeFactoryFunc ff, NodeTypeRenderFunc rf );
 	NodeRegEntry *findType( int type );
-	NodeRegEntry *findType( const string &typeString );
+	NodeRegEntry *findType( const std::string &typeString );
 	
 	void updateNodes();
 	void updateQueues( const Frustum &frustum1, const Frustum *frustum2,
@@ -258,7 +257,7 @@ public:
 	bool removeNode( NodeHandle handle );
 	bool relocateNode( NodeHandle node, NodeHandle parent );
 	
-	int findNodes( SceneNode *startNode, const string &name, int type );
+	int findNodes( SceneNode *startNode, const std::string &name, int type );
 	void clearFindResults() { _findResults.resize( 0 ); }
 	SceneNode *getFindResult( int index ) { return (unsigned)index < _findResults.size() ? _findResults[index] : 0x0; }
 	
@@ -267,8 +266,8 @@ public:
 
 	SceneNode &getRootNode() { return *_nodes[0]; }
 	SceneNode &getDefCamNode() { return *_nodes[1]; }
-	vector< SceneNode * > &getLightQueue() { return _lightQueue; }
-	vector< SceneNode * > &getRenderableQueue() { return _renderableQueue; }
+	std::vector< SceneNode * > &getLightQueue() { return _lightQueue; }
+	std::vector< SceneNode * > &getRenderableQueue() { return _renderableQueue; }
 	
 	SceneNode *resolveNodeHandle( NodeHandle handle )
 		{ return (handle != 0 && (unsigned)(handle - 1) < _nodes.size()) ? _nodes[handle - 1] : 0x0; }

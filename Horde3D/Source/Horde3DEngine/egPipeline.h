@@ -31,7 +31,6 @@
 #include "egMaterial.h"
 #include <string>
 #include <vector>
-using namespace std;
 
 struct XMLNode;
 
@@ -91,11 +90,11 @@ public:
 class PCStringParam : public PCParam
 {
 protected:
-	string	_value;
+	std::string	_value;
 public:
-	PCStringParam( const string &value ) { _value = value; }
-	const string &get() { return _value; }
-	void set( const string &value ) { _value = value; }
+	PCStringParam( const std::string &value ) { _value = value; }
+	const std::string &get() { return _value; }
+	void set( const std::string &value ) { _value = value; }
 };
 
 
@@ -114,9 +113,9 @@ struct RenderingOrder
 struct PipelineCommand
 {
 	PipelineCommands::List	command;
-	vector< void * >		refParams;		// Pointer to object
-	vector< PCParam * >		valParams;		// Newly created object
-	vector< PResource >		resParams;		// Pointers to used resources
+	std::vector< void * >	refParams;		// Pointer to object
+	std::vector< PCParam * >valParams;		// Newly created object
+	std::vector< PResource >resParams;		// Pointers to used resources
 
 
 	PipelineCommand( PipelineCommands::List	command )
@@ -128,10 +127,10 @@ struct PipelineCommand
 
 struct PipelineStage
 {
-	string						id;
-	bool						enabled;
-	PMaterialResource			matLink;
-	vector< PipelineCommand >	commands;
+	std::string						id;
+	bool							enabled;
+	PMaterialResource				matLink;
+	std::vector< PipelineCommand >	commands;
 
 	PipelineStage() : matLink( 0x0 ) {}
 };
@@ -139,7 +138,7 @@ struct PipelineStage
 
 struct RenderTarget
 {
-	string						id;
+	std::string					id;
 	bool						hasDepthBuf;
 	uint32						numColBufs;
 	RenderBufferFormats::List	format;
@@ -162,25 +161,25 @@ class PipelineResource : public Resource
 {
 private:
 
-	vector< RenderTarget >		_renderTargets;
-	vector< PipelineStage >		_stages;
+	std::vector< RenderTarget >		_renderTargets;
+	std::vector< PipelineStage >	_stages;
 	
-	bool raiseError( const string &msg, int line = -1 );
-	const string parseStage( XMLNode &node, PipelineStage &stage );
+	bool raiseError( const std::string &msg, int line = -1 );
+	const std::string parseStage( XMLNode &node, PipelineStage &stage );
 
-	void addRenderTarget( const string &id, bool depthBuffer, uint32 numBuffers,
+	void addRenderTarget( const std::string &id, bool depthBuffer, uint32 numBuffers,
 						  RenderBufferFormats::List format, bool bilinear, uint32 samples,
 						  uint32 width, uint32 height, float scale );
-	RenderTarget *findRenderTarget( const string &id );
+	RenderTarget *findRenderTarget( const std::string &id );
 	bool createRenderTargets();
 	void destroyRenderTargets();
 
 public:
 
-	static Resource *factoryFunc( const string &name, int flags )
+	static Resource *factoryFunc( const std::string &name, int flags )
 		{ return new PipelineResource( name, flags ); }
 	
-	PipelineResource( const string &name, int flags );
+	PipelineResource( const std::string &name, int flags );
 	~PipelineResource();
 	
 	void initDefault();
@@ -188,8 +187,8 @@ public:
 	bool load( const char *data, int size );
 	void resize();
 
-	bool setStageActivation( const string &stageName, bool enabled );
-	bool getRenderTargetData( const string &target, int bufIndex, int *width, int *height,
+	bool setStageActivation( const std::string &stageName, bool enabled );
+	bool getRenderTargetData( const std::string &target, int bufIndex, int *width, int *height,
 							  int *compCount, float *dataBuffer, int bufferSize );
 
 	friend class ResourceManager;

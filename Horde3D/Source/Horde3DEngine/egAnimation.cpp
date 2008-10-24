@@ -27,6 +27,7 @@
 
 #include "utDebug.h"
 
+using namespace std;
 
 AnimationResource::AnimationResource( const string &name, int flags ) :
 	Resource( ResourceTypes::Animation, name, flags )

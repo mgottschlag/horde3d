@@ -29,7 +29,7 @@
 #include <vector>
 #include <map>
 #include <string>
-using namespace std;
+
 
 
 struct ResourceTypes
@@ -68,7 +68,7 @@ class Resource
 protected:
 
 	ResourceTypes::List	_type;
-	string				_name;
+	std::string				_name;
 	ResHandle			_handle;
 	bool				_loaded;
 	bool				_noQuery;
@@ -79,7 +79,7 @@ protected:
 
 public:
 
-	Resource( ResourceTypes::List type, const string &name, int flags );
+	Resource( ResourceTypes::List type, const std::string &name, int flags );
 	virtual ~Resource();
 	virtual Resource *clone();	// TODO: Implement this for all resource types
 	
@@ -99,7 +99,7 @@ public:
 	virtual bool updateData( int param, const void *data, int size );
 
 	ResourceTypes::List &getType() { return _type; }
-	const string &getName() { return _name; }
+	const std::string &getName() { return _name; }
 	ResHandle getHandle() { return _handle; }
 	bool isLoaded() { return _loaded; }
 	void addRef() { ++_refCount; }
@@ -144,11 +144,11 @@ typedef SmartResPtr< Resource > PResource;
 
 typedef void (*ResTypeInitializationFunc)();
 typedef void (*ResTypeReleaseFunc)();
-typedef Resource *(*ResTypeFactoryFunc)( const string &name, int flags );
+typedef Resource *(*ResTypeFactoryFunc)( const std::string &name, int flags );
 
 struct ResourceRegEntry
 {
-	string						typeString;
+	std::string						typeString;
 	ResTypeInitializationFunc	initializationFunc;	// Called when type is registered
 	ResTypeReleaseFunc			releaseFunc;		// Called when type is unregistered
 	ResTypeFactoryFunc			factoryFunc;		// Farctory to create resourec object
@@ -158,8 +158,8 @@ class ResourceManager
 {
 protected:
 
-	map< int, ResourceRegEntry >	_registry;		// Registry of resource types
-	vector < Resource * >			_resources;
+	std::map< int, ResourceRegEntry >	_registry;		// Registry of resource types
+	std::vector < Resource * >			_resources;
 
 	ResHandle addResource( Resource &res );
 
@@ -168,13 +168,13 @@ public:
 	ResourceManager();
 	~ResourceManager();
 
-	void registerType( int type, const string &typeString, ResTypeInitializationFunc inf,
+	void registerType( int type, const std::string &typeString, ResTypeInitializationFunc inf,
 					   ResTypeReleaseFunc rf, ResTypeFactoryFunc ff );
 	
-	Resource *findResource( ResourceTypes::List type, const string &name );
-	ResHandle addResource( ResourceTypes::List type, const string &name, int flags, bool userCall );
+	Resource *findResource( ResourceTypes::List type, const std::string &name );
+	ResHandle addResource( ResourceTypes::List type, const std::string &name, int flags, bool userCall );
 	ResHandle addNonExistingResource( Resource &resource, bool userCall );
-	ResHandle cloneResource( ResHandle sourceRes, const string &name );
+	ResHandle cloneResource( ResHandle sourceRes, const std::string &name );
 	int removeResource( ResHandle handle, bool userCall );
 	void clear();
 	ResHandle queryUnloadedResource( int index );
@@ -183,7 +183,7 @@ public:
 	Resource *resolveResHandle( ResHandle handle )
 		{ return (handle != 0 && (unsigned)(handle - 1) < _resources.size()) ? _resources[handle - 1] : 0x0; }
 
-	vector < Resource * > &getResources() { return _resources; }
+	std::vector < Resource * > &getResources() { return _resources; }
 };
 
 #endif // _egResource_H_

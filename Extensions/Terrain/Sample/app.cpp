@@ -19,6 +19,7 @@
 #include <math.h>
 #include <iomanip>
 
+using namespace std;
 
 // Convert from degrees to radians
 inline float degToRad( float f ) 

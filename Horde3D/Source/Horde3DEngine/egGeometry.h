@@ -111,8 +111,8 @@ struct MorphDiff
 
 struct MorphTarget
 {
-	string					name;
-	vector< MorphDiff >		diffs;
+	std::string					name;
+	std::vector< MorphDiff >	diffs;
 };
 
 
@@ -120,18 +120,18 @@ class GeometryResource : public Resource
 {
 private:
 
-	uint32					_vertCount;
-	VertexData				*_vertData;	
-	bool					_16BitIndices;
-	vector< uint32 >		_indices;
+	uint32						_vertCount;
+	VertexData					*_vertData;	
+	bool						_16BitIndices;
+	std::vector< uint32 >		_indices;
 	
-	vector< Joint >			_joints;
-	vector< MorphTarget >	_morphTargets;
-	uint32					_minMorphIndex, _maxMorphIndex;
+	std::vector< Joint >		_joints;
+	std::vector< MorphTarget >	_morphTargets;
+	uint32						_minMorphIndex, _maxMorphIndex;
 
-	uint32					_vertBuffer, _indexBuffer;
+	uint32						_vertBuffer, _indexBuffer;
 
-	bool raiseError( const string &msg );
+	bool raiseError( const std::string &msg );
 
 public:
 
@@ -139,10 +139,10 @@ public:
 	
 	static void initializationFunc();
 	static void releaseFunc();
-	static Resource *factoryFunc( const string &name, int flags )
+	static Resource *factoryFunc( const std::string &name, int flags )
 		{ return new GeometryResource( name, flags ); }
 	
-	GeometryResource( const string &name, int flags );
+	GeometryResource( const std::string &name, int flags );
 	~GeometryResource();
 	Resource *clone();
 	

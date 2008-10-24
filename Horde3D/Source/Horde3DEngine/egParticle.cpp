@@ -30,6 +30,7 @@
 
 #include "utDebug.h"
 
+using namespace std;
 
 // *************************************************************************************************
 // ParticleChannel
@@ -665,5 +666,6 @@ bool EmitterNode::hasFinished()
 	
 	return true;
 }
+
 
 

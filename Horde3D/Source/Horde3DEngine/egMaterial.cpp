@@ -31,6 +31,7 @@
 
 #include "utDebug.h"
 
+using namespace std;
 
 MaterialResource::MaterialResource( const string &name, int flags ) :
 	Resource( ResourceTypes::Material, name, flags )

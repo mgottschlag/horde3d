@@ -33,6 +33,7 @@
 
 #include "utDebug.h"
 
+using namespace std;
 
 // *************************************************************************************************
 // Class SceneNode
@@ -775,5 +776,6 @@ bool SceneManager::getCastRayResult( int index, CastRayResult &crr )
 
 	return false;
 }
+
 
 

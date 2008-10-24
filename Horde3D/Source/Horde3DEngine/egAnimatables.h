@@ -76,7 +76,7 @@ struct MeshNodeTpl : public SceneNodeTpl
 	uint32				batchStart, batchCount;
 	uint32				vertRStart, vertREnd;
 
-	MeshNodeTpl( const string &name, MaterialResource *materialRes, uint32 batchStart,
+	MeshNodeTpl( const std::string &name, MaterialResource *materialRes, uint32 batchStart,
 				 uint32 batchCount, uint32 vertRStart, uint32 vertREnd) :
 		SceneNodeTpl( SceneNodeTypes::Mesh, name ), matRes( materialRes ), batchStart( batchStart ),
 		batchCount( batchCount ), vertRStart( vertRStart ), vertREnd( vertREnd )
@@ -99,7 +99,7 @@ protected:
 
 public:
 
-	static SceneNodeTpl *parsingFunc( map< string, string > &attribs );
+	static SceneNodeTpl *parsingFunc( std::map< std::string, std::string > &attribs );
 	static SceneNode *factoryFunc( const SceneNodeTpl &nodeTpl );
 
 	void markBBoxesDirty();
@@ -135,7 +135,7 @@ struct JointNodeTpl : public SceneNodeTpl
 {
 	uint32	jointIndex;
 
-	JointNodeTpl( const string &name, uint32 jointIndex ) :
+	JointNodeTpl( const std::string &name, uint32 jointIndex ) :
 		SceneNodeTpl( SceneNodeTypes::Joint, name ), jointIndex( jointIndex )
 	{
 	}
@@ -152,7 +152,7 @@ protected:
 
 public:
 	
-	static SceneNodeTpl *parsingFunc( map< string, string > &attribs );
+	static SceneNodeTpl *parsingFunc( std::map< std::string, std::string > &attribs );
 	static SceneNode *factoryFunc( const SceneNodeTpl &nodeTpl );
 	
 	bool canAttach( SceneNode &parent );

@@ -48,26 +48,26 @@ struct Frame
 
 struct AnimResEntity
 {
-	string				name;
-	Matrix4f			firstFrameInvTrans;
-	vector< Frame >		frames;
+	std::string				name;
+	Matrix4f				firstFrameInvTrans;
+	std::vector< Frame >	frames;
 };
 
 class AnimationResource : public Resource
 {
 private:
 
-	uint32						_numFrames;
-	vector< AnimResEntity >		_entities;
+	uint32							_numFrames;
+	std::vector< AnimResEntity >	_entities;
 
-	bool raiseError( const string &msg );
+	bool raiseError( const std::string &msg );
 
 public:
 
-	static Resource *factoryFunc( const string &name, int flags )
+	static Resource *factoryFunc( const std::string &name, int flags )
 		{ return new AnimationResource( name, flags ); }
 	
-	AnimationResource( const string &name, int flags );
+	AnimationResource( const std::string &name, int flags );
 	~AnimationResource();
 	Resource *clone();
 	
@@ -76,7 +76,7 @@ public:
 	bool load( const char *data, int size );
 	int getParami( int param );
 
-	AnimResEntity *findEntity( const string &name );
+	AnimResEntity *findEntity( const std::string &name );
 
 	friend class Renderer;
 	friend class ModelNode;
@@ -85,4 +85,5 @@ public:
 typedef SmartResPtr< AnimationResource > PAnimationResource;
 
 #endif // _egAnimation_H_
+
 

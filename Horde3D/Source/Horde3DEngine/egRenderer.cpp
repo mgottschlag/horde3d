@@ -35,6 +35,8 @@
 
 #include "utDebug.h"
 
+using namespace std;
+
 const char *vsDefColor =
 	"uniform mat4 worldMat;\n"
 	"varying vec4 color;\n"

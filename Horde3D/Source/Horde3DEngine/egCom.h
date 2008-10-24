@@ -33,7 +33,7 @@
 #include <string>
 #include <queue>
 #include <vector>
-using namespace std;
+
 
 
 struct EngineOptions
@@ -79,7 +79,7 @@ public:
 
 struct LogMessage
 {
-	string		text;
+	std::string		text;
 	int			level;
 	float		time;
 
@@ -87,7 +87,7 @@ struct LogMessage
 	{
 	}
 
-	LogMessage( const string &text, int level, float time ) :
+	LogMessage( const std::string &text, int level, float time ) :
 		text( text ), level( level ), time( time )
 	{
 	}
@@ -98,12 +98,12 @@ class EngineLog
 {
 protected:
 	
-	unsigned long			_firstTick;
-	char					_textBuf[2048];
-	uint32					_maxNumMessages;
-	queue< LogMessage >		_messages;
+	unsigned long				_firstTick;
+	char						_textBuf[2048];
+	uint32						_maxNumMessages;
+	std::queue< LogMessage >	_messages;
 
-	void pushMessage( const string &text, uint32 level );
+	void pushMessage( const std::string &text, uint32 level );
 	void pushMessage( int level, const char *msg, va_list ap );
 
 public:

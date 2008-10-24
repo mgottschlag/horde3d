@@ -99,14 +99,14 @@ private:
 	ParticleChannel		_size;
 	ParticleChannel		_colR, _colG, _colB, _colA;
 
-	bool raiseError( const string &msg, int line = -1 );
+	bool raiseError( const std::string &msg, int line = -1 );
 
 public:
 	
-	static Resource *factoryFunc( const string &name, int flags )
+	static Resource *factoryFunc( const std::string &name, int flags )
 		{ return new EffectResource( name, flags ); }
 	
-	EffectResource( const string &name, int flags );
+	EffectResource( const std::string &name, int flags );
 	~EffectResource();
 	
 	void initDefault();
@@ -143,7 +143,7 @@ struct EmitterNodeTpl : public SceneNodeTpl
 	float				delay, emissionRate, spreadAngle;
 	float				fx, fy, fz;
 
-	EmitterNodeTpl( const string &name, MaterialResource *materialRes, EffectResource *effectRes,
+	EmitterNodeTpl( const std::string &name, MaterialResource *materialRes, EffectResource *effectRes,
 					uint32 maxParticleCount, int respawnCount) :
 		SceneNodeTpl( SceneNodeTypes::Emitter, name ),
 		matRes( materialRes ), effectRes( effectRes ), maxParticleCount( maxParticleCount ),
@@ -176,8 +176,8 @@ protected:
 	float				*_parSizesANDRotations;
 	float				*_parColors;
 
-	vector< uint32 >	_occQueries;
-	vector< uint32 >	_lastVisited;
+	std::vector< uint32 >_occQueries;
+	std::vector< uint32 >_lastVisited;
 
 	EmitterNode( const EmitterNodeTpl &emitterTpl );
 	void setMaxParticleCount( uint32 maxParticleCount );
@@ -186,7 +186,7 @@ public:
 	
 	~EmitterNode();
 
-	static SceneNodeTpl *parsingFunc( map< string, string > &attribs );
+	static SceneNodeTpl *parsingFunc( std::map< std::string, std::string > &attribs );
 	static SceneNode *factoryFunc( const SceneNodeTpl &nodeTpl );
 
 	BoundingBox *getLocalBBox() { return &_localBBox; }
@@ -202,4 +202,5 @@ public:
 };
 
 #endif // _egParticle_H_
+
 

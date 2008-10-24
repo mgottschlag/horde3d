@@ -35,16 +35,16 @@ class CodeResource : public Resource
 {
 private:
 	
-	string	_code;
+	std::string	_code;
 
 	void updateShaders();
 
 public:
 	
-	static Resource *factoryFunc( const string &name, int flags )
+	static Resource *factoryFunc( const std::string &name, int flags )
 		{ return new CodeResource( name, flags ); }
 	
-	CodeResource( const string &name, int flags );
+	CodeResource( const std::string &name, int flags );
 	~CodeResource();
 	Resource *clone();
 	
@@ -53,7 +53,7 @@ public:
 	bool load( const char *data, int size );
 
 	bool isLoaded() { return _loaded; }
-	const string &getCode() { return _code; }
+	const std::string &getCode() { return _code; }
 
 	friend class Renderer;
 };
@@ -64,7 +64,7 @@ typedef SmartResPtr< CodeResource > PCodeResource;
 struct ShaderCodeFract
 {
 	PCodeResource	refCodeRes;
-	string			code;
+	std::string			code;
 };
 
 
@@ -83,8 +83,8 @@ struct BlendModes
 
 struct ShaderContext
 {
-	string						id;
-	vector< ShaderCodeFract >	vertShaderFracts, fragShaderFracts;
+	std::string						id;
+	std::vector< ShaderCodeFract >	vertShaderFracts, fragShaderFracts;
 	bool						compiled;
 	uint32						shaderObject;
 	uint32						lastUpdateStamp;
@@ -109,7 +109,7 @@ struct ShaderContext
 	int							attrib_texCoords0, attrib_texCoords1;
 
 	// Custom uniforms
-	map< string, int >			customUniforms;
+	std::map< std::string, int >			customUniforms;
 
 
 	ShaderContext()
@@ -127,22 +127,22 @@ class ShaderResource : public Resource
 {
 private:
 	
-	static string				_vertPreamble, _fragPreamble;
+	static std::string				_vertPreamble, _fragPreamble;
 	
-	vector< ShaderContext >		_contexts;
+	std::vector< ShaderContext >		_contexts;
 
-	bool raiseError( const string &msg, int line = -1 );
-	bool parseCode( XMLNode &node, vector< ShaderCodeFract > &codeFracts );
+	bool raiseError( const std::string &msg, int line = -1 );
+	bool parseCode( XMLNode &node, std::vector< ShaderCodeFract > &codeFracts );
 
 public:
 	
-	static Resource *factoryFunc( const string &name, int flags )
+	static Resource *factoryFunc( const std::string &name, int flags )
 		{ return new ShaderResource( name, flags ); }
 
-	static void setPreambles( const string &vertPreamble, const string &fragPreamble )
+	static void setPreambles( const std::string &vertPreamble, const std::string &fragPreamble )
 		{ _vertPreamble = vertPreamble; _fragPreamble = fragPreamble; }
 	
-	ShaderResource( const string &name, int flags );
+	ShaderResource( const std::string &name, int flags );
 	~ShaderResource();
 	
 	void initDefault();
@@ -150,7 +150,7 @@ public:
 	bool load( const char *data, int size );
 	void compileShaders();
 
-	ShaderContext *findContext( const string &name )
+	ShaderContext *findContext( const std::string &name )
 	{
 		for( uint32 i = 0; i < _contexts.size(); ++i )
 			if( _contexts[i].id == name ) return &_contexts[i];
@@ -158,7 +158,7 @@ public:
 		return 0x0;
 	}
 
-	vector< ShaderContext > &getContexts() { return _contexts; }
+	std::vector< ShaderContext > &getContexts() { return _contexts; }
 
 	friend class Renderer;
 };

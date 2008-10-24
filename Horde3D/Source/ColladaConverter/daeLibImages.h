@@ -28,14 +28,14 @@
 #include "utXMLParser.h"
 #include <string>
 #include <vector>
-using namespace std;
+
 
 
 struct DaeImage
 {
-	string		id;
-	string		name;
-	string		fileName;
+	std::string		id;
+	std::string		name;
+	std::string		fileName;
 
 
 	bool parse( const XMLNode &imageNode )
@@ -60,7 +60,7 @@ struct DaeImage
 
 struct DaeLibImages
 {
-	vector< DaeImage * >	images;
+	std::vector< DaeImage * >	images;
 
 
 	~DaeLibImages()
@@ -69,7 +69,7 @@ struct DaeLibImages
 	}
 
 
-	DaeImage *findImage( const string &id )
+	DaeImage *findImage( const std::string &id )
 	{
 		if( id == "" ) return 0x0;
 		

@@ -52,10 +52,10 @@ struct TriGroup
 {
 	unsigned int	first, count;
 	unsigned int	vertRStart, vertREnd;
-	string			matName;
+	std::string		matName;
 
 	unsigned int			numPosIndices;
-	vector< unsigned int >	*posIndexToVertices;
+	std::vector< unsigned int >	*posIndexToVertices;
 
 	TriGroup() : posIndexToVertices( 0x0 )
 	{
@@ -71,10 +71,10 @@ struct SceneNode
 	DaeNode					*daeNode;
 	DaeInstance				*daeInstance;
 	SceneNode				*parent;
-	vector< SceneNode * >	children;
+	std::vector< SceneNode * >	children;
 
 	// Animation
-	vector< Matrix4f >		frames;			// Relative transformation for every frame
+	std::vector< Matrix4f >	frames;			// Relative transformation for every frame
 
 	SceneNode()
 	{
@@ -87,7 +87,7 @@ struct SceneNode
 
 struct Mesh : public SceneNode
 {
-	vector< TriGroup >		triGroups;
+	std::vector< TriGroup >		triGroups;
 	
 	Mesh()
 	{
@@ -125,7 +125,7 @@ struct MorphDiff
 struct MorphTarget
 {
 	char					name[256];
-	vector< MorphDiff >		diffs;
+	std::vector< MorphDiff >diffs;
 };
 
 
@@ -133,24 +133,24 @@ class Converter
 {
 private:
 
-	vector< Vertex >		_vertices;
-	vector< unsigned int >	_indices;
-	vector< Mesh * >		_meshes;
-	vector< Joint * >		_joints;
-	vector< MorphTarget >	_morphTargets;
+	std::vector< Vertex >		_vertices;
+	std::vector< unsigned int >	_indices;
+	std::vector< Mesh * >		_meshes;
+	std::vector< Joint * >		_joints;
+	std::vector< MorphTarget >	_morphTargets;
 
 	unsigned int			_frameCount;
 
 
 	Matrix4f getNodeTransform( ColladaDocument &doc, DaeNode &node, unsigned int frame );
 	SceneNode *processNode( ColladaDocument &doc, DaeNode &node, SceneNode *parentNode,
-							Matrix4f transAccum, vector< Matrix4f > animTransAccum );
-	void calcTangentSpaceBasis( vector< Vertex > &vertices );
+							Matrix4f transAccum, std::vector< Matrix4f > animTransAccum );
+	void calcTangentSpaceBasis( std::vector< Vertex > &vertices );
 	void processJoints();
 	void processMeshes( ColladaDocument &doc, bool optimize );
-	bool writeGeometry( const string &name );
-	void writeSGNode( const string &modelName, SceneNode *node, unsigned int depth, ofstream &outf );
-	bool writeSceneGraph( const string &name );
+	bool writeGeometry( const std::string &name );
+	void writeSGNode( const std::string &modelName, SceneNode *node, unsigned int depth, std::ofstream &outf );
+	bool writeSceneGraph( const std::string &name );
 	void writeAnimFrames( SceneNode &node, FILE *f );
 
 public:
@@ -159,11 +159,11 @@ public:
 	~Converter();
 	
 	bool convertModel( ColladaDocument &doc, bool optimize );
-	bool saveModel( const string &name );
+	bool saveModel( const std::string &name );
 	
-	bool writeMaterials( ColladaDocument &doc, const string &name, const string &defShader );
+	bool writeMaterials( ColladaDocument &doc, const std::string &name, const std::string &defShader );
 	bool hasAnimation();
-	bool writeAnimation( const string &name );
+	bool writeAnimation( const std::string &name );
 };
 
 #endif // _converter_H_

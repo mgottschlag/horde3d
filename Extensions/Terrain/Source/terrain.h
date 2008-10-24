@@ -46,7 +46,7 @@ namespace Horde3DTerrain
 		float				skirtHeight;
 		int					blockSize;
 
-		TerrainNodeTpl( const string &name, Texture2DResource *hmapRes, MaterialResource *matRes ) :
+		TerrainNodeTpl( const std::string &name, Texture2DResource *hmapRes, MaterialResource *matRes ) :
 			SceneNodeTpl( SNT_TerrainNode, name ), hmapRes( hmapRes ), matRes( matRes ),
 			meshQuality( 50.0f ), skirtHeight( 0.1f ), blockSize( 17 )
 		{
@@ -91,7 +91,7 @@ namespace Horde3DTerrain
 		uint32				_vertexBuffer, _indexBuffer;
 		BoundingBox			_localBBox;
 
-		vector< BlockInfo >	_blockTree;
+		std::vector< BlockInfo >	_blockTree;
 
 
 		TerrainNode( const TerrainNodeTpl &terrainTpl );
@@ -124,9 +124,9 @@ namespace Horde3DTerrain
 		
 		~TerrainNode();
 
-		static SceneNodeTpl *parsingFunc( map< string, string > &attribs );
+		static SceneNodeTpl *parsingFunc( std::map< std::string, std::string > &attribs );
 		static SceneNode *factoryFunc( const SceneNodeTpl &nodeTpl );
-		static void renderFunc( const string &shaderContext, const string &theClass, bool debugView,
+		static void renderFunc( const std::string &shaderContext, const std::string &theClass, bool debugView,
 			const Frustum *frust1, const Frustum *frust2, RenderingOrder::List order, int occSet );
 
 		bool canAttach( SceneNode &parent );
@@ -137,7 +137,7 @@ namespace Horde3DTerrain
 
 		bool checkIntersection( const Vec3f &rayOrig, const Vec3f &rayDir, Vec3f &intsPos ) const;
 
-		ResHandle createGeometryResource( const string &name, float lodThreshold );
+		ResHandle createGeometryResource( const std::string &name, float lodThreshold );
 		
 		BoundingBox *getLocalBBox() { return &_localBBox; }
 		float getHeight( float x, float y )

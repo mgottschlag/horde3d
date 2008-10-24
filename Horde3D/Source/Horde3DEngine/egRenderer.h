@@ -33,7 +33,6 @@
 #include "egModel.h"
 #include <vector>
 #include <algorithm>
-using namespace std;
 
 class MaterialResource;
 struct ShaderContext;
@@ -122,8 +121,8 @@ protected:
 	float				_splitPlanes[5];
 	Matrix4f			_lightMats[4];
 
-	vector< char >		_occSets;	// Actually bool
-	vector< Overlay >	_overlays;
+	std::vector< char >		_occSets;	// Actually bool
+	std::vector< Overlay >	_overlays;
 
 	int					_statTriCount, _statBatchCount, _statLightPassCount;
 
@@ -135,8 +134,8 @@ protected:
 		{ return ((MeshNode *)e1.node)->getMaterialRes() < ((MeshNode *)e2.node)->getMaterialRes(); }
 	
 	void setupViewMatrices( CameraNode *cam );
-	bool setMaterialRec( MaterialResource *materialRes, const string &shaderContext, bool firstRec = false );
-	void drawRenderables( const string &shaderContext, const string &theClass, bool debugView,
+	bool setMaterialRec( MaterialResource *materialRes, const std::string &shaderContext, bool firstRec = false );
+	void drawRenderables( const std::string &shaderContext, const std::string &theClass, bool debugView,
 		const Frustum *frust1, const Frustum *frust2, RenderingOrder::List order, int occSet );
 	
 	Matrix4f calcLightMat( const Frustum &frustum );
@@ -145,13 +144,13 @@ protected:
 
 	void bindBuffer( RenderBuffer *rb, uint32 texUnit, uint32 bufIndex );
 	void clear( bool depth, bool buf0, bool buf1, bool buf2, bool buf3, float r, float g, float b, float a );
-	void drawOverlays( const string &shaderContext );
-	void drawFSQuad( Resource *matRes, const string &shaderContext );
-	void drawGeometry( const string &shaderContext, const string &theClass,
+	void drawOverlays( const std::string &shaderContext );
+	void drawFSQuad( Resource *matRes, const std::string &shaderContext );
+	void drawGeometry( const std::string &shaderContext, const std::string &theClass,
 					   RenderingOrder::List order, int occSet );
-	void drawLightGeometry( const string shaderContext, const string &theClass,
+	void drawLightGeometry( const std::string shaderContext, const std::string &theClass,
 							bool noShadows, RenderingOrder::List order, int occSet );
-	void drawLightShapes( const string shaderContext, bool noShadows, int occSet );
+	void drawLightShapes( const std::string shaderContext, bool noShadows, int occSet );
 	void renderDebugView();
 	void finishRendering();
 
@@ -176,7 +175,7 @@ public:
 
 	bool uploadShader( const char *vertexShader, const char *fragmentShader, ShaderContext &sc );
 	void setShader( ShaderContext *sc );
-	bool setMaterial( MaterialResource *materialRes, const string &shaderContext );
+	bool setMaterial( MaterialResource *materialRes, const std::string &shaderContext );
 	
 	bool createShadowBuffer( uint32 width, uint32 height );
 	void destroyShadowBuffer();
@@ -192,9 +191,9 @@ public:
 	CameraNode *getCurCamera() { return _curCamera; }
 	uint32 getParticleVBO() { return _particleVBO; }
 
-	static void drawModels( const string &shaderContext, const string &theClass, bool debugView,
+	static void drawModels( const std::string &shaderContext, const std::string &theClass, bool debugView,
 		const Frustum *frust1, const Frustum *frust2, RenderingOrder::List order, int occSet );
-	static void drawParticles( const string &shaderContext, const string &theClass, bool debugView,
+	static void drawParticles( const std::string &shaderContext, const std::string &theClass, bool debugView,
 		const Frustum *frust1, const Frustum *frust2, RenderingOrder::List order, int occSet );
 };
 

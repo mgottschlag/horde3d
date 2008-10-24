@@ -32,7 +32,8 @@ static double t0;
 static int mx0, my0;
 static Application *app;
 
-string generatePath(char p[], const string& file) {
+std::string generatePath(char p[], const std::string& file) {
+	using namespace std;
 #ifdef __APPLE__
    string s(p);
    for (int i = 0; i < 4; i++)

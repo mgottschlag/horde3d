@@ -28,7 +28,7 @@
 #include "utXMLParser.h"
 #include <string>
 #include <vector>
-using namespace std;
+
 
 
 struct DaeWeight
@@ -38,19 +38,19 @@ struct DaeWeight
 };
 
 
-typedef vector< DaeWeight > DaeVertWeights;
+typedef std::vector< DaeWeight > DaeVertWeights;
 
 
 struct DaeSkin
 {
-	string						id;
-	string						ownerId;
+	std::string					id;
+	std::string					ownerId;
 	float						bindShapeMat[16];
-	vector< DaeSource >			sources;
+	std::vector< DaeSource >	sources;
 	DaeSource					*jointArray;
 	DaeSource					*weightArray;
 	DaeSource					*bindMatArray;
-	vector< DaeVertWeights >	vertWeights;
+	std::vector< DaeVertWeights >	vertWeights;
 
 	
 	DaeSkin()
@@ -61,7 +61,7 @@ struct DaeSkin
 	}
 	
 
-	DaeSource *findSource( const string &id )
+	DaeSource *findSource( const std::string &id )
 	{
 		if( id == "" ) return 0x0;
 		
@@ -119,13 +119,13 @@ struct DaeSkin
 			{
 				if( strcmp( node3.getAttribute( "semantic", "" ), "JOINT" ) == 0 )
 				{
-					string id = node3.getAttribute( "source", "" );
+					std::string id = node3.getAttribute( "source", "" );
 					removeGate( id );
 					jointArray = findSource( id );
 				}
 				else if( strcmp( node3.getAttribute( "semantic", "" ), "INV_BIND_MATRIX" ) == 0 )
 				{
-					string sourceId = node3.getAttribute( "source", "" );
+					std::string sourceId = node3.getAttribute( "source", "" );
 					removeGate( sourceId );
 					bindMatArray = findSource( sourceId );
 				}
@@ -150,7 +150,7 @@ struct DaeSkin
 			{
 				jointOffset = atoi( node3.getAttribute( "offset", "0" ) );
 				
-				string id = node3.getAttribute( "source", "" );
+				std::string id = node3.getAttribute( "source", "" );
 				removeGate( id );
 				DaeSource *vertJointArray = findSource( id );
 				if( jointOffset != 0 || vertJointArray->stringArray != jointArray->stringArray )
@@ -159,7 +159,7 @@ struct DaeSkin
 			else if( strcmp( node3.getAttribute( "semantic", "" ), "WEIGHT" ) == 0 )
 			{
 				weightOffset = atoi( node3.getAttribute( "offset", "0" ) );
-				string id = node3.getAttribute( "source", "" );
+				std::string id = node3.getAttribute( "source", "" );
 				removeGate( id );
 				weightArray = findSource( id );
 			}
@@ -211,9 +211,9 @@ struct DaeSkin
 
 struct DaeMorph
 {
-	string					id;
-	string					ownerId;
-	vector< DaeSource >		sources;
+	std::string				id;
+	std::string				ownerId;
+	std::vector< DaeSource >sources;
 	DaeSource				*targetArray;
 	DaeSource				*weightArray;
 
@@ -225,7 +225,7 @@ struct DaeMorph
 	}
 		
 
-	DaeSource *findSource( const string &id )
+	DaeSource *findSource( const std::string &id )
 	{
 		if( id == "" ) return 0x0;
 		
@@ -269,13 +269,13 @@ struct DaeMorph
 			{
 				if( strcmp( node3.getAttribute( "semantic", "" ), "MORPH_TARGET" ) == 0 )
 				{
-					string sourceId = node3.getAttribute( "source", "" );
+					std::string sourceId = node3.getAttribute( "source", "" );
 					removeGate( sourceId );
 					targetArray = findSource( sourceId );
 				}
 				else if( strcmp( node3.getAttribute( "semantic", "" ), "MORPH_WEIGHT" ) == 0 )
 				{
-					string sourceId = node3.getAttribute( "source", "" );
+					std::string sourceId = node3.getAttribute( "source", "" );
 					removeGate( sourceId );
 					weightArray = findSource( sourceId );
 				}
@@ -291,8 +291,8 @@ struct DaeMorph
 
 struct DaeLibControllers
 {
-	vector< DaeSkin * >		skinControllers;
-	vector< DaeMorph * >	morphControllers;
+	std::vector< DaeSkin * >	skinControllers;
+	std::vector< DaeMorph * >	morphControllers;
 
 
 	~DaeLibControllers()
@@ -302,7 +302,7 @@ struct DaeLibControllers
 	}
 
 	
-	DaeSkin *findSkin( const string &id )
+	DaeSkin *findSkin( const std::string &id )
 	{
 		if( id == "" ) return 0x0;
 		
@@ -315,7 +315,7 @@ struct DaeLibControllers
 	}
 
 
-	DaeMorph *findMorph( const string &id )
+	DaeMorph *findMorph( const std::string &id )
 	{
 		if( id == "" ) return 0x0;
 		

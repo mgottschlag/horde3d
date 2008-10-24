@@ -30,7 +30,7 @@
 #include <cstring>
 #include <string>
 #include <vector>
-using namespace std;
+
 
 
 typedef const char *(*ExtensionNameFunc)();
@@ -39,7 +39,7 @@ typedef void (*ExtensionReleaseFunc)();
 
 struct Extension
 {
-	string					name;
+	std::string					name;
 	ExtensionInitFunc		initFunc;
 	ExtensionReleaseFunc	releaseFunc;
 };
@@ -48,7 +48,7 @@ class ExtensionManager
 {
 protected:
 
-	vector< Extension >		_extensions;
+	std::vector< Extension >		_extensions;
 
 	void installExtension( ExtensionNameFunc nameFunc, ExtensionInitFunc initFunc,
 						   ExtensionReleaseFunc releaseFunc )
@@ -80,7 +80,7 @@ public:
 		return true;
 	}
 
-	bool checkExtension( const string &name )
+	bool checkExtension( const std::string &name )
 	{
 		for( uint32 i = 0; i < _extensions.size(); ++i )
 		{

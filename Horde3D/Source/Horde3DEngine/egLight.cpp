@@ -28,6 +28,7 @@
 
 #include "utDebug.h"
 
+using namespace std;
 
 LightNode::LightNode( const LightNodeTpl &lightTpl ) :
 	SceneNode( lightTpl )

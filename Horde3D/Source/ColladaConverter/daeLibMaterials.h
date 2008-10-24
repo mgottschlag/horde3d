@@ -29,15 +29,15 @@
 #include "daeLibEffects.h"
 #include <string>
 #include <vector>
-using namespace std;
+
 
 
 
 struct DaeMaterial
 {
-	string		id;
-	string		name;
-	string		effectId;
+	std::string	id;
+	std::string	name;
+	std::string	effectId;
 	DaeEffect	*effect;
 	bool		used;
 	
@@ -69,7 +69,7 @@ struct DaeMaterial
 
 struct DaeLibMaterials
 {
-	vector< DaeMaterial * >	materials;
+	std::vector< DaeMaterial * >	materials;
 
 
 	~DaeLibMaterials()
@@ -78,7 +78,7 @@ struct DaeLibMaterials
 	}
 
 
-	DaeMaterial *findMaterial( const string &id )
+	DaeMaterial *findMaterial( const std::string &id )
 	{
 		if( id == "" ) return 0x0;
 		
