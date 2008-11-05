@@ -309,7 +309,7 @@ struct DaeGeometry
 		while( !node2.isEmpty() )
 		{
 			sources.push_back( DaeSource() );
-			if( !sources[sources.size() - 1].parse( node2 ) ) sources.pop_back();
+			if( !sources.back().parse( node2 ) ) sources.pop_back();
 			
 			node2 = node1.getChildNode( "source", ++nodeItr2 );
 		}
@@ -319,10 +319,10 @@ struct DaeGeometry
 		while( !node2.isEmpty() )
 		{
 			vsources.push_back( DaeVSource() );
-			if( vsources[vsources.size() - 1].parse( node2 ) )
+			if( vsources.back().parse( node2 ) )
 			{
-				vsources[vsources.size() - 1].posSource = findSource( vsources[vsources.size() - 1].posSourceId );
-				if( vsources[vsources.size() - 1].posSource == 0x0 ) vsources.pop_back();
+				vsources.back().posSource = findSource( vsources.back().posSourceId );
+				if( vsources.back().posSource == 0x0 ) vsources.pop_back();
 			}
 			else vsources.pop_back();
 			
@@ -334,9 +334,9 @@ struct DaeGeometry
 		while( !node2.isEmpty() )
 		{
 			triGroups.push_back( DaeTriGroup() );
-			if( triGroups[triGroups.size() - 1].parse( node2 ) )
+			if( triGroups.back().parse( node2 ) )
 			{
-				DaeTriGroup &triGroup = triGroups[triGroups.size() - 1];
+				DaeTriGroup &triGroup = triGroups.back();
 				
 				triGroup.vSource = findVSource( triGroup.vSourceId );
 				triGroup.normSource = findSource( triGroup.normSourceId );

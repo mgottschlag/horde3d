@@ -146,7 +146,7 @@ void ModelNode::recreateNodeListRec( SceneNode *node, bool firstCall )
 		++_meshCount;
 		_nodeList.push_back( NodeListEntry( (AnimatableSceneNode *)node ) );
 		if( _nodeList.size() > _meshCount )
-			swap( _nodeList[_meshCount - 1], _nodeList[_nodeList.size() - 1] );
+			swap( _nodeList[_meshCount - 1], _nodeList.back() );
 	}
 	else if( node->getType() == SceneNodeTypes::Joint )
 	{

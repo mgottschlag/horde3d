@@ -170,7 +170,7 @@ SceneNode *Converter::processNode( ColladaDocument &doc, DaeNode &node, SceneNod
 		{
 			SceneNode *oNode2 = new Mesh();
 			_meshes.push_back( (Mesh *)oNode2 );
-			oNode->children.push_back( _meshes[_meshes.size() - 1] );
+			oNode->children.push_back( _meshes.back() );
 			
 			*oNode2 = *oNode;
 			oNode2->typeJoint = false;
@@ -186,7 +186,7 @@ SceneNode *Converter::processNode( ColladaDocument &doc, DaeNode &node, SceneNod
 			{
 				SceneNode *oNode3 = new Mesh();
 				_meshes.push_back( (Mesh *)oNode3 );
-				oNode2->children.push_back( _meshes[_meshes.size() - 1] );
+				oNode2->children.push_back( _meshes.back() );
 
 				*oNode3 = *oNode2;
 				oNode3->daeInstance = &node.instances[i];
@@ -200,7 +200,7 @@ SceneNode *Converter::processNode( ColladaDocument &doc, DaeNode &node, SceneNod
 			{
 				SceneNode *oNode2 = new Mesh();
 				_meshes.push_back( (Mesh *)oNode2 );
-				oNode->children.push_back( _meshes[_meshes.size() - 1] );
+				oNode->children.push_back( _meshes.back() );
 
 				*oNode2 = *oNode;
 				oNode2->matRel = Matrix4f();

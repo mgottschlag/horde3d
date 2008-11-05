@@ -162,7 +162,7 @@ struct DaeNode
 				if( url != "" )
 				{
 					instances.push_back( DaeInstance() );
-					DaeInstance &inst = instances[instances.size() - 1];
+					DaeInstance &inst = instances.back();
 					
 					inst.url = url;
 

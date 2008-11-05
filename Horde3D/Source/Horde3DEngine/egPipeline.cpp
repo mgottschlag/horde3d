@@ -119,13 +119,13 @@ const string PipelineResource::parseStage( XMLNode &node, PipelineStage &stage )
 			if( strcmp( node1.getAttribute( "target" ), "" ) == 0 )
 			{
 				stage.commands.push_back( PipelineCommand( PipelineCommands::SwitchTarget ) );
-				(stage.commands.end() - 1)->refParams.push_back( 0x0 );
+				stage.commands.back().refParams.push_back( 0x0 );
 			}
 			else
 			{
 				if( findRenderTarget( node1.getAttribute( "target" ) ) == 0x0 ) return "Reference to undefined render target in SwitchTarget";
 				stage.commands.push_back( PipelineCommand( PipelineCommands::SwitchTarget ) );
-				(stage.commands.end() - 1)->refParams.push_back( findRenderTarget( node1.getAttribute( "target" ) ) );
+				stage.commands.back().refParams.push_back( findRenderTarget( node1.getAttribute( "target" ) ) );
 			}
 		}
 		else if( strcmp( node1.getName(), "BindBuffer" ) == 0 )
@@ -134,8 +134,8 @@ const string PipelineResource::parseStage( XMLNode &node, PipelineStage &stage )
 				node1.getAttribute( "bufIndex" ) == 0x0 ) return "Missing BindBuffer attribute";
 			if( findRenderTarget( node1.getAttribute( "target" ) ) == 0x0 ) return "Reference to undefined render target in BindBuffer";
 			stage.commands.push_back( PipelineCommand( PipelineCommands::BindBuffer ) );
-			(stage.commands.end() - 1)->refParams.push_back( findRenderTarget( node1.getAttribute( "target" ) ) );
-			vector< PCParam * > &valParams = (stage.commands.end() - 1)->valParams;
+			stage.commands.back().refParams.push_back( findRenderTarget( node1.getAttribute( "target" ) ) );
+			vector< PCParam * > &valParams = stage.commands.back().valParams;
 			valParams.resize( 2 );
 			valParams[0] = new PCFloatParam( (float)atof( node1.getAttribute( "texUnit" ) ) );
 			valParams[1] = new PCFloatParam( (float)atof( node1.getAttribute( "bufIndex" ) ) );
@@ -144,7 +144,7 @@ const string PipelineResource::parseStage( XMLNode &node, PipelineStage &stage )
 		{
 			stage.commands.push_back( PipelineCommand( PipelineCommands::ClearTarget ) );
 			
-			vector< PCParam * > &valParams = (stage.commands.end() - 1)->valParams;
+			vector< PCParam * > &valParams = stage.commands.back().valParams;
 			valParams.resize( 9 );
 			valParams[0] = new PCBoolParam( false );
 			valParams[1] = new PCBoolParam( false );
@@ -180,21 +180,21 @@ const string PipelineResource::parseStage( XMLNode &node, PipelineStage &stage )
 		{
 			if( node1.getAttribute( "context" ) == 0x0 ) return "Missing DrawGeometry attribute 'context'";
 			stage.commands.push_back( PipelineCommand( PipelineCommands::DrawGeometry ) );
-			(stage.commands.end() - 1)->valParams.push_back( new PCStringParam( node1.getAttribute( "context" ) ) );
-			(stage.commands.end() - 1)->valParams.push_back( new PCStringParam( node1.getAttribute( "class", "" ) ) );
+			stage.commands.back().valParams.push_back( new PCStringParam( node1.getAttribute( "context" ) ) );
+			stage.commands.back().valParams.push_back( new PCStringParam( node1.getAttribute( "class", "" ) ) );
 			
 			string orderString = node1.getAttribute( "order", "" );
 			int order = RenderingOrder::None;
 			if( orderString == "FRONT_TO_BACK" ) order = RenderingOrder::FrontToBack;
 			else if( orderString == "BACK_TO_FRONT" ) order = RenderingOrder::BackToFront;
 			else if( orderString == "STATECHANGES" ) order = RenderingOrder::StateChanges;
-			(stage.commands.end() - 1)->valParams.push_back( new PCIntParam( order ) );
+			stage.commands.back().valParams.push_back( new PCIntParam( order ) );
 		}
 		else if( strcmp( node1.getName(), "DrawOverlays" ) == 0 )
 		{
 			if( node1.getAttribute( "context" ) == 0x0 ) return "Missing DrawOverlays attribute 'context'";
 			stage.commands.push_back( PipelineCommand( PipelineCommands::DrawOverlays ) );
-			(stage.commands.end() - 1)->valParams.push_back( new PCStringParam( node1.getAttribute( "context" ) ) );
+			stage.commands.back().valParams.push_back( new PCStringParam( node1.getAttribute( "context" ) ) );
 		}
 		else if( strcmp( node1.getName(), "DrawQuad" ) == 0 )
 		{
@@ -203,15 +203,15 @@ const string PipelineResource::parseStage( XMLNode &node, PipelineStage &stage )
 			stage.commands.push_back( PipelineCommand( PipelineCommands::DrawQuad ) );
 			uint32 matRes = Modules::resMan().addResource(
 				ResourceTypes::Material, node1.getAttribute( "material" ), 0, false );
-			(stage.commands.end() - 1)->resParams.push_back( Modules::resMan().resolveResHandle( matRes ) );
-			(stage.commands.end() - 1)->valParams.push_back( new PCStringParam( node1.getAttribute( "context" ) ) );
+			stage.commands.back().resParams.push_back( Modules::resMan().resolveResHandle( matRes ) );
+			stage.commands.back().valParams.push_back( new PCStringParam( node1.getAttribute( "context" ) ) );
 		}
 		else if( strcmp( node1.getName(), "DoForwardLightLoop" ) == 0 )
 		{
 		    stage.commands.push_back( PipelineCommand( PipelineCommands::DoForwardLightLoop ) );
-		    (stage.commands.end() - 1)->valParams.push_back( new PCStringParam( node1.getAttribute( "context", "" ) ) );
-			(stage.commands.end() - 1)->valParams.push_back( new PCStringParam( node1.getAttribute( "class", "" ) ) );
-			(stage.commands.end() - 1)->valParams.push_back( new PCBoolParam(
+		    stage.commands.back().valParams.push_back( new PCStringParam( node1.getAttribute( "context", "" ) ) );
+			stage.commands.back().valParams.push_back( new PCStringParam( node1.getAttribute( "class", "" ) ) );
+			stage.commands.back().valParams.push_back( new PCBoolParam(
 				_stricmp( node1.getAttribute( "noShadows", "false" ), "true" ) == 0 ) );
 
 			string orderString = node1.getAttribute( "order", "" );
@@ -219,13 +219,13 @@ const string PipelineResource::parseStage( XMLNode &node, PipelineStage &stage )
 			if( orderString == "FRONT_TO_BACK" ) order = RenderingOrder::FrontToBack;
 			else if( orderString == "BACK_TO_FRONT" ) order = RenderingOrder::BackToFront;
 			else if( orderString == "STATECHANGES" ) order = RenderingOrder::StateChanges;
-			(stage.commands.end() - 1)->valParams.push_back( new PCIntParam( order ) );
+			stage.commands.back().valParams.push_back( new PCIntParam( order ) );
 		}
 		else if( strcmp( node1.getName(), "DoDeferredLightLoop" ) == 0 )
 		{
 			stage.commands.push_back( PipelineCommand( PipelineCommands::DoDeferredLightLoop ) );
-			(stage.commands.end() - 1)->valParams.push_back( new PCStringParam( node1.getAttribute( "context", "" ) ) );
-			(stage.commands.end() - 1)->valParams.push_back( new PCBoolParam(
+			stage.commands.back().valParams.push_back( new PCStringParam( node1.getAttribute( "context", "" ) ) );
+			stage.commands.back().valParams.push_back( new PCBoolParam(
 				_stricmp( node1.getAttribute( "noShadows", "false" ), "true" ) == 0 ) );
 		}
 		else if( strcmp( node1.getName(), "SetUniform" ) == 0 )
@@ -235,9 +235,9 @@ const string PipelineResource::parseStage( XMLNode &node, PipelineStage &stage )
 			stage.commands.push_back( PipelineCommand( PipelineCommands::SetUniform ) );
 			uint32 matRes = Modules::resMan().addResource(
 				ResourceTypes::Material, node1.getAttribute( "material" ), 0, false );
-			(stage.commands.end() - 1)->resParams.push_back( Modules::resMan().resolveResHandle( matRes ) );
+			stage.commands.back().resParams.push_back( Modules::resMan().resolveResHandle( matRes ) );
 
-			vector< PCParam * > &valParams = (stage.commands.end() - 1)->valParams;
+			vector< PCParam * > &valParams = stage.commands.back().valParams;
 			valParams.resize( 5 );
 			valParams[0] = new PCStringParam( node1.getAttribute( "uniform" ) );
 			valParams[1] = new PCFloatParam( (float)atof( node1.getAttribute( "a", "0" ) ) );
@@ -401,9 +401,9 @@ bool PipelineResource::load( const char *data, int size )
 		while( !node2.isEmpty() )
 		{
 			_stages.push_back( PipelineStage() );
-			string errorMsg = parseStage( node2, _stages[_stages.size() - 1] );
+			string errorMsg = parseStage( node2, _stages.back() );
 			if( errorMsg != "" ) 
-				return raiseError( "Error in stage '" + _stages[_stages.size() - 1].id + "': " + errorMsg );
+				return raiseError( "Error in stage '" + _stages.back().id + "': " + errorMsg );
 			
 			node2 = node1.getChildNode( "Stage", ++nodeItr2 );
 		}

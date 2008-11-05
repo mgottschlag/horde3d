@@ -110,7 +110,7 @@ struct DaeAnimation
 		while( !node1.isEmpty() )
 		{
 			sources.push_back( DaeSource() );
-			if( !sources[sources.size() - 1].parse( node1 ) ) sources.pop_back();
+			if( !sources.back().parse( node1 ) ) sources.pop_back();
 
 			node1 = animNode.getChildNode( "source", ++nodeItr1 );
 		}
@@ -121,7 +121,7 @@ struct DaeAnimation
 		while( !node1.isEmpty() )
 		{
 			samplers.push_back( DaeSampler() );
-			DaeSampler &sampler = samplers[samplers.size() - 1];
+			DaeSampler &sampler = samplers.back();
 
 			sampler.id = node1.getAttribute( "id" );
 			
@@ -165,7 +165,7 @@ struct DaeAnimation
 		while( !node1.isEmpty() )
 		{
 			channels.push_back( DaeChannel() );
-			DaeChannel &channel = channels[channels.size() - 1];
+			DaeChannel &channel = channels.back();
 			channel.transValuesIndex = -1;
 
 			// Parse target

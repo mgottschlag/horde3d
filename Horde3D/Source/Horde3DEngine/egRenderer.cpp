@@ -273,7 +273,7 @@ void Renderer::showOverlay( const Overlay &overlay, uint32 matRes )
 	if( res != 0x0 && res->getType() == ResourceTypes::Material )
 	{
 		_overlays.push_back( overlay );
-		_overlays[_overlays.size() - 1].materialRes = (MaterialResource *)res;
+		_overlays.back().materialRes = (MaterialResource *)res;
 	}
 }
 

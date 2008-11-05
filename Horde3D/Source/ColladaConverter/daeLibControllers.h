@@ -104,7 +104,7 @@ struct DaeSkin
 		while( !node2.isEmpty() )
 		{
 			sources.push_back( DaeSource() );
-			if( !sources[sources.size() - 1].parse( node2 ) ) sources.pop_back();
+			if( !sources.back().parse( node2 ) ) sources.pop_back();
 			
 			node2 = node1.getChildNode( "source", ++nodeItr2 );
 		}
@@ -254,7 +254,7 @@ struct DaeMorph
 		while( !node2.isEmpty() )
 		{
 			sources.push_back( DaeSource() );
-			if( !sources[sources.size() - 1].parse( node2 ) ) sources.pop_back();
+			if( !sources.back().parse( node2 ) ) sources.pop_back();
 			
 			node2 = node1.getChildNode( "source", ++nodeItr2 );
 		}
