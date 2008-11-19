@@ -225,7 +225,7 @@ public:
 		Vec3f v;
 		
 		if( y != 0 ) v.x = atan2( y, sqrtf( x*x + z*z ) );
-		if( z != 0 ) v.y = atan2( -x, -z );
+		if( x != 0 || z != 0 ) v.y = atan2( -x, -z );
 
 		return v;
 	}
