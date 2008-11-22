@@ -98,8 +98,8 @@ class ModelNode : public SceneNode
 {
 protected:
 
-	GeometryResource			*_geometryRes;
-	GeometryResource			*_baseGeoRes;
+	PGeometryResource			_geometryRes;
+	PGeometryResource			_baseGeoRes;
 	std::vector< Vec4f >		_skinMatRows;
 	bool						_softwareSkinning;
 	
