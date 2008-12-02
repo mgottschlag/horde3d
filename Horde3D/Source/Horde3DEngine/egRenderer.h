@@ -34,6 +34,7 @@
 #include <vector>
 #include <algorithm>
 
+
 class MaterialResource;
 struct ShaderContext;
 
@@ -45,6 +46,10 @@ extern const char *vsOccBox;
 extern const char *fsOccBox;	
 	
 
+// =================================================================================================
+// Renderer
+// =================================================================================================
+
 struct EngineStats
 {
 	enum List
@@ -55,29 +60,30 @@ struct EngineStats
 	};
 };
 
+// =================================================================================================
 
 struct Overlay
 {
-	float				x_ll, y_ll, u_ll, v_ll;		// Lower left corner
-	float				x_lr, y_lr, u_lr, v_lr;		// Lower right corner
-	float				x_ur, y_ur, u_ur, v_ur;		// Upper right corner
-	float				x_ul, y_ul, u_ul, v_ul;		// Upper left corner
-	int					layer;
-	PMaterialResource	materialRes;
+	PMaterialResource  materialRes;
+	int                layer;
+	float              x_ll, y_ll, u_ll, v_ll;  // Lower left corner
+	float              x_lr, y_lr, u_lr, v_lr;  // Lower right corner
+	float              x_ur, y_ur, u_ur, v_ur;  // Upper right corner
+	float              x_ul, y_ul, u_ul, v_ul;  // Upper left corner
 
 
 	Overlay() {}
 
 	Overlay( const float &x_ll, const float &y_ll, const float &u_ll, const float &v_ll,
-			 const float &x_lr, const float &y_lr, const float &u_lr, const float &v_lr,
-			 const float &x_ur, const float &y_ur, const float &u_ur, const float &v_ur,
-			 const float &x_ul, const float &y_ul, const float &u_ul, const float &v_ul,
-			 int layer ) :
+	         const float &x_lr, const float &y_lr, const float &u_lr, const float &v_lr,
+	         const float &x_ur, const float &y_ur, const float &u_ur, const float &v_ur,
+	         const float &x_ul, const float &y_ul, const float &u_ul, const float &v_ul,
+	         int layer ) :
+		materialRes( 0x0 ), layer( layer ),
 		x_ll( x_ll ), y_ll( y_ll ), u_ll( u_ll ), v_ll( v_ll ),
 		x_lr( x_lr ), y_lr( y_lr ), u_lr( u_lr ), v_lr( v_lr ),
 		x_ur( x_ur ), y_ur( y_ur ), u_ur( u_ur ), v_ur( v_ur ),
-		x_ul( x_ul ), y_ul( y_ul ), u_ul( u_ul ), v_ul( v_ul ),
-		layer( layer ), materialRes( 0x0 )
+		x_ul( x_ul ), y_ul( y_ul ), u_ul( u_ul ), v_ul( v_ul )
 	{	
 	}
 };
@@ -85,10 +91,10 @@ struct Overlay
 
 struct ParticleVert
 {
-	float	x, y, z;		// Position
-	float	u, v;			// Texture coordinates
-	float	cornerIndex;	// Index of corner of quad (for up/right vectors)
-	float	index;			// Index in property array
+	float  x, y, z;  // Position
+	float  u, v;  // Texture coordinates
+	float  cornerIndex;  // Index of corner of quad (for up/right vectors)
+	float  index;  // Index in property array
 
 	ParticleVert()
 	{
@@ -100,31 +106,32 @@ struct ParticleVert
 	}
 };
 
+// =================================================================================================
 
 class Renderer : public RendererBase
 {
 protected:
 
-	uint32				_frameID;
-	uint32				_smFBO, _smTex;
-	uint32				_defShadowMap;
-	uint32				_particleVBO;
-	MaterialResource	*_curStageMatLink;
-	CameraNode			*_curCamera;
-	LightNode			*_curLight;
-	MaterialResource	*_curMatRes;
-	ShaderContext		*_curShader;
-	RenderTarget		*_curRenderTarget;
-	Frustum				_camFrustum, _lightFrustum;
-	uint32				_curUpdateStamp;
+	uint32                  _frameID;
+	uint32                  _smFBO, _smTex;
+	uint32                  _defShadowMap;
+	uint32                  _particleVBO;
+	MaterialResource        *_curStageMatLink;
+	CameraNode              *_curCamera;
+	LightNode               *_curLight;
+	MaterialResource        *_curMatRes;
+	ShaderContext           *_curShader;
+	RenderTarget            *_curRenderTarget;
+	Frustum                 _camFrustum, _lightFrustum;
+	uint32                  _curUpdateStamp;
 	
-	float				_splitPlanes[5];
-	Matrix4f			_lightMats[4];
+	float                   _splitPlanes[5];
+	Matrix4f                _lightMats[4];
 
-	std::vector< char >		_occSets;	// Actually bool
-	std::vector< Overlay >	_overlays;
+	std::vector< char >     _occSets;  // Actually bool
+	std::vector< Overlay >  _overlays;
 
-	int					_statTriCount, _statBatchCount, _statLightPassCount;
+	int                     _statTriCount, _statBatchCount, _statLightPassCount;
 
 	static bool nodeFrontToBackOrder( NodeListEntry e1, NodeListEntry e2 )
 		{ return ((MeshNode *)e1.node)->tmpSortValue < ((MeshNode *)e2.node)->tmpSortValue; }
@@ -156,8 +163,8 @@ protected:
 
 public:
 	
-	static ShaderContext	defColorShader;
-	static ShaderContext	occShader;
+	static ShaderContext  defColorShader;
+	static ShaderContext  occShader;
 	
 	Renderer();
 	~Renderer();

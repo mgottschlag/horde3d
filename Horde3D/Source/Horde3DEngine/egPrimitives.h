@@ -29,11 +29,15 @@
 #include "utMath.h"
 
 
+// =================================================================================================
+// Bounding Box
+// =================================================================================================
+
 class BoundingBox
 {
 private:	
 	
-	Vec3f _minCoords, _maxCoords;
+	Vec3f  _minCoords, _maxCoords;
 
 public:
 	
@@ -125,13 +129,17 @@ public:
 };
 
 
+// =================================================================================================
+// Frustum
+// =================================================================================================
+
 class Frustum
 {
 private:
 	
-	Vec3f			_origin;
-	Plane			_planes[6];		// Planes of frustum
-	Vec3f			_corners[8];	// Corner points
+	Plane  _planes[6];  // Planes of frustum
+	Vec3f  _origin;
+	Vec3f  _corners[8];  // Corner points
 
 public:
 
@@ -140,10 +148,10 @@ public:
 	
 	void buildViewFrustum( const Matrix4f &transMat, float fov, float aspect, float near, float far );
 	void buildViewFrustum( const Matrix4f &transMat, float left, float right,
-						   float bottom, float top, float near, float far );
+	                       float bottom, float top, float near, float far );
 	void buildViewFrustum( const Matrix4f &viewMat, const Matrix4f &projMat );
 	void buildBoxFrustum( const Matrix4f &transMat, float left, float right,
-						  float bottom, float top, float front, float back );
+	                      float bottom, float top, float front, float back );
 	bool cullSphere( Vec3f pos, float rad );
 	bool cullBox( BoundingBox &b ) const;
 	bool cullFrustum( const Frustum &frust );

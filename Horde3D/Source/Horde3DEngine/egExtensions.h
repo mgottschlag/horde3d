@@ -32,26 +32,32 @@
 #include <vector>
 
 
-
 typedef const char *(*ExtensionNameFunc)();
 typedef bool (*ExtensionInitFunc)();
 typedef void (*ExtensionReleaseFunc)();
 
+
+// =================================================================================================
+// Extension Manager
+// =================================================================================================
+
 struct Extension
 {
-	std::string					name;
-	ExtensionInitFunc		initFunc;
-	ExtensionReleaseFunc	releaseFunc;
+	std::string           name;
+	ExtensionInitFunc     initFunc;
+	ExtensionReleaseFunc  releaseFunc;
 };
+
+// =================================================================================================
 
 class ExtensionManager
 {
 protected:
 
-	std::vector< Extension >		_extensions;
+	std::vector< Extension >  _extensions;
 
 	void installExtension( ExtensionNameFunc nameFunc, ExtensionInitFunc initFunc,
-						   ExtensionReleaseFunc releaseFunc )
+	                       ExtensionReleaseFunc releaseFunc )
 	{
 		Extension ext;
 		ext.name = (*nameFunc)();

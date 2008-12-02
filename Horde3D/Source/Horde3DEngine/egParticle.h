@@ -33,22 +33,9 @@
 struct XMLNode;
 
 
-struct EmitterNodeParams
-{
-	enum List
-	{
-		MaterialRes = 700,
-		EffectRes,
-		MaxCount,
-		RespawnCount,
-		Delay,
-		EmissionRate,
-		SpreadAngle,
-		ForceX,
-		ForceY,
-		ForceZ
-	};
-};
+// =================================================================================================
+// Effect Resource
+// =================================================================================================
 
 struct EffectResParams
 {
@@ -80,24 +67,28 @@ struct EffectResParams
 	};
 };
 
+// =================================================================================================
+
 struct ParticleChannel
 {
-	float	startMin, startMax;
-	float	endRate;
+	float  startMin, startMax;
+	float  endRate;
 
 	ParticleChannel();
 	void reset();
 	bool parse( XMLNode &node );
 };
 
+// =================================================================================================
+
 class EffectResource : public Resource
 {
 private:
 
-	float				_lifeMin, _lifeMax;
-	ParticleChannel		_moveVel, _rotVel;
-	ParticleChannel		_size;
-	ParticleChannel		_colR, _colG, _colB, _colA;
+	float            _lifeMin, _lifeMax;
+	ParticleChannel  _moveVel, _rotVel;
+	ParticleChannel  _size;
+	ParticleChannel  _colR, _colG, _colB, _colA;
 
 	bool raiseError( const std::string &msg, int line = -1 );
 
@@ -122,29 +113,40 @@ public:
 typedef SmartResPtr< EffectResource > PEffectResource;
 
 
-struct ParticleData
-{
-	float		life, maxLife;
-	Vec3f		dir;
-	uint32		respawnCounter;
+// =================================================================================================
+// Emitter Node
+// =================================================================================================
 
-	// Start values
-	float		moveVel0, rotVel0;
-	float		size0;
-	float		r0, g0, b0, a0;
+struct EmitterNodeParams
+{
+	enum List
+	{
+		MaterialRes = 700,
+		EffectRes,
+		MaxCount,
+		RespawnCount,
+		Delay,
+		EmissionRate,
+		SpreadAngle,
+		ForceX,
+		ForceY,
+		ForceZ
+	};
 };
+
+// =================================================================================================
 
 struct EmitterNodeTpl : public SceneNodeTpl
 {
-	PMaterialResource	matRes;
-	PEffectResource		effectRes;
-	uint32				maxParticleCount;
-	int					respawnCount;
-	float				delay, emissionRate, spreadAngle;
-	float				fx, fy, fz;
+	PMaterialResource  matRes;
+	PEffectResource    effectRes;
+	uint32             maxParticleCount;
+	int                respawnCount;
+	float              delay, emissionRate, spreadAngle;
+	float              fx, fy, fz;
 
 	EmitterNodeTpl( const std::string &name, MaterialResource *materialRes, EffectResource *effectRes,
-					uint32 maxParticleCount, int respawnCount) :
+	                uint32 maxParticleCount, int respawnCount) :
 		SceneNodeTpl( SceneNodeTypes::Emitter, name ),
 		matRes( materialRes ), effectRes( effectRes ), maxParticleCount( maxParticleCount ),
 		respawnCount( respawnCount ), delay( 0 ), emissionRate( 0 ), spreadAngle( 0 ),
@@ -153,31 +155,47 @@ struct EmitterNodeTpl : public SceneNodeTpl
 	}
 };
 
+// =================================================================================================
+
+struct ParticleData
+{
+	float   life, maxLife;
+	Vec3f   dir;
+	uint32  respawnCounter;
+
+	// Start values
+	float  moveVel0, rotVel0;
+	float  size0;
+	float  r0, g0, b0, a0;
+};
+
+// =================================================================================================
+
 class EmitterNode : public SceneNode
 {
 protected:
 
-	BoundingBox			_localBBox;
-	
-	// Emitter params
-	PMaterialResource	_materialRes;
-	PEffectResource		_effectRes;
-	uint32				_particleCount;
-	int					_respawnCount;
-	float				_delay, _emissionRate, _spreadAngle;
-	Vec3f				_force;
+	BoundingBox            _localBBox;
 
 	// Emitter data
-	float				_emissionAccum;
+	float                  _emissionAccum;
+	
+	// Emitter params
+	PMaterialResource      _materialRes;
+	PEffectResource        _effectRes;
+	uint32                 _particleCount;
+	int                    _respawnCount;
+	float                  _delay, _emissionRate, _spreadAngle;
+	Vec3f                  _force;
 
 	// Particle data
-	ParticleData		*_particles;
-	Vec3f				*_parPositions;
-	float				*_parSizesANDRotations;
-	float				*_parColors;
+	ParticleData           *_particles;
+	Vec3f                  *_parPositions;
+	float                  *_parSizesANDRotations;
+	float                  *_parColors;
 
-	std::vector< uint32 >_occQueries;
-	std::vector< uint32 >_lastVisited;
+	std::vector< uint32 >  _occQueries;
+	std::vector< uint32 >  _lastVisited;
 
 	EmitterNode( const EmitterNodeTpl &emitterTpl );
 	void setMaxParticleCount( uint32 maxParticleCount );

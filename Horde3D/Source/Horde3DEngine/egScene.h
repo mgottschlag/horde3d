@@ -32,12 +32,16 @@
 #include "egPipeline.h"
 #include <map>
 
+
 struct SceneNodeTpl;
 class SceneGraphResource;
 
-
 const int RootNode = 1;
 
+
+// =================================================================================================
+// Scene Node
+// =================================================================================================
 
 struct SceneNodeTypes
 {
@@ -63,13 +67,15 @@ struct SceneNodeParams
 	};
 };
 
+// =================================================================================================
+
 struct SceneNodeTpl
 {
-	int								type;
-	std::string						name;
-	Vec3f							trans, rot, scale;
-	std::string						attachmentString;
-	std::vector< SceneNodeTpl * >	children;
+	int                            type;
+	std::string                    name;
+	Vec3f                          trans, rot, scale;
+	std::string                    attachmentString;
+	std::vector< SceneNodeTpl * >  children;
 
 	SceneNodeTpl( int type, const std::string &name ) :
 		type( type ), name( name ), scale( Vec3f ( 1, 1, 1 ) )
@@ -82,29 +88,32 @@ struct SceneNodeTpl
 	}
 };
 
+// =================================================================================================
+
 class SceneNode
 {
 protected:
 	
-	int							_type;
-	std::string					_name;
-	bool						_renderable;
-	bool						_active;
-	NodeHandle					_handle;
-	bool						_dirty;
-	bool						_transformed;
-	Matrix4f					_relTrans, _absTrans;			// Transformation matrices
-	BoundingBox					_bBox;							// AABB in world space
+	Matrix4f                    _relTrans, _absTrans;  // Transformation matrices
+	SceneNode                   *_parent;  // Parent node
+	int                         _type;
+	NodeHandle                  _handle;
+	bool                        _dirty;
+	bool                        _transformed;
+	bool                        _renderable;
+	bool                        _active;
 
-	SceneNode					*_parent;		// Parent node
-	std::vector< SceneNode * >	_children;		// Child nodes
-	std::string					_attachment;	// User defined data
+	BoundingBox                 _bBox;  // AABB in world space
+
+	std::vector< SceneNode * >  _children;  // Child nodes
+	std::string                 _name;
+	std::string                 _attachment;  // User defined data
 	
 	void markChildrenDirty();
 
 public:
 
-	float					tmpSortValue;
+	float                       tmpSortValue;
 	
 	static bool frontToBackOrder( SceneNode *n1, SceneNode *n2 )
 		{ return n1->tmpSortValue < n2->tmpSortValue; }
@@ -156,6 +165,10 @@ public:
 };
 
 
+// =================================================================================================
+// Group Node
+// =================================================================================================
+
 struct GroupNodeParams
 {
 	enum List
@@ -165,9 +178,11 @@ struct GroupNodeParams
 	};
 };
 
+// =================================================================================================
+
 struct GroupNodeTpl : public SceneNodeTpl
 {
-	float	minDist, maxDist;
+	float  minDist, maxDist;
 
 	GroupNodeTpl( const std::string &name ) :
 		SceneNodeTpl( SceneNodeTypes::Group, name )
@@ -175,11 +190,13 @@ struct GroupNodeTpl : public SceneNodeTpl
 	}
 };
 
+// =================================================================================================
+
 class GroupNode : public SceneNode
 {
 protected:
 
-	float	_minDist, _maxDist;
+	float  _minDist, _maxDist;
 
 	GroupNode( const GroupNodeTpl &groupTpl );
 
@@ -196,44 +213,51 @@ public:
 };
 
 
+// =================================================================================================
+// Scene Manager
+// =================================================================================================
+
 typedef SceneNodeTpl *(*NodeTypeParsingFunc)( std::map< std::string, std::string > &attribs );
 typedef SceneNode *(*NodeTypeFactoryFunc)( const SceneNodeTpl &tpl );
 typedef void (*NodeTypeRenderFunc)( const std::string &shaderContext, const std::string &theClass, bool debugView,
-								    const Frustum *frust1, const Frustum *frust2, RenderingOrder::List order,
-								    int occSet );
+                                    const Frustum *frust1, const Frustum *frust2, RenderingOrder::List order,
+                                    int occSet );
 
 struct NodeRegEntry
 {
-	std::string				typeString;
-	NodeTypeParsingFunc		parsingFunc;
-	NodeTypeFactoryFunc		factoryFunc;
-	NodeTypeRenderFunc		renderFunc;
+	std::string          typeString;
+	NodeTypeParsingFunc  parsingFunc;
+	NodeTypeFactoryFunc  factoryFunc;
+	NodeTypeRenderFunc   renderFunc;
 };
 
 struct CastRayResult
 {
-	SceneNode *node;
-	float distance;
-	Vec3f intersection;
+	SceneNode  *node;
+	float      distance;
+	Vec3f      intersection;
 };
+
+// =================================================================================================
 
 class SceneManager
 {
 protected:
 
-	std::map< int, NodeRegEntry >	_registry;		// Registry of node types
-	std::vector< SceneNode *>		_nodes;			// _nodes[0] is root node
-	std::vector< SceneNode *>		_lightQueue;
-	std::vector< SceneNode *>		_renderableQueue;
-	std::vector< SceneNode * >		_findResults;
-	std::vector< CastRayResult >     _castRayResults;
+	std::vector< SceneNode *>      _nodes;  // _nodes[0] is root node
+	std::vector< SceneNode *>      _lightQueue;
+	std::vector< SceneNode *>      _renderableQueue;
+	std::vector< SceneNode * >     _findResults;
+	std::vector< CastRayResult >   _castRayResults;
 
-	Vec3f                       _rayOrigin;// don't put these values during recursive search on the stack
-	Vec3f                       _rayDirection;// dito
-	int                         _rayNum;// dito
+	std::map< int, NodeRegEntry >  _registry;  // Registry of node types
+
+	Vec3f                          _rayOrigin;  // Don't put these values on the stack during recursive search
+	Vec3f                          _rayDirection;  // Ditto
+	int                            _rayNum;  // Ditto
 
 	void updateQueuesRec( const Frustum &frustum1, const Frustum *frustum2, bool sorted, 
-						  SceneNode &node, bool lightQueue, bool renderableQueue );
+	                      SceneNode &node, bool lightQueue, bool renderableQueue );
 	NodeHandle parseNode( SceneNodeTpl &tpl, SceneNode *parent );
 	void removeNodeRec( SceneNode *node );
 
@@ -244,13 +268,13 @@ public:
 	~SceneManager();
 
 	void registerType( int type, const std::string &typeString, NodeTypeParsingFunc pf,
-					   NodeTypeFactoryFunc ff, NodeTypeRenderFunc rf );
+	                   NodeTypeFactoryFunc ff, NodeTypeRenderFunc rf );
 	NodeRegEntry *findType( int type );
 	NodeRegEntry *findType( const std::string &typeString );
 	
 	void updateNodes();
 	void updateQueues( const Frustum &frustum1, const Frustum *frustum2,
-					   RenderingOrder::List order, bool lightQueue, bool renderableQueue );
+	                   RenderingOrder::List order, bool lightQueue, bool renderableQueue );
 	
 	NodeHandle addNode( SceneNode *node, SceneNode &parent );
 	NodeHandle addNodes( SceneNode &parent, SceneGraphResource &sgRes );

@@ -30,6 +30,10 @@
 #include "utMath.h"
 
 
+// =================================================================================================
+// Animation Resource
+// =================================================================================================
+
 struct AnimationResParams
 {
 	enum List
@@ -38,27 +42,31 @@ struct AnimationResParams
 	};
 };
 
+// =================================================================================================
+
 struct Frame
 {
-	Quaternion			rotQuat;
-	Vec3f				transVec, scaleVec;
-	Matrix4f			bakedTransMat;
+	Quaternion  rotQuat;
+	Vec3f       transVec, scaleVec;
+	Matrix4f    bakedTransMat;
 };
 
 
 struct AnimResEntity
 {
-	std::string				name;
-	Matrix4f				firstFrameInvTrans;
-	std::vector< Frame >	frames;
+	std::string           name;
+	Matrix4f              firstFrameInvTrans;
+	std::vector< Frame >  frames;
 };
+
+// =================================================================================================
 
 class AnimationResource : public Resource
 {
 private:
 
-	uint32							_numFrames;
-	std::vector< AnimResEntity >	_entities;
+	uint32                        _numFrames;
+	std::vector< AnimResEntity >  _entities;
 
 	bool raiseError( const std::string &msg );
 

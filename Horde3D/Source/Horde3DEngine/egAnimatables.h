@@ -32,17 +32,18 @@
 
 class ModelNode;
 
+
 // The following class is not real SceneNode, rather some sort of interface
 class AnimatableSceneNode : public SceneNode
 {
 protected:
 
-	ModelNode		*_parentModel;
-	bool			_ignoreAnim;
-	uint32			_animUpdateStamp;
-	float			_weightAccum;
-	Quaternion		_rotQuat;
-	Vec3f			_transVec, _scaleVec;
+	Quaternion  _rotQuat;
+	Vec3f       _transVec, _scaleVec;
+	ModelNode   *_parentModel;
+	uint32      _animUpdateStamp;
+	float       _weightAccum;
+	bool        _ignoreAnim;
 
 public:
 
@@ -58,6 +59,10 @@ public:
 };
 
 
+// =================================================================================================
+// Mesh Node
+// =================================================================================================
+
 struct MeshNodeParams
 {
 	enum List
@@ -70,30 +75,34 @@ struct MeshNodeParams
 	};
 };
 
+// =================================================================================================
+
 struct MeshNodeTpl : public SceneNodeTpl
 {
-	PMaterialResource	matRes;
-	uint32				batchStart, batchCount;
-	uint32				vertRStart, vertREnd;
+	PMaterialResource  matRes;
+	uint32             batchStart, batchCount;
+	uint32             vertRStart, vertREnd;
 
 	MeshNodeTpl( const std::string &name, MaterialResource *materialRes, uint32 batchStart,
-				 uint32 batchCount, uint32 vertRStart, uint32 vertREnd) :
+	             uint32 batchCount, uint32 vertRStart, uint32 vertREnd) :
 		SceneNodeTpl( SceneNodeTypes::Mesh, name ), matRes( materialRes ), batchStart( batchStart ),
 		batchCount( batchCount ), vertRStart( vertRStart ), vertREnd( vertREnd )
 	{
 	}
 };
 
+// =================================================================================================
+
 class MeshNode : public AnimatableSceneNode
 {
 protected:
 
-	bool				_bBoxDirty;
-	PMaterialResource	_materialRes;
-	uint32				_batchStart, _batchCount;
-	uint32				_vertRStart, _vertREnd;
+	PMaterialResource   _materialRes;
+	uint32              _batchStart, _batchCount;
+	uint32              _vertRStart, _vertREnd;
 	
-	BoundingBox			_localBBox;
+	BoundingBox         _localBBox;
+	bool                _bBoxDirty;
 
 	MeshNode( const MeshNodeTpl &meshTpl );
 
@@ -123,6 +132,10 @@ public:
 };
 
 
+// =================================================================================================
+// Joint Node
+// =================================================================================================
+
 struct JointNodeParams
 {
 	enum List
@@ -131,9 +144,11 @@ struct JointNodeParams
 	};
 };
 
+// =================================================================================================
+
 struct JointNodeTpl : public SceneNodeTpl
 {
-	uint32	jointIndex;
+	uint32  jointIndex;
 
 	JointNodeTpl( const std::string &name, uint32 jointIndex ) :
 		SceneNodeTpl( SceneNodeTypes::Joint, name ), jointIndex( jointIndex )
@@ -141,12 +156,14 @@ struct JointNodeTpl : public SceneNodeTpl
 	}
 };
 
+// =================================================================================================
+
 class JointNode : public AnimatableSceneNode
 {
 protected:
 
-	uint32		_jointIndex;
-	Matrix4f	_relModelMat;		// Transformation relative to parent model
+	uint32    _jointIndex;
+	Matrix4f  _relModelMat;  // Transformation relative to parent model
 
 	JointNode( const JointNodeTpl &jointTpl );
 

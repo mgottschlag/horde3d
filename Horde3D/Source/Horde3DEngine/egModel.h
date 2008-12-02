@@ -37,6 +37,10 @@
 const uint32 MaxNumAnimStages = 16;
 
 
+// =================================================================================================
+// Model Node
+// =================================================================================================
+
 struct ModelNodeParams
 {
 	enum List
@@ -46,27 +50,41 @@ struct ModelNodeParams
 	};
 };
 
+// =================================================================================================
+
+struct ModelNodeTpl : public SceneNodeTpl
+{
+	PGeometryResource  geoRes;
+	bool               softwareSkinning;
+
+	ModelNodeTpl( const std::string &name, GeometryResource *geoRes ) :
+		SceneNodeTpl( SceneNodeTypes::Model, name ), geoRes( geoRes ), softwareSkinning( false )
+	{
+	}
+};
+
+// =================================================================================================
 
 struct Morpher	// Morph modifier
 {
-	std::string	name;
-	uint32		index;		// Index of morph target in Geometry resource
-	float		weight;
+	std::string  name;
+	uint32       index;  // Index of morph target in Geometry resource
+	float        weight;
 };
 
 struct AnimStage
 {
-	PAnimationResource			anim;
-	std::string					startNode;
-	bool						additive;
-	float						animTime;
-	float						blendWeight;
+	PAnimationResource  anim;
+	float               animTime;
+	float               blendWeight;
+	std::string         startNode;
+	bool                additive;
 };
 
 struct NodeListEntry
 {
-	AnimatableSceneNode			*node;
-	AnimResEntity				*animEntities[MaxNumAnimStages];
+	AnimatableSceneNode  *node;
+	AnimResEntity        *animEntities[MaxNumAnimStages];
 
 
 	NodeListEntry()
@@ -82,40 +100,29 @@ struct NodeListEntry
 	}
 };
 
-
-struct ModelNodeTpl : public SceneNodeTpl
-{
-	PGeometryResource	geoRes;
-	bool				softwareSkinning;
-
-	ModelNodeTpl( const std::string &name, GeometryResource *geoRes ) :
-		SceneNodeTpl( SceneNodeTypes::Model, name ), geoRes( geoRes ), softwareSkinning( false )
-	{
-	}
-};
+// =================================================================================================
 
 class ModelNode : public SceneNode
 {
 protected:
 
-	PGeometryResource			_geometryRes;
-	PGeometryResource			_baseGeoRes;
-	std::vector< Vec4f >		_skinMatRows;
-	bool						_softwareSkinning;
+	PGeometryResource             _geometryRes;
+	PGeometryResource             _baseGeoRes;
+	std::vector< Vec4f >          _skinMatRows;
 	
-	bool						_morpherUsed, _morpherDirty;
-	std::vector< Morpher >		_morphers;
+	uint32                        _animTimeStamp;
+	uint32                        _meshCount;  // Number of meshes in _animatedNodes
+	std::vector< NodeListEntry >  _nodeList;  // List of the model's meshes followed by joints
+	AnimStage                     *_animStages[MaxNumAnimStages];
+
+	std::vector< Morpher >        _morphers;
+	bool                          _softwareSkinning;
+	bool                          _animDirty;  // Animation has changed		
+	bool                          _nodeListDirty;  // An animatable node has been attached to model
+	bool                          _morpherUsed, _morpherDirty;
 	
-	AnimStage					*_animStages[MaxNumAnimStages];
-	bool						_animDirty;				// Animation has changed		
-	bool						_nodeListDirty;			// An animatable node has been attached to model
-	uint32						_animTimeStamp;
-
-	uint32						_meshCount;			// Number of meshes in _animatedNodes
-	std::vector< NodeListEntry >_nodeList;			// List of the model's meshes followed by joints
-
-	std::vector< uint32 >		_occQueries;
-	std::vector< uint32 >		_lastVisited;
+	std::vector< uint32 >         _occQueries;
+	std::vector< uint32 >         _lastVisited;
 
 	ModelNode( const ModelNodeTpl &modelTpl );
 	void recreateNodeListRec( SceneNode *node, bool firstCall );

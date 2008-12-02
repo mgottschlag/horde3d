@@ -35,6 +35,10 @@
 struct XMLNode;
 
 
+// =================================================================================================
+// Pipeline Resource
+// =================================================================================================
+
 struct PipelineCommands
 {
 	enum List
@@ -51,53 +55,6 @@ struct PipelineCommands
 	};
 };
 
-class PCParam
-{
-public:
-	virtual ~PCParam() { }
-};
-
-class PCBoolParam : public PCParam
-{
-protected:
-	bool	_value;
-public:
-	PCBoolParam( bool value ) { _value = value; }
-	bool get() { return _value; }
-	void set( bool value ) { _value = value; }
-};
-
-class PCIntParam : public PCParam
-{
-protected:
-	int		_value;
-public:
-	PCIntParam( int value ) { _value = value; }
-	int get() { return _value; }
-	void set( int value ) { _value = value; }
-};
-
-class PCFloatParam : public PCParam
-{
-protected:
-	float	_value;
-public:
-	PCFloatParam( float value ) { _value = value; }
-	float get() { return _value; }
-	void set( float value ) { _value = value; }
-};
-
-class PCStringParam : public PCParam
-{
-protected:
-	std::string	_value;
-public:
-	PCStringParam( const std::string &value ) { _value = value; }
-	const std::string &get() { return _value; }
-	void set( const std::string &value ) { _value = value; }
-};
-
-
 struct RenderingOrder
 {
 	enum List
@@ -110,12 +67,59 @@ struct RenderingOrder
 };
 
 
+class PCParam
+{
+public:
+	virtual ~PCParam() { }
+};
+
+class PCBoolParam : public PCParam
+{
+protected:
+	bool  _value;
+public:
+	PCBoolParam( bool value ) { _value = value; }
+	bool get() { return _value; }
+	void set( bool value ) { _value = value; }
+};
+
+class PCIntParam : public PCParam
+{
+protected:
+	int  _value;
+public:
+	PCIntParam( int value ) { _value = value; }
+	int get() { return _value; }
+	void set( int value ) { _value = value; }
+};
+
+class PCFloatParam : public PCParam
+{
+protected:
+	float  _value;
+public:
+	PCFloatParam( float value ) { _value = value; }
+	float get() { return _value; }
+	void set( float value ) { _value = value; }
+};
+
+class PCStringParam : public PCParam
+{
+protected:
+	std::string  _value;
+public:
+	PCStringParam( const std::string &value ) { _value = value; }
+	const std::string &get() { return _value; }
+	void set( const std::string &value ) { _value = value; }
+};
+
+
 struct PipelineCommand
 {
-	PipelineCommands::List	command;
-	std::vector< void * >	refParams;		// Pointer to object
-	std::vector< PCParam * >valParams;		// Newly created object
-	std::vector< PResource >resParams;		// Pointers to used resources
+	PipelineCommands::List    command;
+	std::vector< void * >     refParams;  // Pointer to object
+	std::vector< PCParam * >  valParams;  // Newly created object
+	std::vector< PResource >  resParams;  // Pointers to used resources
 
 
 	PipelineCommand( PipelineCommands::List	command )
@@ -127,10 +131,10 @@ struct PipelineCommand
 
 struct PipelineStage
 {
-	std::string						id;
-	bool							enabled;
-	PMaterialResource				matLink;
-	std::vector< PipelineCommand >	commands;
+	std::string                     id;
+	PMaterialResource               matLink;
+	std::vector< PipelineCommand >  commands;
+	bool                            enabled;
 
 	PipelineStage() : matLink( 0x0 ) {}
 };
@@ -138,16 +142,16 @@ struct PipelineStage
 
 struct RenderTarget
 {
-	std::string					id;
-	bool						hasDepthBuf;
-	uint32						numColBufs;
-	RenderBufferFormats::List	format;
-	bool						bilinear;
-	uint32						samples;	// Multisampled if > 0
-	uint32						width, height;
-	float						scale;		// Scale factor for FB width and height
-	RenderBuffer				rendBuf;
-	RenderBuffer				rendBufMultisample;
+	std::string                id;
+	uint32                     numColBufs;
+	RenderBufferFormats::List  format;
+	uint32                     width, height;
+	uint32                     samples;  // Multisampled if > 0
+	float                      scale;  // Scale factor for FB width and height
+	bool                       hasDepthBuf;
+	bool                       bilinear;
+	RenderBuffer               rendBuf;
+	RenderBuffer               rendBufMultisample;
 
 	RenderTarget()
 	{
@@ -156,20 +160,21 @@ struct RenderTarget
 	}
 };
 
+// =================================================================================================
 
 class PipelineResource : public Resource
 {
 private:
 
-	std::vector< RenderTarget >		_renderTargets;
-	std::vector< PipelineStage >	_stages;
+	std::vector< RenderTarget >   _renderTargets;
+	std::vector< PipelineStage >  _stages;
 	
 	bool raiseError( const std::string &msg, int line = -1 );
 	const std::string parseStage( XMLNode &node, PipelineStage &stage );
 
 	void addRenderTarget( const std::string &id, bool depthBuffer, uint32 numBuffers,
-						  RenderBufferFormats::List format, bool bilinear, uint32 samples,
-						  uint32 width, uint32 height, float scale );
+	                      RenderBufferFormats::List format, bool bilinear, uint32 samples,
+	                      uint32 width, uint32 height, float scale );
 	RenderTarget *findRenderTarget( const std::string &id );
 	bool createRenderTargets();
 	void destroyRenderTargets();
@@ -189,7 +194,7 @@ public:
 
 	bool setStageActivation( const std::string &stageName, bool enabled );
 	bool getRenderTargetData( const std::string &target, int bufIndex, int *width, int *height,
-							  int *compCount, float *dataBuffer, int bufferSize );
+	                          int *compCount, float *dataBuffer, int bufferSize );
 
 	friend class ResourceManager;
 	friend class Renderer;

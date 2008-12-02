@@ -37,16 +37,20 @@
 extern const char *versionString;
 
 
+// =================================================================================================
+// Modules
+// =================================================================================================
+
 class Modules
 {
 private:
 
-	static EngineConfig		*_engineConfig;
-	static EngineLog		*_engineLog;
-	static SceneManager		*_sceneManager;
-	static ResourceManager	*_resourceManager;
-	static Renderer			*_renderer;
-	static ExtensionManager	*_extensionManager;
+	static EngineConfig      *_engineConfig;
+	static EngineLog         *_engineLog;
+	static SceneManager      *_sceneManager;
+	static ResourceManager   *_resourceManager;
+	static Renderer          *_renderer;
+	static ExtensionManager  *_extensionManager;
 
 public:
 

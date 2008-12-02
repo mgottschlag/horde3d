@@ -35,6 +35,9 @@
 #include <vector>
 
 
+// =================================================================================================
+// Engine Config
+// =================================================================================================
 
 struct EngineOptions
 {
@@ -54,21 +57,23 @@ struct EngineOptions
 	};
 };
 
+// =================================================================================================
+
 class EngineConfig
 {
 public:
 	
-	int		maxLogLevel;
-	bool	trilinearFiltering;
-	int		anisotropyFactor;
-	bool	texCompression;
-	bool	loadTextures;
-	bool	fastAnimation;
-	bool	occlusionCulling;
-	int		shadowMapSize;
-	int		sampleCount;
-	bool	wireframeMode;
-	bool	debugViewMode;
+	int   maxLogLevel;
+	int   anisotropyFactor;
+	int   shadowMapSize;
+	int   sampleCount;
+	bool  texCompression;
+	bool  loadTextures;
+	bool  fastAnimation;
+	bool  occlusionCulling;
+	bool  trilinearFiltering;
+	bool  wireframeMode;
+	bool  debugViewMode;
 
 
 	EngineConfig();
@@ -77,11 +82,15 @@ public:
 };
 
 
+// =================================================================================================
+// Engine Log
+// =================================================================================================
+
 struct LogMessage
 {
-	std::string		text;
-	int			level;
-	float		time;
+	std::string  text;
+	int          level;
+	float        time;
 
 	LogMessage()
 	{
@@ -93,15 +102,16 @@ struct LogMessage
 	}
 };
 
+// =================================================================================================
 
 class EngineLog
 {
 protected:
 	
-	unsigned long				_firstTick;
-	char						_textBuf[2048];
-	uint32						_maxNumMessages;
-	std::queue< LogMessage >	_messages;
+	unsigned long             _firstTick;
+	char                      _textBuf[2048];
+	uint32                    _maxNumMessages;
+	std::queue< LogMessage >  _messages;
 
 	void pushMessage( const std::string &text, uint32 level );
 	void pushMessage( int level, const char *msg, va_list ap );

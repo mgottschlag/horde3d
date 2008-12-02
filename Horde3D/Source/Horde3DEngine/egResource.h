@@ -31,6 +31,9 @@
 #include <string>
 
 
+// =================================================================================================
+// Resource
+// =================================================================================================
 
 struct ResourceTypes
 {
@@ -63,25 +66,28 @@ struct ResourceFlags
 	};
 };
 
+// =================================================================================================
+
 class Resource
 {
 protected:
 
-	ResourceTypes::List	_type;
-	std::string				_name;
-	ResHandle			_handle;
-	bool				_loaded;
-	bool				_noQuery;
-	int					_flags;
+	ResourceTypes::List  _type;
+	std::string          _name;
+	ResHandle            _handle;
+	int                  _flags;
 	
-	uint32				_refCount;		// Number of other objects referencing to this resource
-	uint32				_userRefCount;	// Number of handles created by user
+	uint32               _refCount;  // Number of other objects referencing to this resource
+	uint32               _userRefCount;  // Number of handles created by user
+
+	bool                 _loaded;
+	bool                 _noQuery;
 
 public:
 
 	Resource( ResourceTypes::List type, const std::string &name, int flags );
 	virtual ~Resource();
-	virtual Resource *clone();	// TODO: Implement this for all resource types
+	virtual Resource *clone();  // TODO: Implement this for all resource types
 	
 	virtual void initDefault();
 	virtual void release();
@@ -108,12 +114,13 @@ public:
 	friend class ResourceManager;
 };
 
+// =================================================================================================
 
 template< class T > class SmartResPtr
 {
 private:
 
-    T	*_ptr;
+    T  *_ptr;
 
 	void addRef() { if( _ptr != 0x0 ) _ptr->addRef(); }
 	void subRef() { if( _ptr != 0x0 ) _ptr->subRef(); }
@@ -142,24 +149,30 @@ public:
 typedef SmartResPtr< Resource > PResource;
 
 
+// =================================================================================================
+// Resource Manager
+// =================================================================================================
+
 typedef void (*ResTypeInitializationFunc)();
 typedef void (*ResTypeReleaseFunc)();
 typedef Resource *(*ResTypeFactoryFunc)( const std::string &name, int flags );
 
 struct ResourceRegEntry
 {
-	std::string						typeString;
-	ResTypeInitializationFunc	initializationFunc;	// Called when type is registered
-	ResTypeReleaseFunc			releaseFunc;		// Called when type is unregistered
-	ResTypeFactoryFunc			factoryFunc;		// Farctory to create resourec object
+	std::string                typeString;
+	ResTypeInitializationFunc  initializationFunc;  // Called when type is registered
+	ResTypeReleaseFunc         releaseFunc;  // Called when type is unregistered
+	ResTypeFactoryFunc         factoryFunc;  // Farctory to create resourec object
 };
+
+// =================================================================================================
 
 class ResourceManager
 {
 protected:
 
-	std::map< int, ResourceRegEntry >	_registry;		// Registry of resource types
-	std::vector < Resource * >			_resources;
+	std::vector < Resource * >         _resources;
+	std::map< int, ResourceRegEntry >  _registry;  // Registry of resource types
 
 	ResHandle addResource( Resource &res );
 
@@ -169,7 +182,7 @@ public:
 	~ResourceManager();
 
 	void registerType( int type, const std::string &typeString, ResTypeInitializationFunc inf,
-					   ResTypeReleaseFunc rf, ResTypeFactoryFunc ff );
+	                   ResTypeReleaseFunc rf, ResTypeFactoryFunc ff );
 	
 	Resource *findResource( ResourceTypes::List type, const std::string &name );
 	ResHandle addResource( ResourceTypes::List type, const std::string &name, int flags, bool userCall );

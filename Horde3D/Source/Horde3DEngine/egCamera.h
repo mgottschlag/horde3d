@@ -31,6 +31,10 @@
 #include "egTextures.h"
 
 
+// =================================================================================================
+// Camera Node
+// =================================================================================================
+
 struct CameraNodeParams
 {
 	enum List
@@ -49,16 +53,18 @@ struct CameraNodeParams
 	};
 };
 
+// =================================================================================================
+
 struct CameraNodeTpl : public SceneNodeTpl
 {
-	PPipelineResource	pipeRes;
-	PTexture2DResource	outputTex;
-	int					outputBufferIndex;
-	float				leftPlane, rightPlane;
-	float				bottomPlane, topPlane;
-	float				nearPlane, farPlane;
-	bool				orthographic;
-	bool				occlusionCulling;
+	PPipelineResource   pipeRes;
+	PTexture2DResource  outputTex;
+	float               leftPlane, rightPlane;
+	float               bottomPlane, topPlane;
+	float               nearPlane, farPlane;
+	int                 outputBufferIndex;
+	bool                orthographic;
+	bool                occlusionCulling;
 
 	CameraNodeTpl( const std::string &name, PipelineResource *pipelineRes ) :
 		SceneNodeTpl( SceneNodeTypes::Camera, name ), pipeRes( pipelineRes ),
@@ -71,18 +77,20 @@ struct CameraNodeTpl : public SceneNodeTpl
 	}
 };
 
+// =================================================================================================
+
 class CameraNode : public SceneNode
 {
 private:
 
-	PPipelineResource	_pipelineRes;
-	PTexture2DResource	_outputTex;
-	int					_outputBufferIndex;
-	Matrix4f			_invTrans;
-	float				_frustLeft, _frustRight, _frustBottom, _frustTop;
-	float				_frustNear, _frustFar;
-	bool				_orthographic;		// Perspective or orthographic frustum?
-	int					_occSet;
+	PPipelineResource   _pipelineRes;
+	PTexture2DResource  _outputTex;
+	Matrix4f            _invTrans;
+	float               _frustLeft, _frustRight, _frustBottom, _frustTop;
+	float               _frustNear, _frustFar;
+	int                 _outputBufferIndex;
+	int                 _occSet;
+	bool                _orthographic;  // Perspective or orthographic frustum?
 
 	void onPostUpdate();
 

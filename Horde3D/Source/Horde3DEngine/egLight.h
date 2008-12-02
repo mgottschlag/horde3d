@@ -30,6 +30,10 @@
 #include "egScene.h"
 
 
+// =================================================================================================
+// Light Node
+// =================================================================================================
+
 struct LightNodeParams
 {
 	enum List
@@ -46,18 +50,20 @@ struct LightNodeParams
 	};
 };
 
+// =================================================================================================
+
 struct LightNodeTpl : public SceneNodeTpl
 {
-	PMaterialResource	matRes;
-	std::string			lightingContext, shadowContext;
-	float				radius, fov;
-	float				col_R, col_G, col_B;
-	uint32				shadowMapCount;
-	float				shadowSplitLambda;
-	float				shadowMapBias;
+	PMaterialResource  matRes;
+	std::string        lightingContext, shadowContext;
+	float              radius, fov;
+	float              col_R, col_G, col_B;
+	uint32             shadowMapCount;
+	float              shadowSplitLambda;
+	float              shadowMapBias;
 
 	LightNodeTpl( const std::string &name, MaterialResource *materialRes,
-				  const std::string &lightingContext, const std::string &shadowContext ) :
+	              const std::string &lightingContext, const std::string &shadowContext ) :
 		SceneNodeTpl( SceneNodeTypes::Light, name ), matRes( materialRes ),
 		lightingContext( lightingContext ), shadowContext( shadowContext ),
 		radius( 100 ), fov( 90 ), col_R( 1 ), col_G( 1 ), col_B( 1 ), shadowMapCount( 0 ),
@@ -66,22 +72,24 @@ struct LightNodeTpl : public SceneNodeTpl
 	}
 };
 
+// =================================================================================================
+
 class LightNode : public SceneNode
 {
 private:
 
-	Matrix4f			_invTrans;
-	Vec3f				_absPos, _spotDir;
+	Matrix4f               _invTrans;
+	Vec3f                  _absPos, _spotDir;
 
-	PMaterialResource	_materialRes;
-	std::string			_lightingContext, _shadowContext;
-	float				_radius, _fov;
-	float				_diffCol_R, _diffCol_G, _diffCol_B;
-	uint32				_shadowMapCount;
-	float				_shadowSplitLambda, _shadowMapBias;
+	PMaterialResource      _materialRes;
+	std::string            _lightingContext, _shadowContext;
+	float                  _radius, _fov;
+	float                  _diffCol_R, _diffCol_G, _diffCol_B;
+	uint32                 _shadowMapCount;
+	float                  _shadowSplitLambda, _shadowMapBias;
 
-	std::vector< uint32 >	_occQueries;
-	std::vector< uint32 >	_lastVisited;
+	std::vector< uint32 >  _occQueries;
+	std::vector< uint32 >  _lastVisited;
 
 	void onPostUpdate();
 

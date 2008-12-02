@@ -32,6 +32,10 @@
 #include "utMath.h"
 
 
+// =================================================================================================
+// Geometry Resource
+// =================================================================================================
+
 struct GeometryResParams
 {
 	enum List
@@ -43,31 +47,32 @@ struct GeometryResParams
 	};
 };
 
+// =================================================================================================
 
 struct VertexDataStatic		// Static data
 {
-	float			u0, v0;
-	float			jointVec[4];		// Float faster than int for GPU
-	float			weightVec[4];
-	float			u1, v1;
+	float  u0, v0;
+	float  jointVec[4];		// Float faster than int for GPU
+	float  weightVec[4];
+	float  u1, v1;
 };
 
 struct VertexData
 {
 private:
 
-	char				*memory;	// Continous memory block for data
+	char              *memory;  // Continous memory block for data
 	
 public:
 
 	// Dynamic stream data
-	Vec3f				*positions;
-	Vec3f				*normals;
-	Vec3f				*tangents;
-	Vec3f				*bitangents;
+	Vec3f             *positions;
+	Vec3f             *normals;
+	Vec3f             *tangents;
+	Vec3f             *bitangents;
 
 	// Interleaved static data
-	VertexDataStatic	*staticData;
+	VertexDataStatic  *staticData;
 
 	friend class GeometryResource;
 	friend class ModelNode;
@@ -97,39 +102,40 @@ public:
 
 struct Joint
 {
-	Matrix4f		invBindMat;
+	Matrix4f  invBindMat;
 };
 
 
 struct MorphDiff
 {
-	uint32		vertIndex;
-	Vec3f		posDiff;
-	Vec3f		normDiff, tanDiff, bitanDiff;
+	uint32  vertIndex;
+	Vec3f   posDiff;
+	Vec3f   normDiff, tanDiff, bitanDiff;
 };
 
 
 struct MorphTarget
 {
-	std::string					name;
-	std::vector< MorphDiff >	diffs;
+	std::string               name;
+	std::vector< MorphDiff >  diffs;
 };
 
+// =================================================================================================
 
 class GeometryResource : public Resource
 {
 private:
 
-	uint32						_vertCount;
-	VertexData					*_vertData;	
-	bool						_16BitIndices;
-	std::vector< uint32 >		_indices;
-	
-	std::vector< Joint >		_joints;
-	std::vector< MorphTarget >	_morphTargets;
-	uint32						_minMorphIndex, _maxMorphIndex;
+	uint32                      _vertBuffer, _indexBuffer;
 
-	uint32						_vertBuffer, _indexBuffer;
+	uint32                      _vertCount;
+	VertexData                  *_vertData;	
+	bool                        _16BitIndices;
+	std::vector< uint32 >       _indices;
+	
+	std::vector< Joint >        _joints;
+	std::vector< MorphTarget >  _morphTargets;
+	uint32                      _minMorphIndex, _maxMorphIndex;
 
 	bool raiseError( const std::string &msg );
 

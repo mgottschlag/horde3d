@@ -33,6 +33,10 @@
 struct XMLNode;
 
 
+// =================================================================================================
+// SceneGraph Resource
+// =================================================================================================
+
 class SceneGraphResource : public Resource
 {
 private:
@@ -61,6 +65,7 @@ public:
 
 typedef SmartResPtr< SceneGraphResource > PSceneGraphResource;
 
+// =================================================================================================
 
 struct ReferenceNodeTpl : public SceneNodeTpl
 {

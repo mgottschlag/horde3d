@@ -32,6 +32,9 @@
 #include <string>
 
 
+// =================================================================================================
+// Base Renderer
+// =================================================================================================
 
 struct RenderBufferFormats
 {
@@ -47,13 +50,13 @@ struct RenderBuffer
 {
 	static const uint32 MaxColorAttachmentCount = 4;
 
-	uint32	fbo;
-	uint32	width, height;
+	uint32  fbo;
+	uint32  width, height;
 	uint32  samples;
 
 	// If samples == 0 buffers are texture objects, otherwise multisampled renderbuffers
-	uint32	depthBuf;
-	uint32	colBufs[MaxColorAttachmentCount];
+	uint32  depthBuf;
+	uint32  colBufs[MaxColorAttachmentCount];
 
 	RenderBuffer()
 	{
@@ -64,15 +67,17 @@ struct RenderBuffer
 	}
 };
 
+// =================================================================================================
+
 class RendererBase
 {
 protected:
 
-	int				_vpX, _vpY, _vpWidth, _vpHeight;
-	int				_fbWidth, _fbHeight;
-	std::string			_shaderLog;
-	RenderBuffer	*_curRendBuf;
-	int				_outputBufferIndex;	// Left and right eye for stereo rendering
+	int           _vpX, _vpY, _vpWidth, _vpHeight;
+	int           _fbWidth, _fbHeight;
+	std::string   _shaderLog;
+	RenderBuffer  *_curRendBuf;
+	int           _outputBufferIndex;  // Left and right eye for stereo rendering
 
 
 	void myPerspective( float fovy, float aspect, float zNear, float zFar );
@@ -100,10 +105,10 @@ public:
 	// Texture map functions
 	bool supportsNPOTTextures();
 	uint32 uploadTexture2D( void *pixels, int width, int height, int comps, bool hdr, bool allowCompression,
-							bool mipmaps, bool filtering, bool repeatMode, uint32 texId = 0 );
+	                        bool mipmaps, bool filtering, bool repeatMode, uint32 texId = 0 );
 	void updateTexture2D( unsigned char *pixels, int width, int height, int comps, bool filtering, uint32 texId );
 	uint32 uploadTextureCube( void *pixels, int width, int height, int comps, bool hdr, uint32 cubeFace,
-							  bool allowCompression, bool mipmaps, bool filtering, uint32 texId = 0 );
+	                          bool allowCompression, bool mipmaps, bool filtering, uint32 texId = 0 );
 	void unloadTexture( uint32 texId, bool cubeMap );
 	float *downloadTexture2DData( uint32 texId, int *width, int *height );
 
@@ -114,11 +119,11 @@ public:
 
 	// Render buffer functions
 	RenderBuffer createRenderBuffer( uint32 width, uint32 height, RenderBufferFormats::List format,
-									 bool depth, uint32 numColBufs, bool bilinear, uint32 samples );
+	                                 bool depth, uint32 numColBufs, bool bilinear, uint32 samples );
 	void destroyRenderBuffer( RenderBuffer &rb );
 	void setRenderBuffer( RenderBuffer *rb );
 	bool getBufferData( RenderBuffer *rb, int bufIndex, int *width, int *height,
-						int *compCount, float *dataBuffer, int bufferSize );
+	                    int *compCount, float *dataBuffer, int bufferSize );
 	void blitRenderBuffer( RenderBuffer &sourceBuf, RenderBuffer &destBuf );
 
 	// Occlusion queries

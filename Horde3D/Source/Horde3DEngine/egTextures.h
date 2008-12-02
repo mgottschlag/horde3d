@@ -31,6 +31,10 @@
 struct RenderBuffer;
 
 
+// =================================================================================================
+// Image Loader
+// =================================================================================================
+
 class ImageLoader
 {
 private:
@@ -40,10 +44,14 @@ private:
 public:
 
 	static uint32 loadImage( const char *data, uint32 size, bool makePOT,
-							 void *&pixels, int &width, int &height, int &comps, bool &hdr );
+	                         void *&pixels, int &width, int &height, int &comps, bool &hdr );
 	static std::string getErrorString();
 };
 
+
+// =================================================================================================
+// 2D Texture Resource
+// =================================================================================================
 
 struct TextureResParams
 {
@@ -57,14 +65,16 @@ struct TextureResParams
 	};
 };
 
+// =================================================================================================
+
 class Texture2DResource : public Resource
 {
 protected:
 	
-	int				_width, _height, _comps;
-	bool			_hdr;
-	uint32			_texObject;
-	RenderBuffer	*_rendBuf;	// Used when texture is renderable
+	uint32        _texObject;
+	int           _width, _height, _comps;
+	RenderBuffer  *_rendBuf;	// Used when texture is renderable
+	bool          _hdr;
 
 	bool raiseError( const std::string &msg );
 
@@ -79,7 +89,7 @@ public:
 	
 	Texture2DResource( const std::string &name, int flags );
 	Texture2DResource( const std::string &name, int flags,
-					   uint32 width, uint32 height, bool renderable );
+	                   uint32 width, uint32 height, bool renderable );
 	~Texture2DResource();
 	
 	void initDefault();
@@ -103,13 +113,17 @@ public:
 typedef SmartResPtr< Texture2DResource > PTexture2DResource;
 
 
+// =================================================================================================
+// Cubemap Texture Resource
+// =================================================================================================
+
 class TextureCubeResource : public Resource
 {
 protected:
 	
-	int		_width, _height, _comps;
-	bool	_hdr;
-	uint32	_texObject;
+	uint32  _texObject;
+	int     _width, _height, _comps;
+	bool    _hdr;
 
 	bool raiseError( const std::string &msg );
 

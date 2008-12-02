@@ -30,6 +30,10 @@
 #include "egShader.h"
 
 
+// =================================================================================================
+// Material Resource
+// =================================================================================================
+
 struct MaterialResParams
 {
 	enum List
@@ -52,11 +56,12 @@ struct MaterialResParams
 	};	
 };
 
+// =================================================================================================
 
 struct TexUnit
 {
-	uint32		unit;
-	PResource	texRes;
+	uint32     unit;
+	PResource  texRes;
 	
 
 	TexUnit(): unit( 0 ) {}
@@ -65,8 +70,8 @@ struct TexUnit
 
 struct Uniform
 {
-	std::string			name;
-	float			values[4];	
+	std::string  name;
+	float        values[4];	
 
 
 	Uniform()
@@ -75,16 +80,17 @@ struct Uniform
 	}
 };
 
+// =================================================================================================
 
 class MaterialResource : public Resource
 {
 private:
 
-	std::string						_class;
-	PShaderResource					_shaderRes;
-	std::vector< TexUnit >			_texUnits;
-	std::vector< Uniform >			_uniforms;
-	SmartResPtr< MaterialResource >	_matLink;	
+	PShaderResource                  _shaderRes;
+	std::string                      _class;
+	std::vector< TexUnit >           _texUnits;
+	std::vector< Uniform >           _uniforms;
+	SmartResPtr< MaterialResource >  _matLink;	
 
 	ResHandle getTexUnit( int unit );
 	bool setTexUnit( int unit, ResHandle texRes );
