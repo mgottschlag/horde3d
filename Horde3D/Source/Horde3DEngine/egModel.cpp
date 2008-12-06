@@ -338,7 +338,7 @@ bool ModelNode::setParami( int param, int value )
 		if( !_morphers.empty() || _softwareSkinning )
 		{
 			Resource *clonedRes =  Modules::resMan().resolveResHandle(
-				Modules::resMan().cloneResource( _geometryRes->getHandle(), "" ) );
+				Modules::resMan().cloneResource( res->getHandle(), "" ) );
 			_geometryRes = (GeometryResource *)clonedRes;
 			_baseGeoRes = (GeometryResource *)res;
 		}
@@ -352,8 +352,16 @@ bool ModelNode::setParami( int param, int value )
 		return true;
 	case ModelNodeParams::SoftwareSkinning:
 		_softwareSkinning = (value != 0);
-		if( _geometryRes != 0x0 ) setParami( ModelNodeParams::GeometryRes, _geometryRes->getHandle() );
+
+		if( _softwareSkinning && _baseGeoRes == 0x0 && _geometryRes != 0x0 )
+			// Create a local resource copy since it is not yet existing
+			setParami( ModelNodeParams::GeometryRes, _geometryRes->getHandle() );
+		else if( !_softwareSkinning && _morphers.empty() && _baseGeoRes != 0x0 )
+			// Remove the local resource copy by removing reference
+			setParami( ModelNodeParams::GeometryRes, _baseGeoRes->getHandle() );
+
 		return true;
+
 	default:
 		return SceneNode::setParami( param, value );
 	}

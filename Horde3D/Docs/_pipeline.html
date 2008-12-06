@@ -655,7 +655,8 @@ rendering emitters.
 <p>
 The vertex position is available through the attribute <b>gl_Vertex</b>.
 The camera transformation is stored in the modelview matrix (<b>gl_ModelViewMatrix</b>) and the projection
-matrix in <b>gl_ProjectionMatrix</b>. All overlays have their texture coordinates stored in
+matrix in <b>gl_ProjectionMatrix</b>. The camera transformation is also available when rendering a fullscreen
+quad (e.g. for post-processing effects).All overlays have their texture coordinates stored in
 <b>gl_MultiTexCoord0</b>.
 <br /><br />
 

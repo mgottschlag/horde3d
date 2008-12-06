@@ -107,7 +107,7 @@ class ModelNode : public SceneNode
 protected:
 
 	PGeometryResource             _geometryRes;
-	PGeometryResource             _baseGeoRes;
+	PGeometryResource             _baseGeoRes;	// NULL if model does not have a private geometry copy
 	std::vector< Vec4f >          _skinMatRows;
 	
 	uint32                        _animTimeStamp;

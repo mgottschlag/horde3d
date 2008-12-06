@@ -170,6 +170,8 @@ Texture2DResource::Texture2DResource( const string &name, int flags,
 	Resource( ResourceTypes::Texture2D, name, flags ), _rendBuf(0x0),
 	_width(width), _height(height), _comps(4), _hdr(false)
 {	
+	_loaded = true;
+	
 	if( !renderable )
 	{
 		_texObject = Modules::renderer().uploadTexture2D( 0x0, _width, _height, _comps, _hdr,
@@ -180,7 +182,6 @@ Texture2DResource::Texture2DResource( const string &name, int flags,
 	}
 	else
 	{
-		_loaded = true;
 		_rendBuf = new RenderBuffer();
 		*_rendBuf = Modules::renderer().createRenderBuffer(
 			width, height, RenderBufferFormats::RGBA8, false, 1, !(_flags & ResourceFlags::NoTexFiltering), 0 ); 
