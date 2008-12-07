@@ -27,6 +27,7 @@
 #include "utXMLParser.h"
 #include "utPlatform.h"
 #include <sstream>
+#include <fstream>
 
 #include "utDebug.h"
 
@@ -61,12 +62,28 @@ Resource *CodeResource::clone()
 
 void CodeResource::initDefault()
 {
-	_code = "";
+	_code.clear();
 }
 
 
 void CodeResource::release()
 {
+	for( uint32 i = 0; i < _includes.size(); ++i )
+	{
+		_includes[i].first = 0x0;
+	}
+}
+
+
+bool CodeResource::raiseError( const std::string &msg )
+{
+	// Reset
+	release();
+	initDefault();
+	
+	Modules::log().writeError( "Code resource '%s': %s", _name.c_str(), msg.c_str() );
+
+	return false;
 }
 
 
@@ -74,13 +91,128 @@ bool CodeResource::load( const char *data, int size )
 {
 	if( !Resource::load( data, size ) ) return false;
 
-	_code.reserve( size );
-	_code = data;
+	char *code = new char[size+1];
+	char *pCode = code;
+	const char *pData = data;
+	const char *eof = data + size;
+	
+	bool lineComment = false, blockComment = false;
+	
+	// Parse code
+	while( pData < eof )
+	{
+		// Check for begin of comment
+		if( pData < eof - 1 && !lineComment && !blockComment )
+		{
+			if( *pData == '/' && *(pData+1) == '/' )
+				lineComment = true;
+			else if( *pData == '/' &&  *(pData+1) == '*' )
+				blockComment = true;
+		}
+
+		// Check for end of comment
+		if( lineComment && (*pData == '\n' || *pData == '\r') )
+			lineComment = false;
+		else if( blockComment && pData < eof - 1 && *pData == '*' && *(pData+1) == '/' )
+			blockComment = false;
+
+		// Check for includes
+		if( !lineComment && !blockComment && pData < eof - 7 )
+		{
+			if( *pData == '#' && *(pData+1) == 'i' && *(pData+2) == 'n' && *(pData+3) == 'c' &&
+			    *(pData+4) == 'l' && *(pData+5) == 'u' && *(pData+6) == 'd' && *(pData+7) == 'e' )
+			{
+				pData += 6;
+				
+				// Parse resource name
+				const char *nameBegin = 0x0, *nameEnd = 0x0;
+				
+				while( ++pData < eof )
+				{
+					if( *pData == '"' )
+					{
+						if( nameBegin == 0x0 )
+							nameBegin = pData+1;
+						else
+							nameEnd = pData;
+					}
+					else if( *pData == '\n' || *pData == '\r' ) break;
+				}
+
+				if( nameBegin != 0x0 && nameEnd != 0x0 )
+				{
+					std::string resName( nameBegin, nameEnd );
+					
+					ResHandle res =  Modules::resMan().addResource(
+						ResourceTypes::Code, resName, 0, false );
+					CodeResource *codeRes = (CodeResource *)Modules::resMan().resolveResHandle( res );
+					_includes.push_back( std::pair< PCodeResource, size_t >( codeRes, pCode - code ) );
+				}
+				else
+				{
+					delete[] code;
+					return raiseError( "Invalid #include syntax" );
+				}
+			}
+		}
+
+		*pCode++ = *pData++;
+	}
+
+	*pCode = '\0';
+	_code = code;
+	delete[] code;
 
 	// Compile shaders that require this code block
 	updateShaders();
 
 	return true;
+}
+
+
+bool CodeResource::hasDependency( CodeResource *codeRes )
+{
+	// Note: There is no check for cycles
+	
+	if( codeRes == this ) return true;
+	
+	for( uint32 i = 0; i < _includes.size(); ++i )
+	{
+		if( _includes[i].first->hasDependency( codeRes ) ) return true;
+	}
+	
+	return false;
+}
+
+
+bool CodeResource::isComplete()
+{
+	if( !_loaded ) return false;
+	
+	for( uint32 i = 0; i < _includes.size(); ++i )
+	{
+		if( !_includes[i].first->isComplete() ) return false;
+	}
+
+	return true;
+}
+
+
+std::string CodeResource::assembleCode()
+{
+	if( !_loaded ) return "";
+
+	std::string finalCode = _code;
+	uint32 offset = 0;
+	
+	for( uint32 i = 0; i < _includes.size(); ++i )
+	{
+		std::string &depCode = _includes[i].first->assembleCode();
+		finalCode.insert( _includes[i].second + offset, depCode );
+		offset += (uint32)depCode.length();
+	}
+
+	return finalCode;
 }
 
 
@@ -99,16 +231,13 @@ void CodeResource::updateShaders()
 			{
 				ShaderContext &sc = shaderRes->getContexts()[j];
 
-				for( uint32 k = 0; k < sc.vertShaderFracts.size(); ++k )
+				if( sc.vertCode->hasDependency( this ) || sc.fragCode->hasDependency( this ) )
 				{
-					if( sc.vertShaderFracts[k].refCodeRes == this ) sc.compiled = false;
-				}
-				for( uint32 k = 0; k < sc.fragShaderFracts.size(); ++k )
-				{
-					if( sc.fragShaderFracts[k].refCodeRes == this ) sc.compiled = false;
+					sc.compiled = false;
 				}
 			}
 			
+			// Recompile shaders
 			shaderRes->compileShaders();
 		}
 	}
@@ -121,6 +250,8 @@ void CodeResource::updateShaders()
 
 string ShaderResource::_vertPreamble = "";
 string ShaderResource::_fragPreamble = "";
+string ShaderResource::_tmpCode0 = "";
+string ShaderResource::_tmpCode1 = "";
 
 
 ShaderResource::ShaderResource( const string &name, int flags ) :
@@ -167,41 +298,33 @@ bool ShaderResource::raiseError( const string &msg, int line )
 }
 
 
-bool ShaderResource::parseCode( XMLNode &node, vector< ShaderCodeFract > &codeFracts )
+bool ShaderResource::parseCode( XMLNode &node, std::string &code )
 {
+	code = "";
+	
 	int nodeItr1 = 0;
 	XMLNode node1 = node.getChildNode( nodeItr1 );
 	while( !node1.isEmpty() && node1.getName() != 0x0 )
 	{
 		if( strcmp( node1.getName(), "DefCode" ) == 0 )
 		{
-			ShaderCodeFract codeFract;
 			// Find CDATA
 			for( int i = 0; i < node1.nClear(); ++i )
 			{
 				if( strcmp( node1.getClear( i ).lpszOpenTag, "<![CDATA[" ) == 0 )
 				{
-					codeFract.code = node1.getClear().lpszValue;
+					code += node1.getClear().lpszValue;
 					break;
 				}
 			}
-			codeFracts.push_back( codeFract );
 		}
 		else if( strcmp( node1.getName(), "InsCode" ) == 0 )
 		{
 			if( node1.getAttribute( "code" ) == 0x0 ) return false;
 		
-			ShaderCodeFract codeFract;
-			
-			uint32 id = Modules::resMan().addResource(
-				ResourceTypes::Code, node1.getAttribute( "code" ), 0, false );
-
-			Resource *res = Modules::resMan().resolveResHandle( id );
-			if( res != 0x0 )
-			{	
-				codeFract.refCodeRes = (CodeResource *)res;
-				codeFracts.push_back( codeFract );
-			}
+			code += "\r\n#include \"";
+			code += node1.getAttribute( "code" );
+			code += "\"\r\n";
 		}
 
 		node1 = node.getChildNode( ++nodeItr1 );
@@ -259,15 +382,26 @@ bool ShaderResource::load( const char *data, int size )
 				sc.blendMode = BlendModes::Replace;
 		}
 		
-		// Code 
+		// Create vertex shader code resource
 		node2 = node1.getChildNode( "VertexShader" );
 		if( node2.isEmpty() ) return raiseError( "Missing VertexShader node in Context '" + sc.id + "'" );
-		if( !parseCode( node2, sc.vertShaderFracts ) ) return raiseError( "Error in VertexShader node of Context '" + sc.id + "'" );
-
+		if( !parseCode( node2, _tmpCode0 ) ) return raiseError( "Error in VertexShader node of Context '" + sc.id + "'" );
+		
+		ResHandle res = Modules::resMan().addResource(
+			ResourceTypes::Code, _name + ":VS_" + sc.id, 0, false );
+		sc.vertCode = (CodeResource *)Modules::resMan().resolveResHandle( res );
+		sc.vertCode->load( _tmpCode0.c_str(), (uint32)_tmpCode0.length() );
+		
+		// Create fragment shader code resource
 		node2 = node1.getChildNode( "FragmentShader" );
-		if( node2.isEmpty() ) return raiseError( "Missing VertexShader node in Context '" + sc.id + "'" );
-		if( !parseCode( node2, sc.fragShaderFracts ) ) return raiseError( "Error in FragmentShader node of Context '" + sc.id + "'" );
+		if( node2.isEmpty() ) return raiseError( "Missing FragmentShader node in Context '" + sc.id + "'" );
+		if( !parseCode( node2, _tmpCode0 ) ) return raiseError( "Error in FragmentShader node of Context '" + sc.id + "'" );
 
+		res = Modules::resMan().addResource(
+			ResourceTypes::Code, _name + ":FS_" + sc.id, 0, false );
+		sc.fragCode = (CodeResource *)Modules::resMan().resolveResHandle( res );
+		sc.fragCode->load( _tmpCode0.c_str(), (uint32)_tmpCode0.length() );
+ 
 		_contexts.push_back( sc );
 		
 		node1 = rootNode.getChildNode( "Context", ++nodeItr1 );
@@ -287,56 +421,14 @@ void ShaderResource::compileShaders()
 
 		if( !sc.compiled )
 		{
-			// Check if all referenced code blocks are available
-			bool allAvailbale = true;
-			for( uint32 j = 0; j < sc.vertShaderFracts.size(); ++j )
-			{
-				if( sc.vertShaderFracts[j].refCodeRes != 0x0 && !sc.vertShaderFracts[j].refCodeRes->isLoaded() )
-				{
-					allAvailbale = false;
-					break;
-				}
-			}
-			if( !allAvailbale ) continue;
-			
-			for( uint32 j = 0; j < sc.fragShaderFracts.size(); ++j )
-			{
-				if( sc.fragShaderFracts[j].refCodeRes != 0x0 && !sc.fragShaderFracts[j].refCodeRes->isLoaded() )
-				{
-					allAvailbale = false;
-					break;
-				}
-			}
-			if( !allAvailbale ) continue;
-						
-			// Assemble shader
-			stringstream vertCode, fragCode;
-			
-			vertCode << "#line 0\n" << _vertPreamble << "\n";
-			for( uint32 j = 0; j < sc.vertShaderFracts.size(); ++j )
-			{
-				vertCode << "#line " << (j + 1) * 1000 << "\n";
-				
-				if( !sc.vertShaderFracts[j].refCodeRes != 0x0 )
-					vertCode << sc.vertShaderFracts[j].code;
-				else
-					vertCode << sc.vertShaderFracts[j].refCodeRes->getCode();
+			if( !sc.vertCode->isComplete() || !sc.fragCode->isComplete() ) continue;
 
-				vertCode << "\n";
-			}
-			
-			fragCode << "#line 0\n" << _fragPreamble << "\n";
-			for( uint32 j = 0; j < sc.fragShaderFracts.size(); ++j )
-			{
-				fragCode << "#line " << (j + 1) * 1000 << "\n";
-				
-				if( !sc.fragShaderFracts[j].refCodeRes != 0x0 )
-					fragCode << sc.fragShaderFracts[j].code;
-				else
-					fragCode << sc.fragShaderFracts[j].refCodeRes->getCode();
-
-				fragCode << "\n";
-			}
+			_tmpCode0 = _vertPreamble;
+			_tmpCode0 += "\r\n";
+			_tmpCode0 += sc.vertCode->assembleCode();
+			_tmpCode1 = _vertPreamble;
+			_tmpCode1 += "\r\n";
+			_tmpCode1 += sc.fragCode->assembleCode();
 			
 			// Compile shader
 			Modules::log().writeInfo( "Shader resource '%s': Compiling shader context '%s'", _name.c_str(), sc.id.c_str() );
@@ -346,8 +438,19 @@ void ShaderResource::compileShaders()
 				sc.shaderObject = 0;
 			}
 			
-			if( !Modules::renderer().uploadShader( vertCode.str().c_str(), fragCode.str().c_str(), sc ) )
+			if( !Modules::renderer().uploadShader( _tmpCode0.c_str(), _tmpCode1.c_str(), sc ) )
+			{
 				Modules::log().writeError( "Shader resource '%s': Failed to compile shader context '%s'", _name.c_str(), sc.id.c_str() );
+
+				if( Modules::config().dumpFailedShaders )
+				{
+					std::ofstream out0( "shdDumpVS.txt", ios::binary ), out1( "shdDumpFS.txt", ios::binary );
+					if( out0.good() ) out0 << _tmpCode0;
+					if( out1.good() ) out1 << _tmpCode1;
+					out0.close();
+					out1.close();
+				}
+			}
 
 			if( Modules::renderer().getShaderLog() != "" )
 				Modules::log().writeInfo( "Shader resource '%s': ShaderLog: %s", _name.c_str(), Modules::renderer().getShaderLog().c_str() );

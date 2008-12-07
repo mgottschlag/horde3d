@@ -82,15 +82,18 @@ struct Uniform
 
 // =================================================================================================
 
+class MaterialResource;
+typedef SmartResPtr< MaterialResource > PMaterialResource;
+
 class MaterialResource : public Resource
 {
 private:
 
-	PShaderResource                  _shaderRes;
-	std::string                      _class;
-	std::vector< TexUnit >           _texUnits;
-	std::vector< Uniform >           _uniforms;
-	SmartResPtr< MaterialResource >  _matLink;	
+	PShaderResource         _shaderRes;
+	std::string             _class;
+	std::vector< TexUnit >  _texUnits;
+	std::vector< Uniform >  _uniforms;
+	PMaterialResource       _matLink;	
 
 	ResHandle getTexUnit( int unit );
 	bool setTexUnit( int unit, ResHandle texRes );
@@ -120,7 +123,5 @@ public:
 	friend class Renderer;
 	friend class MeshNode;
 };
-
-typedef SmartResPtr< MaterialResource > PMaterialResource;
 
 #endif // _egMaterial_H_

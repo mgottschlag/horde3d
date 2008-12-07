@@ -35,12 +35,17 @@ struct XMLNode;
 // Code Resource
 // =================================================================================================
 
+class CodeResource;
+typedef SmartResPtr< CodeResource > PCodeResource;
+
 class CodeResource : public Resource
 {
 private:
 	
-	std::string  _code;
+	std::string                                        _code;
+	std::vector< std::pair< PCodeResource, size_t > >  _includes;	// Pair: Included res and location in _code
 
+	bool raiseError( const std::string &msg );
 	void updateShaders();
 
 public:
@@ -56,13 +61,15 @@ public:
 	void release();
 	bool load( const char *data, int size );
 
+	bool hasDependency( CodeResource *codeRes );
+	bool isComplete();
+	std::string assembleCode();
+
 	bool isLoaded() { return _loaded; }
 	const std::string &getCode() { return _code; }
 
 	friend class Renderer;
 };
-
-typedef SmartResPtr< CodeResource > PCodeResource;
 
 
 // =================================================================================================
@@ -117,7 +124,7 @@ struct ShaderContext
 	// Custom uniforms
 	std::map< std::string, int >    customUniforms;
 
-	std::vector< ShaderCodeFract >  vertShaderFracts, fragShaderFracts;
+	PCodeResource                   vertCode, fragCode;
 	bool                            compiled;
 
 
@@ -129,6 +136,12 @@ struct ShaderContext
 		writeDepth = true;
 		blendMode = BlendModes::Replace;
 	}
+
+	~ShaderContext()
+	{
+		vertCode = 0x0;
+		fragCode = 0x0;
+	}
 };
 
 // =================================================================================================
@@ -138,11 +151,12 @@ class ShaderResource : public Resource
 private:
 	
 	static std::string            _vertPreamble, _fragPreamble;
+	static std::string            _tmpCode0, _tmpCode1;
 	
 	std::vector< ShaderContext >  _contexts;
 
 	bool raiseError( const std::string &msg, int line = -1 );
-	bool parseCode( XMLNode &node, std::vector< ShaderCodeFract > &codeFracts );
+	bool parseCode( XMLNode &node, std::string &code );
 
 public:
 	

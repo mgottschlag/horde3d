@@ -90,6 +90,8 @@ struct EngineOptions
 		WireframeMode		- Enables or disables wireframe rendering
 		DebugViewMode		- Enables or disables debug view where geometry is rendered in wireframe without shaders and
 							  lights are visualized using their screen space bounding box. (Values: 0, 1; Default: 0)
+		DumpFailedShaders	- Enables or disables storing of shader code that failed to compile in a text file; this can be
+							  useful in combination with the line numbers given back by the shader compiler. (Values: 0, 1; Default: 0)
 	*/
 	enum List
 	{
@@ -103,7 +105,8 @@ struct EngineOptions
 		ShadowMapSize,
 		SampleCount,
 		WireframeMode,
-		DebugViewMode
+		DebugViewMode,
+		DumpFailedShaders
 	};
 };
 

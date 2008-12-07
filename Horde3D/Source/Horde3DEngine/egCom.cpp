@@ -46,6 +46,7 @@ EngineConfig::EngineConfig()
 	sampleCount = 0;
 	wireframeMode = false;
 	debugViewMode = false;
+	dumpFailedShaders = false;
 }
 
 
@@ -75,6 +76,8 @@ float EngineConfig::getOption( EngineOptions::List param )
 		return wireframeMode ? 1.0f : 0.0f;
 	case EngineOptions::DebugViewMode:
 		return debugViewMode ? 1.0f : 0.0f;
+	case EngineOptions::DumpFailedShaders:
+		return dumpFailedShaders ? 1.0f : 0.0f;
 	default:
 		return Math::NaN;
 	}
@@ -137,6 +140,9 @@ bool EngineConfig::setOption( EngineOptions::List param, float value )
 		return true;
 	case EngineOptions::DebugViewMode:
 		debugViewMode = (value != 0);
+		return true;
+	case EngineOptions::DumpFailedShaders:
+		dumpFailedShaders = (value != 0);
 		return true;
 	default:
 		return false;

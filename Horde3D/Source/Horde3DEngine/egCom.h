@@ -53,7 +53,8 @@ struct EngineOptions
 		ShadowMapSize,
 		SampleCount,
 		WireframeMode,
-		DebugViewMode
+		DebugViewMode,
+		DumpFailedShaders
 	};
 };
 
@@ -74,6 +75,7 @@ public:
 	bool  trilinearFiltering;
 	bool  wireframeMode;
 	bool  debugViewMode;
+	bool  dumpFailedShaders;
 
 
 	EngineConfig();
