@@ -156,7 +156,8 @@ private:
 	std::vector< ShaderContext >  _contexts;
 
 	bool raiseError( const std::string &msg, int line = -1 );
-	bool parseCode( XMLNode &node, std::string &code );
+	bool parseXMLCode( XMLNode &node, std::string &code );
+	bool parseFXSection( const char *data, bool oldFormat );
 
 public:
 	

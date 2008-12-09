@@ -298,7 +298,7 @@ bool ShaderResource::raiseError( const string &msg, int line )
 }
 
 
-bool ShaderResource::parseCode( XMLNode &node, std::string &code )
+bool ShaderResource::parseXMLCode( XMLNode &node, std::string &code )
 {
 	code = "";
 	
@@ -334,21 +334,18 @@ bool ShaderResource::parseCode( XMLNode &node, std::string &code )
 }
 
 
-bool ShaderResource::load( const char *data, int size )
+bool ShaderResource::parseFXSection( const char *data, bool oldFormat )
 {
-	if( !Resource::load( data, size ) ) return false;
-	if( data[size - 1] != '\0' )
-	{	
-		return raiseError( "Data block not NULL-terminated" );
-	}
-	
-	// Parse shader
+	// Parse FX
 	XMLResults res;
 	XMLNode rootNode = XMLNode::parseString( data, "Shader", &res );
 	if( res.error != eXMLErrorNone )
 	{
 		return raiseError( XMLNode::getError( res.error ), res.nLine );
 	}
+
+	if( oldFormat )
+		Modules::log().writeWarning( "Shader resource '%s': Deprecated old syntax, please consider converting to new format", _name.c_str() );
 	
 	int nodeItr1 = 0;
 	XMLNode node1 = rootNode.getChildNode( "Context", nodeItr1 );
@@ -382,30 +379,113 @@ bool ShaderResource::load( const char *data, int size )
 				sc.blendMode = BlendModes::Replace;
 		}
 		
-		// Create vertex shader code resource
-		node2 = node1.getChildNode( "VertexShader" );
-		if( node2.isEmpty() ) return raiseError( "Missing VertexShader node in Context '" + sc.id + "'" );
-		if( !parseCode( node2, _tmpCode0 ) ) return raiseError( "Error in VertexShader node of Context '" + sc.id + "'" );
-		
-		ResHandle res = Modules::resMan().addResource(
-			ResourceTypes::Code, _name + ":VS_" + sc.id, 0, false );
-		sc.vertCode = (CodeResource *)Modules::resMan().resolveResHandle( res );
-		sc.vertCode->load( _tmpCode0.c_str(), (uint32)_tmpCode0.length() );
-		
-		// Create fragment shader code resource
-		node2 = node1.getChildNode( "FragmentShader" );
-		if( node2.isEmpty() ) return raiseError( "Missing FragmentShader node in Context '" + sc.id + "'" );
-		if( !parseCode( node2, _tmpCode0 ) ) return raiseError( "Error in FragmentShader node of Context '" + sc.id + "'" );
+		if( oldFormat )
+		{
+			// Create vertex shader code resource
+			node2 = node1.getChildNode( "VertexShader" );
+			if( node2.isEmpty() ) return raiseError( "Missing VertexShader node in Context '" + sc.id + "'" );
+			if( !parseXMLCode( node2, _tmpCode0 ) ) return raiseError( "Error in VertexShader node of Context '" + sc.id + "'" );
+			
+			ResHandle res = Modules::resMan().addResource(
+				ResourceTypes::Code, _name + ":VS_" + sc.id, 0, false );
+			sc.vertCode = (CodeResource *)Modules::resMan().resolveResHandle( res );
+			sc.vertCode->load( _tmpCode0.c_str(), (uint32)_tmpCode0.length() );
+			
+			// Create fragment shader code resource
+			node2 = node1.getChildNode( "FragmentShader" );
+			if( node2.isEmpty() ) return raiseError( "Missing FragmentShader node in Context '" + sc.id + "'" );
+			if( !parseXMLCode( node2, _tmpCode0 ) ) return raiseError( "Error in FragmentShader node of Context '" + sc.id + "'" );
 
-		res = Modules::resMan().addResource(
-			ResourceTypes::Code, _name + ":FS_" + sc.id, 0, false );
-		sc.fragCode = (CodeResource *)Modules::resMan().resolveResHandle( res );
-		sc.fragCode->load( _tmpCode0.c_str(), (uint32)_tmpCode0.length() );
- 
+			res = Modules::resMan().addResource(
+				ResourceTypes::Code, _name + ":FS_" + sc.id, 0, false );
+			sc.fragCode = (CodeResource *)Modules::resMan().resolveResHandle( res );
+			sc.fragCode->load( _tmpCode0.c_str(), (uint32)_tmpCode0.length() );
+		}
+		else
+		{
+			node2 = node1.getChildNode( "Shaders" );
+			if( node2.isEmpty() ) return raiseError( "Missing Shaders node in Context '" + sc.id + "'" );
+
+			_tmpCode0 = _name + ":" + node2.getAttribute( "vertex", "" );
+			_tmpCode1 = _name + ":" + node2.getAttribute( "fragment", "" );
+			
+			sc.vertCode = (CodeResource *)Modules::resMan().findResource( ResourceTypes::Code, _tmpCode0.c_str() );
+			if( sc.vertCode == 0x0 )
+				return raiseError( "Context '" + sc.id + "' references undefined vertex shader code section" );
+			sc.fragCode = (CodeResource *)Modules::resMan().findResource( ResourceTypes::Code, _tmpCode1.c_str() );
+			if( sc.fragCode == 0x0 )
+				return raiseError( "Context '" + sc.id + "' references undefined fragment shader code section" );
+		}
+
 		_contexts.push_back( sc );
 		
 		node1 = rootNode.getChildNode( "Context", ++nodeItr1 );
 	}
+
+	return true;
+}
+
+
+bool ShaderResource::load( const char *data, int size )
+{
+	if( !Resource::load( data, size ) ) return false;
+	if( data[size - 1] != '\0' )
+	{	
+		return raiseError( "Data block not NULL-terminated" );
+	}
+	
+	// Parse sections
+	const char *pData = data;
+	_tmpCode1 = "";
+	
+	while( *pData != '\0' )
+	{
+		if( *pData++ == '[' && *pData++ == '[' )
+		{
+			// Parse section name
+			const char *sectionNameStart = pData;
+			while( *pData != ']' && *pData != '\n' && *pData != '\r' ) ++pData;
+			const char *sectionNameEnd = pData++;
+
+			// Check for correct closing of name
+			if( *pData++ != ']' ) return raiseError( "Error in section name" );
+			
+			// Parse content
+			const char *sectionContentStart = pData;
+			while( *pData != '\0' && *pData != '[' && *(pData+1) != '[' ) ++pData;
+			const char *sectionContentEnd = pData;
+			
+
+			if( sectionNameEnd - sectionNameStart == 2 &&
+			    *sectionNameStart == 'F' && *(sectionNameStart+1) == 'X' )
+			{
+				// Parse FX section
+				_tmpCode1 = "<Shader>";
+				_tmpCode1.append( sectionContentStart, sectionContentEnd );
+				_tmpCode1 += "</Shader>";
+			}
+			else
+			{
+				// Add section as code resource
+				_tmpCode0.assign( sectionNameStart, sectionNameEnd );
+				ResHandle res = Modules::resMan().addResource(
+					ResourceTypes::Code, _name + ":" + _tmpCode0, 0, false );
+				CodeResource *codeRes = (CodeResource *)Modules::resMan().resolveResHandle( res );
+				
+				_tmpCode0.assign( sectionContentStart, sectionContentEnd );
+				codeRes->load( _tmpCode0.c_str(), (uint32)_tmpCode0.length() );
+			}
+		}
+	}
+	
+	bool result;
+
+	if( !_tmpCode1.empty() )
+		result = parseFXSection( _tmpCode1.c_str(), false );
+	else
+		result = parseFXSection( data, true );
+
+	if( !result ) return false;
 
 	compileShaders();
 	
