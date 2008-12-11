@@ -1,5 +1,6 @@
 <Material>
-	<Shader source="skinning.shader.xml" />
+	<Shader source="model.shader" />
+	<ShaderFlag name="_F01_Skinning" />
 
 	<TexUnit unit="0" map="civil01.jpg" />
 </Material>
