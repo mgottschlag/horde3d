@@ -903,7 +903,7 @@ The file format is based on streams. The streams are written in that order:
 				</tr>
 				<tr>
 					<td><b>jointIndices</b></td>
-					<td>4 <b>unsigned char</b>s</td>
+					<td>#V * 4 <b>unsigned char</b>s</td>
 					<td>joint indices of current vertex (up to 4); a 0 means unused</td>
 				</tr>
             </table>
@@ -927,7 +927,7 @@ The file format is based on streams. The streams are written in that order:
 				</tr>
 				<tr>
 					<td><b>jointWeights</b></td>
-					<td>4 <b>unsigned char</b>s</td>
+					<td>#V * 4 <b>unsigned char</b>s</td>
 					<td>To save space joint weights are stored as <b>unsigned char</b>s. Before writing multiply your <b>float</b> with 255 and convert it then to <b>unsigned char</b></td>
 				</tr>
             </table>
