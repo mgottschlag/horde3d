@@ -62,8 +62,8 @@ const char *fsOccBox =
 	"}\n";
 
 
-ShaderContext Renderer::defColorShader;
-ShaderContext Renderer::occShader;
+ShaderCombination Renderer::defColorShader;
+ShaderCombination Renderer::occShader;
 
 
 Renderer::Renderer() : RendererBase()
@@ -307,9 +307,9 @@ void Renderer::unregisterOccSet( int occSet )
 }
 
 
-bool Renderer::uploadShader( const char *vertexShader, const char *fragmentShader, ShaderContext &sc )
+bool Renderer::uploadShader( const char *vertexShader, const char *fragmentShader, ShaderCombination &sc )
 {
-	// Create shader
+	// Create shader program
 	uint32 shaderId = loadShader( vertexShader, fragmentShader );
 	if( shaderId == 0 ) return false;
 	
@@ -420,7 +420,7 @@ bool Renderer::uploadShader( const char *vertexShader, const char *fragmentShade
 }
 
 
-void Renderer::setShader( ShaderContext *sc )
+void Renderer::setShader( ShaderCombination *sc )
 {
 	if( sc == 0x0 || sc->shaderObject == 0 )
 	{
@@ -443,34 +443,35 @@ bool Renderer::setMaterialRec( MaterialResource *materialRes, const string &shad
 	// Setup shader and render config (ignore shader for links)
 	if( firstRec && materialRes->_shaderRes != 0x0 )
 	{
-		ShaderContext *sc = materialRes->_shaderRes->findContext( shaderContext );
-		if( sc == 0x0 ) return false;
+		ShaderContext *context = materialRes->_shaderRes->findContext( shaderContext );
+		if( context == 0x0 ) return false;
 		
+		ShaderCombination *sc = materialRes->_shaderRes->getCombination( *context, materialRes->_combMask );
 		if( sc != _curShader ) setShader( sc );	
 
-		if( sc->writeDepth ) glDepthMask( GL_TRUE );
+		if( context->writeDepth ) glDepthMask( GL_TRUE );
 		else glDepthMask( GL_FALSE );
 
-		if( sc->blendMode == BlendModes::Replace )
+		if( context->blendMode == BlendModes::Replace )
 		{
 			glDisable( GL_BLEND );
 		}
-		else if( sc->blendMode == BlendModes::Blend )
+		else if( context->blendMode == BlendModes::Blend )
 		{
 			glEnable( GL_BLEND );
 			glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 		}
-		else if( sc->blendMode == BlendModes::Add )
+		else if( context->blendMode == BlendModes::Add )
 		{
 			glEnable( GL_BLEND );
 			glBlendFunc( GL_ONE, GL_ONE );
 		}
-		else if( sc->blendMode == BlendModes::AddBlended )
+		else if( context->blendMode == BlendModes::AddBlended )
 		{
 			glEnable( GL_BLEND );
 			glBlendFunc( GL_SRC_ALPHA, GL_ONE );
 		}
-		else if( sc->blendMode == BlendModes::Mult )
+		else if( context->blendMode == BlendModes::Mult )
 		{
 			glEnable( GL_BLEND );
 			glBlendFunc( GL_DST_COLOR, GL_ZERO );
@@ -1786,7 +1787,7 @@ void Renderer::drawModels( const string &shaderContext, const string &theClass, 
 			if( meshNode->getBatchStart() + meshNode->getBatchCount() > curGeoRes->_indices.size() )
 				continue;
 			
-			ShaderContext *prevShader = Modules::renderer().getCurShader();
+			ShaderCombination *prevShader = Modules::renderer().getCurShader();
 			
 			if( !debugView )
 			{
@@ -1798,7 +1799,7 @@ void Renderer::drawModels( const string &shaderContext, const string &theClass, 
 				Modules::renderer().setShader( &defColorShader );
 			}
 
-			ShaderContext *curShader = Modules::renderer().getCurShader();
+			ShaderCombination *curShader = Modules::renderer().getCurShader();
 
 			if( modelChanged || curShader != prevShader )
 			{
@@ -1957,7 +1958,7 @@ void Renderer::drawParticles( const string &shaderContext, const string &theClas
 			Modules::renderer().beginOccQuery( emitter->_occQueries[occSet] );
 		
 		// Shader uniforms
-		ShaderContext *curShader = Modules::renderer().getCurShader();
+		ShaderCombination *curShader = Modules::renderer().getCurShader();
 		if( curShader->uni_parCorners >= 0 ) glUniform3fv( curShader->uni_parCorners, 4, (float *)corners );
 
 		// Divide particles in batches and render them

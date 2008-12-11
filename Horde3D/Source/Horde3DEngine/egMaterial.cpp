@@ -59,6 +59,7 @@ Resource *MaterialResource::clone()
 void MaterialResource::initDefault()
 {
 	_shaderRes = 0x0;
+	_combMask = 0;
 	_matLink = 0x0;
 	_class = "";
 }
@@ -165,9 +166,21 @@ bool MaterialResource::load( const char *data, int size )
 			ResourceTypes::Material, rootNode.getAttribute( "link" ), 0, false );
 		_matLink = (MaterialResource *)Modules::resMan().resolveResHandle( mat );
 	}
+
+	// Shader Flags
+	int nodeItr1 = 0;
+	XMLNode node1 = rootNode.getChildNode( "ShaderFlag", nodeItr1 );
+	while( !node1.isEmpty() )
+	{
+		if( node1.getAttribute( "name" ) == 0x0 ) return raiseError( "Missing ShaderFlag attribute 'name'" );
+		
+		_shaderFlags.push_back( node1.getAttribute( "name" ) );
+		
+		node1 = rootNode.getChildNode( "ShaderFlag", ++nodeItr1 );
+	}
     
     // Shader
-	XMLNode node1 = rootNode.getChildNode( "Shader" );
+	node1 = rootNode.getChildNode( "Shader" );
 	if( !node1.isEmpty() )
 	{
 		if( node1.getAttribute( "source" ) == 0x0 ) return raiseError( "Missing Shader attribute 'source'" );
@@ -175,10 +188,13 @@ bool MaterialResource::load( const char *data, int size )
 		uint32 shader = Modules::resMan().addResource(
 				ResourceTypes::Shader, node1.getAttribute( "source" ), 0, false );
 		_shaderRes = (ShaderResource *)Modules::resMan().resolveResHandle( shader );
+
+		_combMask = ShaderResource::calcCombMask( _shaderFlags );
+		_shaderRes->preLoadCombination( _combMask );
 	}
 
 	// Texture units
-	int nodeItr1 = 0;
+	nodeItr1 = 0;
 	node1 = rootNode.getChildNode( "TexUnit", nodeItr1 );
 	while( !node1.isEmpty() )
 	{

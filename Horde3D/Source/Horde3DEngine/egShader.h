@@ -27,6 +27,7 @@
 
 #include "egPrerequisites.h"
 #include "egResource.h"
+#include <set>
 
 struct XMLNode;
 
@@ -42,6 +43,7 @@ class CodeResource : public Resource
 {
 private:
 	
+	uint32                                             _flagMask;
 	std::string                                        _code;
 	std::vector< std::pair< PCodeResource, size_t > >  _includes;	// Pair: Included res and location in _code
 
@@ -62,7 +64,7 @@ public:
 	bool load( const char *data, int size );
 
 	bool hasDependency( CodeResource *codeRes );
-	bool isComplete();
+	bool tryLinking( uint32 *flagMask );
 	std::string assembleCode();
 
 	bool isLoaded() { return _loaded; }
@@ -75,13 +77,6 @@ public:
 // =================================================================================================
 // Shader Resource
 // =================================================================================================
-
-struct ShaderCodeFract
-{
-	PCodeResource  refCodeRes;
-	std::string    code;
-};
-
 
 struct BlendModes
 {
@@ -96,16 +91,13 @@ struct BlendModes
 };
 
 
-struct ShaderContext
+struct ShaderCombination
 {
-	std::string                     id;
+	uint32                          combMask;
+	
 	uint32                          shaderObject;
 	uint32                          lastUpdateStamp;
-	
-	// RenderConfig
-	BlendModes::List                blendMode;
-	bool                            writeDepth;
-	
+
 	// Engine uniform and attribute locations
 	int                             uni_frameBufSize;
 	int                             uni_texs[12];
@@ -124,17 +116,32 @@ struct ShaderContext
 	// Custom uniforms
 	std::map< std::string, int >    customUniforms;
 
-	PCodeResource                   vertCode, fragCode;
-	bool                            compiled;
 
-
-	ShaderContext()
+	ShaderCombination() :
+		combMask( 0 ), shaderObject( 0 ), lastUpdateStamp( 0 )
 	{
-		compiled = false;
-		shaderObject = 0;
-		lastUpdateStamp = 0;
-		writeDepth = true;
-		blendMode = BlendModes::Replace;
+	}
+};
+
+
+struct ShaderContext
+{
+	std::string                       id;
+	uint32                            flagMask;
+	
+	// RenderConfig
+	BlendModes::List                  blendMode;
+	bool                              writeDepth;
+	
+	// Shaders
+	std::vector< ShaderCombination >  shaderCombs;
+	PCodeResource                     vertCode, fragCode;
+	bool                              compiled;
+
+
+	ShaderContext() :
+		compiled( false ), writeDepth( true ), blendMode( BlendModes::Replace )
+	{
 	}
 
 	~ShaderContext()
@@ -154,10 +161,12 @@ private:
 	static std::string            _tmpCode0, _tmpCode1;
 	
 	std::vector< ShaderContext >  _contexts;
+	std::set< uint32 >            _preLoadList;
 
 	bool raiseError( const std::string &msg, int line = -1 );
 	bool parseXMLCode( XMLNode &node, std::string &code );
 	bool parseFXSection( const char *data, bool oldFormat );
+	void compileCombination( ShaderContext &context, ShaderCombination &sc );
 
 public:
 	
@@ -166,6 +175,8 @@ public:
 
 	static void setPreambles( const std::string &vertPreamble, const std::string &fragPreamble )
 		{ _vertPreamble = vertPreamble; _fragPreamble = fragPreamble; }
+
+	static uint32 calcCombMask( const std::vector< std::string > &flags );
 	
 	ShaderResource( const std::string &name, int flags );
 	~ShaderResource();
@@ -173,7 +184,9 @@ public:
 	void initDefault();
 	void release();
 	bool load( const char *data, int size );
-	void compileShaders();
+	void preLoadCombination( uint32 combMask );
+	void compileContexts();
+	ShaderCombination *getCombination( ShaderContext &context, uint32 combMask );
 
 	ShaderContext *findContext( const std::string &name )
 	{

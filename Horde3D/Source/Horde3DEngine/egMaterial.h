@@ -89,11 +89,13 @@ class MaterialResource : public Resource
 {
 private:
 
-	PShaderResource         _shaderRes;
-	std::string             _class;
-	std::vector< TexUnit >  _texUnits;
-	std::vector< Uniform >  _uniforms;
-	PMaterialResource       _matLink;	
+	PShaderResource             _shaderRes;
+	uint32                      _combMask;
+	std::string                 _class;
+	std::vector< TexUnit >      _texUnits;
+	std::vector< Uniform >      _uniforms;
+	std::vector< std::string >  _shaderFlags;
+	PMaterialResource           _matLink;	
 
 	ResHandle getTexUnit( int unit );
 	bool setTexUnit( int unit, ResHandle texRes );

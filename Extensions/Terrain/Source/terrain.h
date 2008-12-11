@@ -120,7 +120,7 @@ namespace Horde3DTerrain
 
 	public:
 
-		static ShaderContext debugViewShader;
+		static ShaderCombination debugViewShader;
 		
 		~TerrainNode();
 

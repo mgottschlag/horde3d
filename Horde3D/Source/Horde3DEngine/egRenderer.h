@@ -120,7 +120,7 @@ protected:
 	CameraNode              *_curCamera;
 	LightNode               *_curLight;
 	MaterialResource        *_curMatRes;
-	ShaderContext           *_curShader;
+	ShaderCombination       *_curShader;
 	RenderTarget            *_curRenderTarget;
 	Frustum                 _camFrustum, _lightFrustum;
 	uint32                  _curUpdateStamp;
@@ -163,8 +163,8 @@ protected:
 
 public:
 	
-	static ShaderContext  defColorShader;
-	static ShaderContext  occShader;
+	static ShaderCombination  defColorShader;
+	static ShaderCombination  occShader;
 	
 	Renderer();
 	~Renderer();
@@ -180,8 +180,8 @@ public:
 	int registerOccSet();
 	void unregisterOccSet( int occSet );
 
-	bool uploadShader( const char *vertexShader, const char *fragmentShader, ShaderContext &sc );
-	void setShader( ShaderContext *sc );
+	bool uploadShader( const char *vertexShader, const char *fragmentShader, ShaderCombination &sc );
+	void setShader( ShaderCombination *sc );
 	bool setMaterial( MaterialResource *materialRes, const std::string &shaderContext );
 	
 	bool createShadowBuffer( uint32 width, uint32 height );
@@ -194,7 +194,7 @@ public:
 	uint32 getFrameID() { return _frameID; }
 	uint32 getVPWidth() { return _vpWidth; }
 	uint32 getVPHeight() { return _vpHeight; }
-	ShaderContext *getCurShader() { return _curShader; }
+	ShaderCombination *getCurShader() { return _curShader; }
 	CameraNode *getCurCamera() { return _curCamera; }
 	uint32 getParticleVBO() { return _particleVBO; }
 

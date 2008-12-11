@@ -62,6 +62,7 @@ Resource *CodeResource::clone()
 
 void CodeResource::initDefault()
 {
+	_flagMask = 0;
 	_code.clear();
 }
 
@@ -156,6 +157,24 @@ bool CodeResource::load( const char *data, int size )
 			}
 		}
 
+		// Check for flags
+		if( !lineComment && !blockComment && pData < eof - 4 )
+		{
+			if( *pData == '_' && *(pData+1) == 'F' && *(pData+4) == '_' &&
+			    *(pData+2) >= 48 && *(pData+2) <= 57 && *(pData+3) >= 48 && *(pData+3) <= 57 )
+			{
+				// Set flag
+				uint32 num = (*(pData+2) - 48) * 10 + (*(pData+3) - 48);
+				_flagMask |= 1 << (num - 1);
+				
+				for( uint32 i = 0; i < 5; ++i ) *pCode++ = *pData++;
+				
+				// Ignore rest of name
+				while( pData < eof && *pData != ' ' && *pData != '\t' && *pData != '\n' && *pData != '\r' )
+					++pData;
+			}
+		}
+
 		*pCode++ = *pData++;
 	}
 
@@ -185,13 +204,14 @@ bool CodeResource::hasDependency( CodeResource *codeRes )
 }
 
 
-bool CodeResource::isComplete()
+bool CodeResource::tryLinking( uint32 *flagMask )
 {
 	if( !_loaded ) return false;
+	if( flagMask != 0x0 ) *flagMask |= _flagMask;
 	
 	for( uint32 i = 0; i < _includes.size(); ++i )
 	{
-		if( !_includes[i].first->isComplete() ) return false;
+		if( !_includes[i].first->tryLinking( flagMask ) ) return false;
 	}
 
 	return true;
@@ -229,16 +249,16 @@ void CodeResource::updateShaders()
 			// Mark shaders using this code as uncompiled
 			for( uint32 j = 0; j < shaderRes->getContexts().size(); ++j )
 			{
-				ShaderContext &sc = shaderRes->getContexts()[j];
+				ShaderContext &con = shaderRes->getContexts()[j];
 
-				if( sc.vertCode->hasDependency( this ) || sc.fragCode->hasDependency( this ) )
+				if( con.vertCode->hasDependency( this ) || con.fragCode->hasDependency( this ) )
 				{
-					sc.compiled = false;
+					con.compiled = false;
 				}
 			}
 			
 			// Recompile shaders
-			shaderRes->compileShaders();
+			shaderRes->compileContexts();
 		}
 	}
 }
@@ -276,10 +296,14 @@ void ShaderResource::release()
 {
 	for( uint32 i = 0; i < _contexts.size(); ++i )
 	{
-		Modules::renderer().unloadShader( _contexts[i].shaderObject );
+		for( uint32 j = 0; j < _contexts[i].shaderCombs.size(); ++j )
+		{
+			Modules::renderer().unloadShader( _contexts[i].shaderCombs[j].shaderObject );
+		}
 	}
 
 	_contexts.clear();
+	//_preLoadList.clear();
 }
 
 
@@ -336,7 +360,7 @@ bool ShaderResource::parseXMLCode( XMLNode &node, std::string &code )
 
 bool ShaderResource::parseFXSection( const char *data, bool oldFormat )
 {
-	// Parse FX
+	// Parse FX section
 	XMLResults res;
 	XMLNode rootNode = XMLNode::parseString( data, "Shader", &res );
 	if( res.error != eXMLErrorNone )
@@ -347,15 +371,16 @@ bool ShaderResource::parseFXSection( const char *data, bool oldFormat )
 	if( oldFormat )
 		Modules::log().writeWarning( "Shader resource '%s': Deprecated old syntax, please consider converting to new format", _name.c_str() );
 	
+	// Parse contexts
 	int nodeItr1 = 0;
 	XMLNode node1 = rootNode.getChildNode( "Context", nodeItr1 );
 	while( !node1.isEmpty() )
 	{
 		if( node1.getAttribute( "id" ) == 0x0 ) return raiseError( "Missing Context attribute 'id'" );
 		
-		ShaderContext sc;
+		ShaderContext context;
 
-		sc.id = node1.getAttribute( "id" );
+		context.id = node1.getAttribute( "id" );
 		
 		// Config
 		XMLNode node2 = node1.getChildNode( "RenderConfig" );
@@ -363,61 +388,61 @@ bool ShaderResource::parseFXSection( const char *data, bool oldFormat )
 		{
 			if( _stricmp( node2.getAttribute( "writeDepth", "true" ), "false" ) == 0 ||
 				_stricmp( node2.getAttribute( "writeDepth", "1" ), "0" ) == 0 )
-				sc.writeDepth = false;
+				context.writeDepth = false;
 			else
-				sc.writeDepth = true;
+				context.writeDepth = true;
 
 			if( _stricmp( node2.getAttribute( "blendMode", "REPLACE" ), "BLEND" ) == 0 )
-				sc.blendMode = BlendModes::Blend;
+				context.blendMode = BlendModes::Blend;
 			else if( _stricmp( node2.getAttribute( "blendMode", "REPLACE" ), "ADD" ) == 0 )
-				sc.blendMode = BlendModes::Add;
+				context.blendMode = BlendModes::Add;
 			else if( _stricmp( node2.getAttribute( "blendMode", "REPLACE" ), "ADD_BLENDED" ) == 0 )
-				sc.blendMode = BlendModes::AddBlended;
+				context.blendMode = BlendModes::AddBlended;
 			else if( _stricmp( node2.getAttribute( "blendMode", "REPLACE" ), "MULT" ) == 0 )
-				sc.blendMode = BlendModes::Mult;
+				context.blendMode = BlendModes::Mult;
 			else
-				sc.blendMode = BlendModes::Replace;
+				context.blendMode = BlendModes::Replace;
 		}
 		
 		if( oldFormat )
 		{
 			// Create vertex shader code resource
 			node2 = node1.getChildNode( "VertexShader" );
-			if( node2.isEmpty() ) return raiseError( "Missing VertexShader node in Context '" + sc.id + "'" );
-			if( !parseXMLCode( node2, _tmpCode0 ) ) return raiseError( "Error in VertexShader node of Context '" + sc.id + "'" );
+			if( node2.isEmpty() ) return raiseError( "Missing VertexShader node in Context '" + context.id + "'" );
+			if( !parseXMLCode( node2, _tmpCode0 ) ) return raiseError( "Error in VertexShader node of Context '" + context.id + "'" );
 			
 			ResHandle res = Modules::resMan().addResource(
-				ResourceTypes::Code, _name + ":VS_" + sc.id, 0, false );
-			sc.vertCode = (CodeResource *)Modules::resMan().resolveResHandle( res );
-			sc.vertCode->load( _tmpCode0.c_str(), (uint32)_tmpCode0.length() );
+				ResourceTypes::Code, _name + ":VS_" + context.id, 0, false );
+			context.vertCode = (CodeResource *)Modules::resMan().resolveResHandle( res );
+			context.vertCode->load( _tmpCode0.c_str(), (uint32)_tmpCode0.length() );
 			
 			// Create fragment shader code resource
 			node2 = node1.getChildNode( "FragmentShader" );
-			if( node2.isEmpty() ) return raiseError( "Missing FragmentShader node in Context '" + sc.id + "'" );
-			if( !parseXMLCode( node2, _tmpCode0 ) ) return raiseError( "Error in FragmentShader node of Context '" + sc.id + "'" );
+			if( node2.isEmpty() ) return raiseError( "Missing FragmentShader node in Context '" + context.id + "'" );
+			if( !parseXMLCode( node2, _tmpCode0 ) ) return raiseError( "Error in FragmentShader node of Context '" + context.id + "'" );
 
 			res = Modules::resMan().addResource(
-				ResourceTypes::Code, _name + ":FS_" + sc.id, 0, false );
-			sc.fragCode = (CodeResource *)Modules::resMan().resolveResHandle( res );
-			sc.fragCode->load( _tmpCode0.c_str(), (uint32)_tmpCode0.length() );
+				ResourceTypes::Code, _name + ":FS_" + context.id, 0, false );
+			context.fragCode = (CodeResource *)Modules::resMan().resolveResHandle( res );
+			context.fragCode->load( _tmpCode0.c_str(), (uint32)_tmpCode0.length() );
 		}
 		else
 		{
 			node2 = node1.getChildNode( "Shaders" );
-			if( node2.isEmpty() ) return raiseError( "Missing Shaders node in Context '" + sc.id + "'" );
+			if( node2.isEmpty() ) return raiseError( "Missing Shaders node in Context '" + context.id + "'" );
 
 			_tmpCode0 = _name + ":" + node2.getAttribute( "vertex", "" );
 			_tmpCode1 = _name + ":" + node2.getAttribute( "fragment", "" );
 			
-			sc.vertCode = (CodeResource *)Modules::resMan().findResource( ResourceTypes::Code, _tmpCode0.c_str() );
-			if( sc.vertCode == 0x0 )
-				return raiseError( "Context '" + sc.id + "' references undefined vertex shader code section" );
-			sc.fragCode = (CodeResource *)Modules::resMan().findResource( ResourceTypes::Code, _tmpCode1.c_str() );
-			if( sc.fragCode == 0x0 )
-				return raiseError( "Context '" + sc.id + "' references undefined fragment shader code section" );
+			context.vertCode = (CodeResource *)Modules::resMan().findResource( ResourceTypes::Code, _tmpCode0.c_str() );
+			if( context.vertCode == 0x0 )
+				return raiseError( "Context '" + context.id + "' references undefined vertex shader code section" );
+			context.fragCode = (CodeResource *)Modules::resMan().findResource( ResourceTypes::Code, _tmpCode1.c_str() );
+			if( context.fragCode == 0x0 )
+				return raiseError( "Context '" + context.id + "' references undefined fragment shader code section" );
 		}
 
-		_contexts.push_back( sc );
+		_contexts.push_back( context );
 		
 		node1 = rootNode.getChildNode( "Context", ++nodeItr1 );
 	}
@@ -487,55 +512,186 @@ bool ShaderResource::load( const char *data, int size )
 
 	if( !result ) return false;
 
-	compileShaders();
+	compileContexts();
 	
 	return true;
 }
 
 
-void ShaderResource::compileShaders()
+void ShaderResource::preLoadCombination( uint32 combMask )
+{
+	if( !_loaded )
+	{
+		_preLoadList.insert( combMask );
+	}
+	else
+	{
+		for( uint32 i = 0; i < _contexts.size(); ++i )
+		{
+			if( getCombination( _contexts[i], combMask ) == 0x0 )
+				_preLoadList.insert( combMask );
+		}
+	}
+}
+
+
+void ShaderResource::compileCombination( ShaderContext &context, ShaderCombination &sc )
+{
+	uint32 combMask = sc.combMask;
+	
+	// Add preamble
+	_tmpCode0 = _vertPreamble;
+	_tmpCode1 = _fragPreamble;
+
+	// Insert defines for flags
+	if( combMask != 0 )
+	{
+		_tmpCode0 += "\r\n// ---- Flags ----\r\n";
+		_tmpCode1 += "\r\n// ---- Flags ----\r\n";
+		for( uint32 i = 1; i <= 32; ++i )
+		{
+			if( combMask & (1 << (i-1)) )
+			{
+				_tmpCode0 += "#define _F";
+				_tmpCode0 += (char)(48 + i / 10);
+				_tmpCode0 += (char)(48 + i % 10);
+				_tmpCode0 += "_\r\n";
+				
+				_tmpCode1 += "#define _F";
+				_tmpCode1 += (char)(48 + i / 10);
+				_tmpCode1 += (char)(48 + i % 10);
+				_tmpCode1 += "_\r\n";
+			}
+		}
+		_tmpCode0 += "// ---------------\r\n";
+		_tmpCode1 += "// ---------------\r\n";
+	}
+
+	// Add actual shader code
+	_tmpCode0 += context.vertCode->assembleCode();
+	_tmpCode1 += context.fragCode->assembleCode();
+
+	
+	Modules::log().writeInfo( "---- C O M P I L I N G  . S H A D E R . %s@%s[%i] ----",
+		_name.c_str(), context.id.c_str(), sc.combMask );
+	
+	// Unload shader if necessary
+	if( sc.shaderObject != 0 )
+	{
+		Modules::renderer().unloadShader( sc.shaderObject );
+		sc.shaderObject = 0;
+	}
+	
+	// Compile shader
+	if( !Modules::renderer().uploadShader( _tmpCode0.c_str(), _tmpCode1.c_str(), sc ) )
+	{
+		Modules::log().writeError( "Shader resource '%s': Failed to compile shader context '%s' (comb %i)",
+			_name.c_str(), context.id.c_str(), sc.combMask );
+
+		if( Modules::config().dumpFailedShaders )
+		{
+			std::ofstream out0( "shdDumpVS.txt", ios::binary ), out1( "shdDumpFS.txt", ios::binary );
+			if( out0.good() ) out0 << _tmpCode0;
+			if( out1.good() ) out1 << _tmpCode1;
+			out0.close();
+			out1.close();
+		}
+	}
+
+	// Output shader log
+	if( Modules::renderer().getShaderLog() != "" )
+		Modules::log().writeInfo( "Shader resource '%s': ShaderLog: %s", _name.c_str(), Modules::renderer().getShaderLog().c_str() );
+}
+
+
+void ShaderResource::compileContexts()
 {
 	for( uint32 i = 0; i < _contexts.size(); ++i )
 	{
-		ShaderContext &sc = _contexts[i];
+		ShaderContext &context = _contexts[i];
 
-		if( !sc.compiled )
+		if( !context.compiled )
 		{
-			if( !sc.vertCode->isComplete() || !sc.fragCode->isComplete() ) continue;
-
-			_tmpCode0 = _vertPreamble;
-			_tmpCode0 += "\r\n";
-			_tmpCode0 += sc.vertCode->assembleCode();
-			_tmpCode1 = _vertPreamble;
-			_tmpCode1 += "\r\n";
-			_tmpCode1 += sc.fragCode->assembleCode();
-			
-			// Compile shader
-			Modules::log().writeInfo( "Shader resource '%s': Compiling shader context '%s'", _name.c_str(), sc.id.c_str() );
-			if( sc.shaderObject != 0 )
+			context.flagMask = 0;
+			if( !context.vertCode->tryLinking( &context.flagMask ) ||
+				!context.fragCode->tryLinking( &context.flagMask ) )
 			{
-				Modules::renderer().unloadShader( sc.shaderObject );
-				sc.shaderObject = 0;
+				continue;
 			}
 			
-			if( !Modules::renderer().uploadShader( _tmpCode0.c_str(), _tmpCode1.c_str(), sc ) )
+			// Add preloaded combinations
+			for( std::set< uint32 >::iterator itr = _preLoadList.begin(); itr != _preLoadList.end(); ++itr )
 			{
-				Modules::log().writeError( "Shader resource '%s': Failed to compile shader context '%s'", _name.c_str(), sc.id.c_str() );
-
-				if( Modules::config().dumpFailedShaders )
+				uint32 combMask = *itr & context.flagMask;
+				
+				// Check if combination already exists
+				bool found = false;
+				for( size_t j = 0; j < _contexts[i].shaderCombs.size(); ++j )
 				{
-					std::ofstream out0( "shdDumpVS.txt", ios::binary ), out1( "shdDumpFS.txt", ios::binary );
-					if( out0.good() ) out0 << _tmpCode0;
-					if( out1.good() ) out1 << _tmpCode1;
-					out0.close();
-					out1.close();
+					if( _contexts[i].shaderCombs[j].combMask == combMask )
+					{
+						found = true;
+						break;
+					}
+				}
+
+				if( !found )
+				{	
+					_contexts[i].shaderCombs.push_back( ShaderCombination() );
+					_contexts[i].shaderCombs.back().combMask = combMask;
 				}
 			}
+			
+			for( size_t j = 0; j < _contexts[i].shaderCombs.size(); ++j )
+			{
+				compileCombination( _contexts[i], _contexts[i].shaderCombs[j] );
+			}
 
-			if( Modules::renderer().getShaderLog() != "" )
-				Modules::log().writeInfo( "Shader resource '%s': ShaderLog: %s", _name.c_str(), Modules::renderer().getShaderLog().c_str() );
-
-			sc.compiled = true;
+			context.compiled = true;
 		}
-	}	
+	}
+}
+
+
+ShaderCombination *ShaderResource::getCombination( ShaderContext &context, uint32 combMask )
+{
+	if( !context.compiled ) return 0x0;
+	
+	// Kill combination bits that are not used by the context
+	combMask &= context.flagMask;
+	
+	// Try to find combination
+	std::vector< ShaderCombination > &combs = context.shaderCombs;
+	for( size_t i = 0, s = combs.size(); i < s; ++i )
+	{
+		if( combs[i].combMask == combMask ) return &combs[i];
+	}
+
+	// Add combination
+	combs.push_back( ShaderCombination() );
+	combs.back().combMask = combMask;
+	compileCombination( context, combs.back() );
+
+	return &combs.back();
+}
+
+
+uint32 ShaderResource::calcCombMask( const std::vector< std::string > &flags )
+{	
+	uint32 combMask = 0;
+	
+	for( size_t i = 0, s = flags.size(); i < s; ++i )
+	{
+		const string &flag = flags[i];
+		
+		// Check format: _F<digit><digit>_
+		if( flag.length() < 5 ) continue;
+		if( flag[0] != '_' || flag[1] != 'F' || flag[4] != '_' ||
+		    flag[2] < 48 || flag[2] > 57 || flag[3] < 48 || flag[3] > 57 ) continue;
+		
+		uint32 num = (flag[2] - 48) * 10 + (flag[3] - 48);
+		combMask |= 1 << (num - 1);
+	}
+	
+	return combMask;
 }
