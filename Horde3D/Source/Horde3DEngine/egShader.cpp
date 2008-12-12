@@ -227,7 +227,7 @@ std::string CodeResource::assembleCode()
 	
 	for( uint32 i = 0; i < _includes.size(); ++i )
 	{
-		std::string &depCode = _includes[i].first->assembleCode();
+		std::string depCode = _includes[i].first->assembleCode();
 		finalCode.insert( _includes[i].second + offset, depCode );
 		offset += (uint32)depCode.length();
 	}
