@@ -796,7 +796,7 @@ namespace Horde3D
 		Returns:
 			type of the resource
 	*/
-	DLL ResourceTypes::List getResourceType( ResHandle res );
+	DLL int getResourceType( ResHandle res );
 
 	/* 	Function: getResourceName
 			Returns the name of a resource.
@@ -828,7 +828,7 @@ namespace Horde3D
 		Returns:
 			handle to the resource or 0 if not found
 	*/
-	DLL ResHandle findResource( ResourceTypes::List type, const char *name );
+	DLL ResHandle findResource( int type, const char *name );
 	
 	/* 	Function: addResource
 			Adds a resource.
@@ -847,7 +847,7 @@ namespace Horde3D
 		Returns:
 			handle to the resource to be added or 0 in case of failure
 	*/
-	DLL ResHandle addResource( ResourceTypes::List type, const char *name, int flags );
+	DLL ResHandle addResource( int type, const char *name, int flags );
 
 	/* 	Function: cloneResource
 			Duplicates a resource.

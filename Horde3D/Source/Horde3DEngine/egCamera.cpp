@@ -261,7 +261,7 @@ void CameraNode::setupViewParams( float fov, float aspect, float near, float far
 
 void CameraNode::genFrustum( Frustum &frustum )
 {
-	update();
+	Modules::sceneMan().updateNodes();
 	
 	frustum.buildViewFrustum( _invTrans, calcProjectionMatrix() );
 }

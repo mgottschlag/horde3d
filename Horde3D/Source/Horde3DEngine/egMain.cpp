@@ -238,7 +238,7 @@ namespace Horde3D
 	// Resource functions
 	// *********************************************************************************************
 
-	DLLEXP ResourceTypes::List getResourceType( ResHandle res )
+	DLLEXP int getResourceType( ResHandle res )
 	{
 		Resource *r = Modules::resMan().resolveResHandle( res );
 		
@@ -266,7 +266,7 @@ namespace Horde3D
 	}
 
 
-	DLLEXP ResHandle findResource( ResourceTypes::List type, const char *name )
+	DLLEXP ResHandle findResource( int type, const char *name )
 	{
 		Resource *res = Modules::resMan().findResource( type, safeStr( name ) );
 		
@@ -275,7 +275,7 @@ namespace Horde3D
 	}
 
 	
-	DLLEXP ResHandle addResource( ResourceTypes::List type, const char *name, int flags )
+	DLLEXP ResHandle addResource( int type, const char *name, int flags )
 	{
 		return Modules::resMan().addResource( type, safeStr( name ), flags, true );
 	}
@@ -541,7 +541,7 @@ namespace Horde3D
 	{
 		SceneNode *sn = Modules::sceneMan().resolveNodeHandle( node );
 		
-		if( sn != 0x0 ) return (SceneNodeTypes::List)sn->getType();
+		if( sn != 0x0 ) return sn->getType();
 		else
 		{	
 			Modules::log().writeDebugInfo( "Invalid node handle %i in getNodeType", node );

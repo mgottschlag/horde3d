@@ -72,7 +72,7 @@ class Resource
 {
 protected:
 
-	ResourceTypes::List  _type;
+	int                  _type;
 	std::string          _name;
 	ResHandle            _handle;
 	int                  _flags;
@@ -85,7 +85,7 @@ protected:
 
 public:
 
-	Resource( ResourceTypes::List type, const std::string &name, int flags );
+	Resource( int type, const std::string &name, int flags );
 	virtual ~Resource();
 	virtual Resource *clone();  // TODO: Implement this for all resource types
 	
@@ -104,7 +104,7 @@ public:
 	virtual const void *getData( int param );
 	virtual bool updateData( int param, const void *data, int size );
 
-	ResourceTypes::List &getType() { return _type; }
+	int &getType() { return _type; }
 	const std::string &getName() { return _name; }
 	ResHandle getHandle() { return _handle; }
 	bool isLoaded() { return _loaded; }
@@ -184,8 +184,8 @@ public:
 	void registerType( int type, const std::string &typeString, ResTypeInitializationFunc inf,
 	                   ResTypeReleaseFunc rf, ResTypeFactoryFunc ff );
 	
-	Resource *findResource( ResourceTypes::List type, const std::string &name );
-	ResHandle addResource( ResourceTypes::List type, const std::string &name, int flags, bool userCall );
+	Resource *findResource( int type, const std::string &name );
+	ResHandle addResource( int type, const std::string &name, int flags, bool userCall );
 	ResHandle addNonExistingResource( Resource &resource, bool userCall );
 	ResHandle cloneResource( ResHandle sourceRes, const std::string &name );
 	int removeResource( ResHandle handle, bool userCall );

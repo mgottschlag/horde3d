@@ -40,7 +40,7 @@ using namespace std;
 // Class Resource
 // **********************************************************************************
 
-Resource::Resource( ResourceTypes::List type, const string &name, int flags )
+Resource::Resource( int type, const string &name, int flags )
 {
 	_type = type;
 	_name = name;
@@ -195,7 +195,7 @@ void ResourceManager::registerType( int type, const string &typeString, ResTypeI
 }
 
 
-Resource *ResourceManager::findResource( ResourceTypes::List type, const string &name )
+Resource *ResourceManager::findResource( int type, const string &name )
 {
 	for( uint32 i = 0; i < _resources.size(); ++i )
 	{
@@ -229,7 +229,7 @@ ResHandle ResourceManager::addResource( Resource &resource )
 }
 
 
-ResHandle ResourceManager::addResource( ResourceTypes::List type, const string &name,
+ResHandle ResourceManager::addResource( int type, const string &name,
 										int flags, bool userCall )
 {
 	if( name == "" || (userCall && name.find( ":" ) != string::npos) )

@@ -732,17 +732,16 @@ The file format is based on streams. The streams are written in that order:
 				<tr>
 					<td><b>numJoints</b></td>
 					<td><b>int</b></td>
-					<td><b>#J + 1</b>: With 4 joints you have to write 5 here</td>
-				</tr>
-				<tr>
-					<td>defaultTransformationMatrix</td>
-					<td>16 <b>float</b>s</td>
-					<td>default transformation matrix, most of the time this is a identity matrix. A matrix is written row by row</td>
+					<td>
+						<b>#J</b>: Number of joints. It can make sense to have an additional default joint as first joint
+						that is used if a vertex has no explicit joint assignment (joint index 0 at vertex). This joint usually
+						has the identity matrix as inverse bind matrix.
+					</td>
 				</tr>
 				<tr>
 					<td>jointInverseBindMatrices</td>
 					<td><b>#J</b> * 16 <b>float</b>s</td>
-					<td>inverse bind matrices for every joint, iff <b>#J</b> is zero nothing is written here</td>
+					<td>inverse bind matrices for every joint, if <b>#J</b> is zero nothing is written here</td>
 				</tr>
             </table>
 		</td>
@@ -903,7 +902,7 @@ The file format is based on streams. The streams are written in that order:
 				</tr>
 				<tr>
 					<td><b>jointIndices</b></td>
-					<td>#V * 4 <b>unsigned char</b>s</td>
+					<td>4 <b>unsigned char</b>s</td>
 					<td>joint indices of current vertex (up to 4); a 0 means unused</td>
 				</tr>
             </table>
@@ -927,7 +926,7 @@ The file format is based on streams. The streams are written in that order:
 				</tr>
 				<tr>
 					<td><b>jointWeights</b></td>
-					<td>#V * 4 <b>unsigned char</b>s</td>
+					<td>4 <b>unsigned char</b>s</td>
 					<td>To save space joint weights are stored as <b>unsigned char</b>s. Before writing multiply your <b>float</b> with 255 and convert it then to <b>unsigned char</b></td>
 				</tr>
             </table>
