@@ -96,6 +96,8 @@ bool ColladaDocument::parseFile( const string &fileName )
 	
 	libVisScenes.parse( rootNode );
 
+	libNodes.parse( rootNode );
+
 	// Visual scene instance
 	bool foundScene = false;
 	node1 = rootNode.getChildNode( "scene" );

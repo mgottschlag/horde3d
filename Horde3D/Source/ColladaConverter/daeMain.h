@@ -33,6 +33,7 @@
 #include "daeLibVisualScenes.h"
 #include "daeLibControllers.h"
 #include "daeLibAnimations.h"
+#include "daeLibNodes.h"
 
 
 class ColladaDocument
@@ -48,6 +49,7 @@ public:
 	DaeLibVisScenes		libVisScenes;
 	DaeLibControllers	libControllers;
 	DaeLibAnimations	libAnimations;
+	DaeLibNodes			libNodes;
 
 	DaeVisualScene		*scene;
 

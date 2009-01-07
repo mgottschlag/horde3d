@@ -54,7 +54,8 @@ struct DaeNode
 	std::string	id, sid;
 	std::string	name;
 	bool		joint;
-	
+	bool		reference;
+
 	std::vector< DaeTransformation >	transStack;
 	std::vector< DaeNode * >			children;
 	std::vector< DaeInstance >			instances;
@@ -62,6 +63,7 @@ struct DaeNode
 
 	bool parse( const XMLNode &nodeNode )
 	{
+		reference = false;	
 		id = nodeNode.getAttribute( "id", "" );
 		if( id == "" ) return false;
 		name = nodeNode.getAttribute( "name", "" );
@@ -153,7 +155,19 @@ struct DaeNode
 		node1 = nodeNode.getChildNode( nodeItr1 );
 		while( !node1.isEmpty() && node1.getName() != 0x0 )
 		{
-			if( strcmp( node1.getName(), "instance_geometry" ) == 0 ||
+			if( strcmp( node1.getName(), "instance_node" ) == 0 )
+			{
+				std::string url = node1.getAttribute( "url", "" );
+				removeGate( url );
+				if( !url.empty() )
+				{
+					DaeNode *n = new DaeNode();
+					n->name = url;
+					n->reference = true;
+					children.push_back( n );
+				}
+			}
+			else if( strcmp( node1.getName(), "instance_geometry" ) == 0 ||
 				strcmp( node1.getName(), "instance_controller" ) == 0 )
 			{
 				std::string url = node1.getAttribute( "url", "" );

@@ -248,6 +248,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\daeLibNodes.h"
+				>
+			</File>
+			<File
 				RelativePath=".\daeLibVisualScenes.h"
 				>
 			</File>

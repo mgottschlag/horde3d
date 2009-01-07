@@ -122,6 +122,14 @@ SceneNode *Converter::processNode( ColladaDocument &doc, DaeNode &node, SceneNod
 	//		* DaeNode and one Instance -> create mesh
 	//		* DaeNode and several Instances -> create mesh with submeshes
 	
+	if (node.reference )
+	{
+		DaeNode* n = doc.libNodes.findNode( node.name );
+		if( n )	return processNode( doc, *n, parentNode, transAccum, animTransAccum );
+		else log( "Warning: undefined reference '"+ node.name +"' in instance_node" );
+		return 0x0;
+	}
+
 	// Assemble matrix
 	Matrix4f relMat = transAccum * makeMatrix4f( node.assembleMatrix().transposed().x, doc.y_up );
 	
@@ -967,7 +975,7 @@ void Converter::writeSGNode( const string &modelName, SceneNode *node, unsigned 
 			for( unsigned int j = 0; j < depth + 1; ++j ) outf << "\t";
 			if( i > 0 ) outf << "\t";
 			outf << "<Mesh ";
-			outf << "name=\"" << mesh->name << "\" ";
+			outf << "name=\"" << (i > 0 ? "#" : "") << mesh->name << "\" ";
 			outf << "material=\"";
 			outf << modelName + "/" + mesh->triGroups[i].matName + ".material.xml\" ";
 			
