@@ -100,15 +100,23 @@ struct DaeTriGroup
 	}
 
 
-	bool parse( const XMLNode &trianglesNode )
-	{
+	bool parse( const XMLNode &primitiveNode )
+	{	
+		enum { tTriangles, tPolygons };
+		int primType = -1;
+		
+		if( strcmp( primitiveNode.getName(), "triangles" ) == 0 ) primType = tTriangles;
+		else if( strcmp( primitiveNode.getName(), "polygons" ) == 0 ) primType = tPolygons;
+		else log( "Warning: Ignoring unsupported geometry primitive" );
+		if( primType < 0 ) return false;
+		
 		int vertexOffset = 0, normOffset = -1, texCoordOffset[4] = { -1, -1, -1, -1 };
 		unsigned int numInputs = 0;
 		
 		// Find the base mapping channel with the lowest set-id
 		int baseChannel = 999999;
 		int nodeItr1 = 0;
-		XMLNode node1 = trianglesNode.getChildNode( "input", nodeItr1 );
+		XMLNode node1 = primitiveNode.getChildNode( "input", nodeItr1 );
 		while( !node1.isEmpty() )
 		{
 			if( strcmp( node1.getAttribute( "semantic", "" ), "TEXCOORD" ) == 0 )
@@ -124,12 +132,12 @@ struct DaeTriGroup
 					break;
 				}
 			}
-			node1 = trianglesNode.getChildNode( "input", ++nodeItr1 );
+			node1 = primitiveNode.getChildNode( "input", ++nodeItr1 );
 		}
 		
-		// Parse data
+		// Parse input mapping
 		nodeItr1 = 0;
-		node1 = trianglesNode.getChildNode( "input", nodeItr1 );
+		node1 = primitiveNode.getChildNode( "input", nodeItr1 );
 		while( !node1.isEmpty() )
 		{
 			++numInputs;
@@ -139,6 +147,7 @@ struct DaeTriGroup
 				vertexOffset = atoi( node1.getAttribute( "offset", "0" ) );
 				vSourceId = node1.getAttribute( "source", "" );
 				removeGate( vSourceId );
+				if( vSourceId == "" ) return false;
 			}
 			if( strcmp( node1.getAttribute( "semantic", "" ), "TEXCOORD" ) == 0 )
 			{
@@ -163,44 +172,65 @@ struct DaeTriGroup
 				removeGate( normSourceId );
 			}
 			
-			node1 = trianglesNode.getChildNode( "input", ++nodeItr1 );
+			node1 = primitiveNode.getChildNode( "input", ++nodeItr1 );
 		}
-		
-		if( vSourceId == "" ) return false;
 
-		matId = trianglesNode.getAttribute( "material", "" );
+		matId = primitiveNode.getAttribute( "material", "" );
 		
-		int count = atoi( trianglesNode.getAttribute( "count", "0" ) ) * 3;
-		node1 = trianglesNode.getChildNode( "p" );
-		
-		unsigned int pos = 0;
-		char *s = (char *)node1.getText();
-		if( s == 0x0 ) return false;
-		for( int i = 0; i < count; ++i )
+		// Parse actual primitive data
+		nodeItr1 = 0;
+		node1 = primitiveNode.getChildNode( "p", nodeItr1 );
+		while( !node1.isEmpty() )
 		{
-			IndexEntry indexEntry;
+			char *s = (char *)node1.getText();
+			if( s == 0x0 ) return false;
 			
-			for( int j = 0; j < (int)numInputs; ++j )
+			unsigned int  ui, pos = 0;
+			unsigned int  inputCnt = 0, vertCnt = 0;
+			IndexEntry    indexEntry;
+			IndexEntry    firstIndex, lastIndex;
+			
+			while( parseUInt( s, pos, ui ) )
 			{
-				unsigned int ui;
-				parseUInt( s, pos, ui );
-				
 				// No else-if since offset sharing is possible
-				if( j == vertexOffset )
+				if( inputCnt == vertexOffset )
 					indexEntry.posIndex = ui;
-				if( j == normOffset )
+				if( inputCnt == normOffset )
 					indexEntry.normIndex = (int)ui;
-				if( j == texCoordOffset[0] )	
+				if( inputCnt == texCoordOffset[0] )	
 					indexEntry.texIndex[0] = (int)ui;
-				if( j == texCoordOffset[1] )	
+				if( inputCnt == texCoordOffset[1] )	
 					indexEntry.texIndex[1] = (int)ui;
-				if( j == texCoordOffset[2] )	
+				if( inputCnt == texCoordOffset[2] )	
 					indexEntry.texIndex[2] = (int)ui;
-				if( j == texCoordOffset[3] )	
+				if( inputCnt == texCoordOffset[3] )	
 					indexEntry.texIndex[3] = (int)ui;
+
+				if( ++inputCnt == numInputs )
+				{
+					if( primType == tPolygons )
+					{
+						// Do simple triangulation (assumes convex polygons)
+						if( vertCnt == 0 )
+						{
+							firstIndex = indexEntry;
+						}
+						else if( vertCnt > 2 )
+						{
+							// Create new triangle
+							indices.push_back( firstIndex );
+							indices.push_back( lastIndex );
+						}
+					}
+
+					indices.push_back( indexEntry );
+					lastIndex = indexEntry;
+					inputCnt = 0;
+					++vertCnt;
+				}
 			}
 
-			indices.push_back( indexEntry );
+			node1 = primitiveNode.getChildNode( "p", ++nodeItr1 );
 		}
 
 		return true;
@@ -304,6 +334,7 @@ struct DaeGeometry
 		
 		name = geometryNode.getAttribute( "name", "" );
 
+		// Parse sources
 		int nodeItr2 = 0;
 		XMLNode node2 = node1.getChildNode( "source", nodeItr2 );
 		while( !node2.isEmpty() )
@@ -314,6 +345,7 @@ struct DaeGeometry
 			node2 = node1.getChildNode( "source", ++nodeItr2 );
 		}
 
+		// Parse vertex data
 		nodeItr2 = 0;
 		node2 = node1.getChildNode( "vertices", nodeItr2 );
 		while( !node2.isEmpty() )
@@ -329,41 +361,42 @@ struct DaeGeometry
 			node2 = node1.getChildNode( "vertices", ++nodeItr2 );
 		}
 
+		// Parse primitives
 		nodeItr2 = 0;
-		node2 = node1.getChildNode( "triangles", nodeItr2 );
+		node2 = node1.getChildNode( nodeItr2 );
 		while( !node2.isEmpty() )
 		{
-			triGroups.push_back( DaeTriGroup() );
-			if( triGroups.back().parse( node2 ) )
+			if( strcmp( node2.getName(), "triangles" ) == 0 ||
+			    strcmp( node2.getName(), "polygons" ) == 0 ||
+			    strcmp( node2.getName(), "polylist" ) == 0 ||
+			    strcmp( node2.getName(), "trifans" ) == 0 ||
+			    strcmp( node2.getName(), "tristrips" ) == 0 ||
+			    strcmp( node2.getName(), "lines" ) == 0 ||
+			    strcmp( node2.getName(), "linestrips" ) == 0 )
 			{
-				DaeTriGroup &triGroup = triGroups.back();
-				
-				triGroup.vSource = findVSource( triGroup.vSourceId );
-				triGroup.normSource = findSource( triGroup.normSourceId );
-				triGroup.texSource[0] = findSource( triGroup.texSourceId[0] );
-				triGroup.texSource[1] = findSource( triGroup.texSourceId[1] );
-				triGroup.texSource[2] = findSource( triGroup.texSourceId[2] );
-				triGroup.texSource[3] = findSource( triGroup.texSourceId[3] );
-
-				if( triGroup.vSource == 0x0 )
+				triGroups.push_back( DaeTriGroup() );
+				if( triGroups.back().parse( node2 ) )
 				{
-					log( "Warning: Mesh '" + id + "' has no vertex coordinates and is ignored" );
-					triGroups.pop_back();
-				}
-			}
-			else triGroups.pop_back();
-			
-			node2 = node1.getChildNode( "triangles", ++nodeItr2 );
-		}
+					DaeTriGroup &triGroup = triGroups.back();
+					
+					triGroup.vSource = findVSource( triGroup.vSourceId );
+					triGroup.normSource = findSource( triGroup.normSourceId );
+					triGroup.texSource[0] = findSource( triGroup.texSourceId[0] );
+					triGroup.texSource[1] = findSource( triGroup.texSourceId[1] );
+					triGroup.texSource[2] = findSource( triGroup.texSourceId[2] );
+					triGroup.texSource[3] = findSource( triGroup.texSourceId[3] );
 
-		if( !node1.getChildNode( "polygons" ).isEmpty() )
-			log( "Warning: Ingnoring non-triangle data in mesh '" + id + "'" );
-		if( !node1.getChildNode( "polylist" ).isEmpty() )
-			log( "Warning: Ingnoring non-triangle data in mesh '" + id + "'" );
-		if( !node1.getChildNode( "trifans" ).isEmpty() )
-			log( "Warning: Ingnoring non-triangle data in mesh '" + id + "'" );
-		if( !node1.getChildNode( "tristrips" ).isEmpty() )
-			log( "Warning: Ingnoring non-triangle data in mesh '" + id + "'" );
+					if( triGroup.vSource == 0x0 )
+					{
+						log( "Warning: Mesh '" + id + "' has no vertex coordinates and is ignored" );
+						triGroups.pop_back();
+					}
+				}
+				else triGroups.pop_back();
+			}
+			
+			node2 = node1.getChildNode( ++nodeItr2 );
+		}
 
 		return true;
 	}

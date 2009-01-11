@@ -67,7 +67,7 @@ struct DaeNode
 		id = nodeNode.getAttribute( "id", "" );
 		if( id == "" ) return false;
 		name = nodeNode.getAttribute( "name", "" );
-		sid = nodeNode.getAttribute( "sid", "" );
+		sid = nodeNode.getAttribute( "sid", id.c_str() );
 		
 		if( strcmp( nodeNode.getAttribute( "type", "" ), "JOINT" ) == 0 ) joint = true;
 		else joint = false;

@@ -514,7 +514,7 @@ void Converter::processMeshes( ColladaDocument &doc, bool optimize )
 					v.storedNormal =  iTriGroup.getNormal( normIndex );
 
 					// Skinning
-					if( skin != 0x0 )
+					if( skin != 0x0 && v.daePosIndex < (int)skin->vertWeights.size() )
 					{
 						DaeVertWeights vertWeights = skin->vertWeights[v.daePosIndex];
 						
