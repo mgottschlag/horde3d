@@ -34,28 +34,28 @@
 
 struct DaeSampler
 {
-	std::string		id;
-	DaeSource		*input;			// Time values
-	DaeSource		*output;		// Transformation data
+	std::string  id;
+	DaeSource    *input;  // Time values
+	DaeSource    *output;  // Transformation data
 };
 
 
 struct DaeChannel
 {
-	DaeSampler		*source;
-	std::string		nodeId;				// Target node
-	std::string		transSid;			// Target transformation channel
-	int				transValuesIndex;	// Index in values of node transformation (-1 for no index)
+	DaeSampler   *source;
+	std::string  nodeId;  // Target node
+	std::string  transSid;  // Target transformation channel
+	int          transValuesIndex;  // Index in values of node transformation (-1 for no index)
 };
 
 
 struct DaeAnimation
 {
-	std::string						id;
-	std::vector< DaeSource >		sources;
-	std::vector< DaeSampler >		samplers;
-	std::vector< DaeChannel >		channels;
-	std::vector< DaeAnimation * >	children;
+	std::string                    id;
+	std::vector< DaeSource >       sources;
+	std::vector< DaeSampler >      samplers;
+	std::vector< DaeChannel >      channels;
+	std::vector< DaeAnimation * >  children;
 
 
 	~DaeAnimation()
@@ -199,18 +199,18 @@ struct DaeAnimation
 				{
 					size_t index1 = channel.transSid.find( '(' );
 					size_t index2 = channel.transSid.find( '(', index1 + 1 );
-					if( index2 == std::string::npos ) // we got a vector index
+					if( index2 == std::string::npos )  // We got a vector index
 					{
 						channel.transValuesIndex = atoi( 
 							channel.transSid.substr( index1 + 1, channel.transSid.find(')', index1) - ( index1 + 1) ).c_str() );
 					}
-					else // we got an array index
+					else  // We got an array index
 					{
 						int x = atoi( channel.transSid.substr( 
-							index1 + 1, channel.transSid.find(')', index1 ) - ( index1 + 1 ) ).c_str() );
+							index1 + 1, channel.transSid.find( ')', index1 ) - (index1 + 1) ).c_str() );
 						int y = atoi( channel.transSid.substr( 
-							index2 + 1, channel.transSid.find(')', index2 ) - ( index2 + 1 ) ).c_str() );
-						// TODO is this the correct access order? Maybe collada defines it transposed
+							index2 + 1, channel.transSid.find( ')', index2 ) - (index2 + 1) ).c_str() );
+						// TODO: Is this the correct access order? Maybe collada defines it transposed
 						channel.transValuesIndex = y * 4 + x; 
 					}
 					channel.transSid = channel.transSid.substr( 0, index1 );					
@@ -260,9 +260,9 @@ struct DaeAnimation
 
 struct DaeLibAnimations
 {
-	std::vector< DaeAnimation * >	animations;
-	unsigned int				maxFrameCount;
-	float						maxAnimTime;
+	std::vector< DaeAnimation * >  animations;
+	unsigned int                   maxFrameCount;
+	float                          maxAnimTime;
 	
 
 	~DaeLibAnimations()

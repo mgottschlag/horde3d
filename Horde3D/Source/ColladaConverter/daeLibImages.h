@@ -30,12 +30,11 @@
 #include <vector>
 
 
-
 struct DaeImage
 {
-	std::string		id;
-	std::string		name;
-	std::string		fileName;
+	std::string  id;
+	std::string  name;
+	std::string  fileName;
 
 
 	bool parse( const XMLNode &imageNode )
@@ -45,7 +44,7 @@ struct DaeImage
 		name = imageNode.getAttribute( "name", "" );
 		
 		if( !imageNode.getChildNode( "init_from" ).isEmpty() &&
-			imageNode.getChildNode( "init_from" ).getText() != 0x0 )
+		    imageNode.getChildNode( "init_from" ).getText() != 0x0 )
 			fileName = imageNode.getChildNode( "init_from" ).getText();
 		else
 			return false;

@@ -31,13 +31,12 @@
 #include <vector>
 
 
-
 struct DaeEffect
 {
-	std::string	id;
-	std::string	name;
-	std::string	diffuseMapId;
-	DaeImage	*diffuseMap;
+	std::string  id;
+	std::string  name;
+	std::string  diffuseMapId;
+	DaeImage     *diffuseMap;
 
 
 	DaeEffect()
@@ -137,7 +136,7 @@ struct DaeEffect
 
 struct DaeLibEffects
 {
-	std::vector< DaeEffect * >	effects;
+	std::vector< DaeEffect * >  effects;
 
 	
 	~DaeLibEffects()

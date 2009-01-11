@@ -35,30 +35,30 @@
 struct DaeTransformation
 {
 	enum Type { MATRIX, TRANSLATION, ROTATION, SCALE };
-	std::string				sid;
-	unsigned int			type;
-	float					values[16];
-	float					animValues[16];		// Temporary animation values
+	std::string   sid;
+	unsigned int  type;
+	float         values[16];
+	float         animValues[16];  // Temporary animation values
 };
 
 
 struct DaeInstance
 {
-	std::string					url;
-	std::map< std::string, std::string >	materialBindings;
+	std::string                           url;
+	std::map< std::string, std::string >  materialBindings;
 };
 
 
 struct DaeNode
 {
-	std::string	id, sid;
-	std::string	name;
-	bool		joint;
-	bool		reference;
+	std::string                       id, sid;
+	std::string                       name;
+	bool                              joint;
+	bool                              reference;
 
-	std::vector< DaeTransformation >	transStack;
-	std::vector< DaeNode * >			children;
-	std::vector< DaeInstance >			instances;
+	std::vector< DaeTransformation >  transStack;
+	std::vector< DaeNode * >          children;
+	std::vector< DaeInstance >        instances;
 	
 
 	bool parse( const XMLNode &nodeNode )
@@ -234,15 +234,15 @@ struct DaeNode
 				break;
 			case DaeTransformation::TRANSLATION:
 				mat = mat * Matrix4f::TransMat( transStack[i].values[0], transStack[i].values[1],
-												transStack[i].values[2] );
+				                                transStack[i].values[2] );
 				break;
 			case DaeTransformation::ROTATION:
 				mat = mat * Matrix4f::RotMat( Vec3f( transStack[i].values[0], transStack[i].values[1],
-											  transStack[i].values[2] ), degToRad( transStack[i].values[3] ) );
+				                              transStack[i].values[2] ), degToRad( transStack[i].values[3] ) );
 				break;
 			case DaeTransformation::SCALE:
 				mat = mat * Matrix4f::ScaleMat( transStack[i].values[0], transStack[i].values[1],
-												transStack[i].values[2] );
+				                                transStack[i].values[2] );
 				break;
 			}
 		}
@@ -264,15 +264,15 @@ struct DaeNode
 				break;
 			case DaeTransformation::TRANSLATION:
 				mat = mat * Matrix4f::TransMat( transStack[i].animValues[0], transStack[i].animValues[1],
-												transStack[i].animValues[2] );
+				                                transStack[i].animValues[2] );
 				break;
 			case DaeTransformation::ROTATION:
 				mat = mat * Matrix4f::RotMat( Vec3f( transStack[i].animValues[0], transStack[i].animValues[1],
-											  transStack[i].animValues[2] ), degToRad( transStack[i].animValues[3] ) );
+				                              transStack[i].animValues[2] ), degToRad( transStack[i].animValues[3] ) );
 				break;
 			case DaeTransformation::SCALE:
 				mat = mat * Matrix4f::ScaleMat( transStack[i].animValues[0], transStack[i].animValues[1],
-												transStack[i].animValues[2] );
+				                                transStack[i].animValues[2] );
 				break;
 			}
 		}
@@ -284,8 +284,8 @@ struct DaeNode
 
 struct DaeVisualScene
 {
-	std::string					id;
-	std::vector< DaeNode * >	nodes;
+	std::string               id;
+	std::vector< DaeNode * >  nodes;
 
 	
 	~DaeVisualScene()

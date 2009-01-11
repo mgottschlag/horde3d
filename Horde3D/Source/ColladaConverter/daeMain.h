@@ -40,18 +40,18 @@ class ColladaDocument
 {
 public:
 
-	bool				y_up;
+	bool               y_up;
 	
-	DaeLibImages		libImages;
-	DaeLibEffects		libEffects;
-	DaeLibMaterials		libMaterials;
-	DaeLibGeometries	libGeometries;
-	DaeLibVisScenes		libVisScenes;
-	DaeLibControllers	libControllers;
-	DaeLibAnimations	libAnimations;
-	DaeLibNodes			libNodes;
+	DaeLibImages       libImages;
+	DaeLibEffects      libEffects;
+	DaeLibMaterials    libMaterials;
+	DaeLibGeometries   libGeometries;
+	DaeLibVisScenes    libVisScenes;
+	DaeLibControllers  libControllers;
+	DaeLibAnimations   libAnimations;
+	DaeLibNodes        libNodes;
 
-	DaeVisualScene		*scene;
+	DaeVisualScene     *scene;
 
 
 	ColladaDocument()

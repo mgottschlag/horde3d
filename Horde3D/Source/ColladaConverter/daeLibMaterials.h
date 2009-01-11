@@ -31,15 +31,13 @@
 #include <vector>
 
 
-
-
 struct DaeMaterial
 {
-	std::string	id;
-	std::string	name;
-	std::string	effectId;
-	DaeEffect	*effect;
-	bool		used;
+	std::string  id;
+	std::string  name;
+	std::string  effectId;
+	DaeEffect    *effect;
+	bool         used;
 	
 
 	DaeMaterial()
@@ -69,7 +67,7 @@ struct DaeMaterial
 
 struct DaeLibMaterials
 {
-	std::vector< DaeMaterial * >	materials;
+	std::vector< DaeMaterial * >  materials;
 
 
 	~DaeLibMaterials()

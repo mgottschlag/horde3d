@@ -36,16 +36,16 @@ struct OptFace;
 
 struct OptVertex
 {
-	unsigned int			index;		// Index in vertex array
-	float					score;
-	std::set< OptFace * >	faces;		// Faces that are using this vertex
+	unsigned int           index;  // Index in vertex array
+	float                  score;
+	std::set< OptFace * >  faces;  // Faces that are using this vertex
 
 	void updateScore( int cacheIndex );
 };
 
 struct OptFace
 {
-	OptVertex	*verts[3];
+	OptVertex  *verts[3];
 	
 	float getScore()  { return verts[0]->score + verts[1]->score + verts[2]->score; }
 };
@@ -57,11 +57,11 @@ public:
 	static const int OptCacheSize = 32;
 	
 	static unsigned int removeDegeneratedTriangles( TriGroup &triGroup, std::vector< Vertex > &vertices,
-													std::vector< unsigned int > &indices );
+	                                                std::vector< unsigned int > &indices );
 	static void optimizeIndexOrderNV( TriGroup &triGroup, std::vector< Vertex > &vertices,
-									  std::vector< unsigned int > &indices );
+	                                  std::vector< unsigned int > &indices );
 	static void optimizeIndexOrder( TriGroup &triGroup, std::vector< Vertex > &vertices,
-									 std::vector< unsigned int > &indices );
+	                                std::vector< unsigned int > &indices );
 };
 
 #endif	// _optimizer_H_

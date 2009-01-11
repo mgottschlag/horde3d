@@ -24,7 +24,7 @@ void OptVertex::updateScore( int cacheIndex )
 
 
 unsigned int MeshOptimizer::removeDegeneratedTriangles( TriGroup &triGroup, vector< Vertex > &vertices,
-														vector< unsigned int > &indices )
+                                                        vector< unsigned int > &indices )
 {
 	unsigned int numDegTris = 0;
 	
@@ -51,7 +51,7 @@ unsigned int MeshOptimizer::removeDegeneratedTriangles( TriGroup &triGroup, vect
 
 
 void MeshOptimizer::optimizeIndexOrder( TriGroup &triGroup, vector< Vertex > &vertices,
-										vector< unsigned int > &indices )
+                                        vector< unsigned int > &indices )
 {
 	// Implementation of Linear-Speed Vertex Cache Optimisation by Tom Forsyth
 	// (see http://home.comcast.net/~tom_forsyth/papers/fast_vert_cache_opt.html)
@@ -157,7 +157,7 @@ void MeshOptimizer::optimizeIndexOrder( TriGroup &triGroup, vector< Vertex > &ve
 
 	// Remap vertices to make access to them as linear as possible
 	vector< Vertex > oldVertices( vertices.begin() + triGroup.vertRStart,
-								  vertices.begin() + triGroup.vertREnd + 1 );
+	                              vertices.begin() + triGroup.vertREnd + 1 );
 	map< unsigned int, unsigned int > mapping;
 	unsigned int curVertex = triGroup.vertRStart;
 	
@@ -177,7 +177,7 @@ void MeshOptimizer::optimizeIndexOrder( TriGroup &triGroup, vector< Vertex > &ve
 	}
 
 	for( map< unsigned int, unsigned int >::iterator itr1 = mapping.begin();
-		 itr1 != mapping.end(); ++itr1 )
+	     itr1 != mapping.end(); ++itr1 )
 	{
 		vertices[itr1->second] = oldVertices[itr1->first - triGroup.vertRStart];
 	}

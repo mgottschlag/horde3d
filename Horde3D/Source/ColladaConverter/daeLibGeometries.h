@@ -33,12 +33,11 @@
 #include <vector>
 
 
-
 struct DaeVSource
 {
-	std::string	id;
-	std::string	posSourceId;
-	DaeSource	*posSource;
+	std::string  id;
+	std::string  posSourceId;
+	DaeSource    *posSource;
 
 
 	bool parse( const XMLNode &verticesNode )
@@ -67,9 +66,9 @@ struct DaeVSource
 
 struct IndexEntry
 {
-	unsigned int				posIndex;		// Required
-	int							normIndex;		// Optional, can be -1
-	int							texIndex[4];	// Optional, can be -1
+	unsigned int  posIndex;     // Required
+	int           normIndex;    // Optional, can be -1
+	int           texIndex[4];  // Optional, can be -1
 
 
 	IndexEntry()
@@ -82,14 +81,14 @@ struct IndexEntry
 
 struct DaeTriGroup
 {
-	std::string					vSourceId;
-	DaeVSource					*vSource;
-	std::string					normSourceId;
-	DaeSource					*normSource;
-	std::string					texSourceId[4];
-	DaeSource					*texSource[4];
-	std::string					matId;
-	std::vector< IndexEntry >	indices;
+	std::string                vSourceId;
+	DaeVSource                 *vSource;
+	std::string                normSourceId;
+	DaeSource                  *normSource;
+	std::string                texSourceId[4];
+	DaeSource                  *texSource[4];
+	std::string                matId;
+	std::vector< IndexEntry >  indices;
 
 
 	DaeTriGroup()
@@ -291,11 +290,11 @@ struct DaeTriGroup
 
 struct DaeGeometry
 {
-	std::string					id;
-	std::string					name;
-	std::vector< DaeSource >	sources;
-	std::vector< DaeVSource >	vsources;
-	std::vector< DaeTriGroup >	triGroups;
+	std::string                 id;
+	std::string                 name;
+	std::vector< DaeSource >    sources;
+	std::vector< DaeVSource >   vsources;
+	std::vector< DaeTriGroup >  triGroups;
 
 
 	DaeSource *findSource( const std::string &id )
@@ -421,7 +420,7 @@ struct DaeLibGeometries
 {
 public:
 
-	std::vector< DaeGeometry* >	geometries;
+	std::vector< DaeGeometry* >  geometries;
 
 	
 	~DaeLibGeometries()

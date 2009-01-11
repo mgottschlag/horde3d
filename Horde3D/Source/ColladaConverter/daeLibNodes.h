@@ -28,15 +28,14 @@
 #include "utXMLParser.h"
 #include <string>
 #include <vector>
-
 #include "daeLibVisualScenes.h"
+
 
 struct DaeLibNodes
 {
-	std::vector< DaeNode * >	nodes;
-
-	std::string	id;
-	std::string	name;
+	std::vector< DaeNode * >  nodes;
+	std::string               id;
+	std::string               name;
 
 	~DaeLibNodes()
 	{

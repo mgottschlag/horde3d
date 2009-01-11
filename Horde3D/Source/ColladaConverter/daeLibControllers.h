@@ -30,11 +30,10 @@
 #include <vector>
 
 
-
 struct DaeWeight
 {
-	unsigned int			joint;
-	float					weight;
+	unsigned int  joint;
+	float         weight;
 };
 
 
@@ -43,14 +42,14 @@ typedef std::vector< DaeWeight > DaeVertWeights;
 
 struct DaeSkin
 {
-	std::string					id;
-	std::string					ownerId;
-	float						bindShapeMat[16];
-	std::vector< DaeSource >	sources;
-	DaeSource					*jointArray;
-	DaeSource					*weightArray;
-	DaeSource					*bindMatArray;
-	std::vector< DaeVertWeights >	vertWeights;
+	std::string                    id;
+	std::string                    ownerId;
+	float                          bindShapeMat[16];
+	std::vector< DaeSource >       sources;
+	DaeSource                      *jointArray;
+	DaeSource                      *weightArray;
+	DaeSource                      *bindMatArray;
+	std::vector< DaeVertWeights >  vertWeights;
 
 	
 	DaeSkin()
@@ -211,11 +210,11 @@ struct DaeSkin
 
 struct DaeMorph
 {
-	std::string				id;
-	std::string				ownerId;
-	std::vector< DaeSource >sources;
-	DaeSource				*targetArray;
-	DaeSource				*weightArray;
+	std::string               id;
+	std::string               ownerId;
+	std::vector< DaeSource >  sources;
+	DaeSource                 *targetArray;
+	DaeSource                 *weightArray;
 
 
 	DaeMorph()
@@ -291,8 +290,8 @@ struct DaeMorph
 
 struct DaeLibControllers
 {
-	std::vector< DaeSkin * >	skinControllers;
-	std::vector< DaeMorph * >	morphControllers;
+	std::vector< DaeSkin * >   skinControllers;
+	std::vector< DaeMorph * >  morphControllers;
 
 
 	~DaeLibControllers()

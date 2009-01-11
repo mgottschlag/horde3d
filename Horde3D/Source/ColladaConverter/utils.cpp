@@ -165,10 +165,10 @@ void log( const std::string &msg )
 {
 	cout << msg << endl;
 	
-	#ifdef PLATFORM_WIN
+#ifdef PLATFORM_WIN
 	OutputDebugString( msg.c_str() );
 	OutputDebugString( "\n" );
-	#endif
+#endif
 }
 
 

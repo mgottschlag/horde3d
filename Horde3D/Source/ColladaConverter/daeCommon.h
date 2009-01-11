@@ -31,13 +31,12 @@
 #include <vector>
 
 
-
 struct DaeSource
 {
-	std::string					id;
-	std::vector< float >		floatArray;
-	std::vector< std::string >	stringArray;
-	unsigned int				elemsPerEntry;
+	std::string                 id;
+	std::vector< float >        floatArray;
+	std::vector< std::string >  stringArray;
+	unsigned int                elemsPerEntry;
 
 
 	bool parse( const XMLNode &sourceNode )
