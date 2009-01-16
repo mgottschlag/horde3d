@@ -25,6 +25,7 @@
 // This file should be included as the last include to all cpp files
 // If in Debug Mode, call _CrtDumpMemoryLeaks() at the end of the application
 
+#include <assert.h>
 #include "utPlatform.h"
 
 
@@ -41,4 +42,11 @@
 
 #define new MYDEBUG_NEW
 
+#endif
+
+
+#if defined( _DEBUG )
+#	define ASSERT( exp ) assert( exp )
+#else
+#	define ASSERT( exp )
 #endif

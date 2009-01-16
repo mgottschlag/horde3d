@@ -547,21 +547,23 @@ NodeHandle SceneManager::addNode( SceneNode *node, SceneNode &parent )
 	// Mark tree as dirty
 	node->markDirty();
 	
-	// Try to insert node in free slot
-	for( uint32 i = 0; i < _nodes.size(); ++i )
+	// Insert node in free slot
+	if( !_freeList.empty() )
 	{
-		if( _nodes[i] == 0x0 )
-		{
-			node->_handle = i + 1;
-			_nodes[i] = node;
-			return i + 1;
-		}
+		uint32 slot = _freeList.back();
+		ASSERT( _nodes[slot] != 0x0 );
+		_freeList.pop_back();
+
+		node->_handle = slot + 1;
+		_nodes[slot] = node;
+		return slot + 1;
 	}
-	
-	// If there is no free slot, add node
-	_nodes.push_back( node );
-	node->_handle = (NodeHandle)_nodes.size();
-	return node->_handle;
+	else
+	{
+		_nodes.push_back( node );
+		node->_handle = (NodeHandle)_nodes.size();
+		return node->_handle;
+	}
 }
 
 
@@ -589,6 +591,7 @@ void SceneManager::removeNodeRec( SceneNode *node )
 	if( handle != RootNode )
 	{
 		delete _nodes[handle - 1]; _nodes[handle - 1] = 0x0;
+		_freeList.push_back( handle - 1 );
 	}
 }
 

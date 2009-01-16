@@ -245,6 +245,7 @@ class SceneManager
 protected:
 
 	std::vector< SceneNode *>      _nodes;  // _nodes[0] is root node
+	std::vector< uint32 >          _freeList;  // List of free slots
 	std::vector< SceneNode *>      _lightQueue;
 	std::vector< SceneNode *>      _renderableQueue;
 	std::vector< SceneNode * >     _findResults;
