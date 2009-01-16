@@ -98,7 +98,7 @@ protected:
 	SceneNode                   *_parent;  // Parent node
 	int                         _type;
 	NodeHandle                  _handle;
-	bool                        _dirty;
+	bool                        _dirty;  // Does the node need to be updated?
 	bool                        _transformed;
 	bool                        _renderable;
 	bool                        _active;
@@ -144,6 +144,7 @@ public:
 
 	virtual void onPreUpdate();	// Called before absolute transformation is updated
 	virtual void onPostUpdate();	// Called after absolute transformation has been updated
+	virtual void onFinishedUpdate();  // Called after children have been updated
 	virtual void onAttach( SceneNode &parentNode );	// Called when node is attached to parent
 	virtual void onDetach( SceneNode &parentNode );	// Called when node is detached from parent
 

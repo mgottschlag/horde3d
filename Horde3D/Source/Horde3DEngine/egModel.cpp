@@ -33,7 +33,7 @@ using namespace std;
 ModelNode::ModelNode( const ModelNodeTpl &modelTpl ) :
 	SceneNode( modelTpl ), _geometryRes( modelTpl.geoRes ), _baseGeoRes( 0x0 ),
 	_softwareSkinning( modelTpl.softwareSkinning ), _morpherUsed( false ), _morpherDirty( false ),
-	_animDirty( false ), _nodeListDirty( false ), _animTimeStamp( 0 ), _meshCount( 0 )
+	_animDirty( false ), _nodeListDirty( false ), _skinningDirty( false ), _meshCount( 0 )
 {
 	_renderable = true;
 	
@@ -242,6 +242,10 @@ bool ModelNode::setAnimParams( int stage, float time, float weight )
 	curStage->animTime = time;
 	curStage->blendWeight = weight;
 
+	// Reset ignore animation flag
+	for( size_t i = 0, s = _nodeList.size(); i < s; ++i )
+		_nodeList[i].node->_ignoreAnim = false;
+
 	markDirty();	// Mark scene node as dirty so that update function is called
 	_animDirty = true;
 	
@@ -348,10 +352,16 @@ bool ModelNode::setParami( int param, int value )
 			_baseGeoRes = 0x0;
 		}
 
+		_skinningDirty = true;
 		markMeshBBoxesDirty();
 		return true;
 	case ModelNodeParams::SoftwareSkinning:
 		_softwareSkinning = (value != 0);
+		if( _softwareSkinning )
+		{	
+			_skinningDirty = true;
+			markMeshBBoxesDirty();
+		}
 
 		if( _softwareSkinning && _baseGeoRes == 0x0 && _geometryRes != 0x0 )
 			// Create a local resource copy since it is not yet existing
@@ -368,9 +378,12 @@ bool ModelNode::setParami( int param, int value )
 }
 
 
-bool ModelNode::updateGeometry( bool skinningDirty )
+bool ModelNode::updateGeometry()
 {
-	if( !skinningDirty && !_morpherDirty ) return false;
+	_skinningDirty |= _morpherDirty;
+	_skinningDirty &= _softwareSkinning;
+	
+	if( !_skinningDirty && !_morpherDirty ) return false;
 
 	if( _baseGeoRes == 0x0 || _baseGeoRes->getVertData() == 0x0 ) return false;
 	if( _geometryRes == 0x0 || _geometryRes->getVertData() == 0x0 ) return false;
@@ -403,7 +416,7 @@ bool ModelNode::updateGeometry( bool skinningDirty )
 		}
 	}
 
-	if( skinningDirty )
+	if( _skinningDirty )
 	{
 		// TODO: Optimize this routine
 
@@ -458,6 +471,7 @@ bool ModelNode::updateGeometry( bool skinningDirty )
 	}
 
 	_morpherDirty = false;
+	_skinningDirty = false;
 	
 	// Upload geometry
 	_geometryRes->updateDynamicVertData();
@@ -470,32 +484,36 @@ void ModelNode::onPostUpdate()
 {
 	if( _nodeListDirty ) recreateNodeList();
 	
-	bool skinningDirty = (_morpherDirty && _softwareSkinning) || (_animDirty && _softwareSkinning);
-	
 	if( _animDirty )
 	{	
+		_skinningDirty = true;
 		_animDirty = false;
 		
-		++_animTimeStamp;
-		if( _animTimeStamp == 0 ) _animTimeStamp = 1;	// Handle overflow/wrapping
-		
-		// Count number of stages
-		uint32 numStages = 0, firstStage = 0;
+		// Find active stages
+		static std::vector< uint32 > activeStages;
+		activeStages.resize( 0 );
+
 		for( uint32 i = 0; i < MaxNumAnimStages; ++i )
 		{
 			if( _animStages[i] != 0x0 && _animStages[i]->anim != 0x0 )
-			{
-				if( numStages == 0 ) firstStage = i;
-				++numStages;
-			}
+				activeStages.push_back( i );
 		}
 
 		// Animate
-		if( Modules::config().fastAnimation && numStages == 1 )
+		if( Modules::config().fastAnimation && activeStages.size() == 1 )
 		{
+			uint32 firstStage = activeStages[0];
+			
 			// Fast animation path
 			for( size_t i = 0, s =_nodeList.size(); i < s; ++i )
 			{
+				// Ignore animation if node transformation was set manually
+				if( _nodeList[i].node->_ignoreAnim )
+				{
+					_nodeList[i].node->_ignoreAnim = false;
+					continue;
+				}
+				
 				AnimResEntity *ae = _nodeList[i].animEntities[firstStage];
 				if( ae != 0x0 && !ae->frames.empty() )
 				{
@@ -507,45 +525,54 @@ void ModelNode::onPostUpdate()
 		}
 		else
 		{
-			for( uint32 i = 0; i < MaxNumAnimStages; ++i )
+			Quaternion nodeRotQuat;
+			Vec3f nodeTransVec, nodeScaleVec;
+			
+			for( size_t i = 0, s = _nodeList.size(); i < s; ++i )
 			{
-				if( _animStages[i] == 0x0 || _animStages[i]->anim == 0x0 ) continue;
-				
-				AnimStage &curStage = *_animStages[i];
-				
-				// Ignore stages with a blend weight near zero
-				if( curStage.blendWeight < 0.0001f && !curStage.additive ) continue;
-				
-				for( size_t j = 0, s = _nodeList.size(); j < s; ++j )
+				// Ignore animation if node transformation was set manually
+				if( _nodeList[i].node->_ignoreAnim )
 				{
-					if( _nodeList[j].animEntities[i] == 0x0 ) continue;
-					uint32 numFrames = (uint32)_nodeList[j].animEntities[i]->frames.size();
+					_nodeList[i].node->_ignoreAnim = false;
+					continue;
+				}
+				
+				bool firstStage = true;
+				float weightAccum = 0.0f;
+
+				for( size_t j = 0, s = activeStages.size(); j < s; ++j )
+				{
+					uint32 stageIdx = activeStages[j];
+					AnimStage &curStage = *_animStages[stageIdx];
+				
+					// Ignore stages with a blend weight near zero
+					if( curStage.blendWeight < 0.0001f && !curStage.additive ) continue;
+
+					if( _nodeList[i].animEntities[stageIdx] == 0x0 ) continue;
+					uint32 numFrames = (uint32)_nodeList[i].animEntities[stageIdx]->frames.size();
 					
 					if( numFrames > 0 )
 					{
-						AnimatableSceneNode &node = *_nodeList[j].node;
-
 						float weight = curStage.blendWeight;
-						if( node._weightAccum + weight > 1.0f ) weight = 1.0f - node._weightAccum;
+						if( weightAccum + weight > 1.0f ) weight = 1.0f - weightAccum;
 
 						// Fast animation with sampled frame data
 						if( Modules::config().fastAnimation )
 						{
 							uint32 f0 = (int)curStage.animTime % numFrames;
 							if( numFrames == 1 ) f0 = 0;	// Animation compression
-							Frame &frame = _nodeList[j].animEntities[i]->frames[f0];
+							Frame &frame = _nodeList[i].animEntities[stageIdx]->frames[f0];
 							
-							// Check if this is the first stage affecting the node
-							if( _animTimeStamp != node._animUpdateStamp )
+							if( firstStage )
 							{
 								// Ignore additive stages that are before a non-additive one
 								if( !curStage.additive )
 								{
-									node._animUpdateStamp = _animTimeStamp;
-									node._weightAccum = curStage.blendWeight;
-									node._rotQuat = frame.rotQuat;
-									node._transVec = frame.transVec;
-									node._scaleVec = frame.scaleVec;
+									firstStage = false;
+									weightAccum = curStage.blendWeight;
+									nodeRotQuat = frame.rotQuat;
+									nodeTransVec = frame.transVec;
+									nodeScaleVec = frame.scaleVec;
 								}
 							}
 							else
@@ -553,23 +580,23 @@ void ModelNode::onPostUpdate()
 								if( curStage.additive )
 								{
 									// Add the difference to the first frame of the animation
-									Frame &firstFrame = _nodeList[j].animEntities[i]->frames[0];
+									Frame &firstFrame = _nodeList[i].animEntities[stageIdx]->frames[0];
 									
-									node._rotQuat *= firstFrame.rotQuat.inverted() * frame.rotQuat;
-									node._transVec += frame.transVec - firstFrame.transVec;
-									node._scaleVec.x *= 1 / firstFrame.scaleVec.x * frame.scaleVec.x;
-									node._scaleVec.y *= 1 / firstFrame.scaleVec.y * frame.scaleVec.y;
-									node._scaleVec.z *= 1 / firstFrame.scaleVec.z * frame.scaleVec.z;
+									nodeRotQuat *= firstFrame.rotQuat.inverted() * frame.rotQuat;
+									nodeTransVec += frame.transVec - firstFrame.transVec;
+									nodeScaleVec.x *= 1 / firstFrame.scaleVec.x * frame.scaleVec.x;
+									nodeScaleVec.y *= 1 / firstFrame.scaleVec.y * frame.scaleVec.y;
+									nodeScaleVec.z *= 1 / firstFrame.scaleVec.z * frame.scaleVec.z;
 								}
-								else if( node._weightAccum < 1.0f )
+								else if( weightAccum < 1.0f )
 								{
-									float blend = node._weightAccum / (node._weightAccum + weight);
+									float blend = weightAccum / (weightAccum + weight);
 							
-									node._rotQuat = frame.rotQuat.slerp( node._rotQuat, blend );
-									node._transVec = frame.transVec.lerp( node._transVec, blend );
-									node._scaleVec = frame.scaleVec.lerp( node._scaleVec, blend );
+									nodeRotQuat = frame.rotQuat.slerp( nodeRotQuat, blend );
+									nodeTransVec = frame.transVec.lerp( nodeTransVec, blend );
+									nodeScaleVec = frame.scaleVec.lerp( nodeScaleVec, blend );
 
-									node._weightAccum += curStage.blendWeight;
+									weightAccum += curStage.blendWeight;
 								}
 							}
 						}
@@ -583,25 +610,24 @@ void ModelNode::onPostUpdate()
 
 							if( numFrames == 1 ) f0 = f1 = 0;	// Animation compression
 							
-							Frame &frame0 = _nodeList[j].animEntities[i]->frames[f0];
-							Frame &frame1 = _nodeList[j].animEntities[i]->frames[f1];
+							Frame &frame0 = _nodeList[i].animEntities[stageIdx]->frames[f0];
+							Frame &frame1 = _nodeList[i].animEntities[stageIdx]->frames[f1];
 							
 							// Inter-frame interpolation
 							Vec3f transVec( frame0.transVec.lerp( frame1.transVec, amount ) );
 							Vec3f scaleVec( frame0.scaleVec.lerp( frame1.scaleVec, amount ) );
 							Quaternion rotQuat( frame0.rotQuat.slerp( frame1.rotQuat, amount ) );
 
-							// Check if this is the first stage affecting the node
-							if( _animTimeStamp != node._animUpdateStamp )
+							if( firstStage )
 							{
 								// Ignore additive stages that are before a non-additive one
 								if( !curStage.additive )
 								{
-									node._animUpdateStamp = _animTimeStamp;
-									node._weightAccum = curStage.blendWeight;
-									node._rotQuat = rotQuat;
-									node._transVec = transVec;
-									node._scaleVec = scaleVec;
+									firstStage = false;
+									weightAccum = curStage.blendWeight;
+									nodeRotQuat = rotQuat;
+									nodeTransVec = transVec;
+									nodeScaleVec = scaleVec;
 								}
 							}
 							else
@@ -609,40 +635,48 @@ void ModelNode::onPostUpdate()
 								if( curStage.additive )
 								{
 									// Add the difference to the first frame of the animation
-									Frame &firstFrame = _nodeList[j].animEntities[i]->frames[0];
+									Frame &firstFrame = _nodeList[i].animEntities[stageIdx]->frames[0];
 									
-									node._rotQuat *= firstFrame.rotQuat.inverted() * rotQuat;
-									node._transVec += transVec - firstFrame.transVec;
-									node._scaleVec.x *= 1 / firstFrame.scaleVec.x * scaleVec.x;
-									node._scaleVec.y *= 1 / firstFrame.scaleVec.y * scaleVec.y;
-									node._scaleVec.z *= 1 / firstFrame.scaleVec.z * scaleVec.z;
+									nodeRotQuat *= firstFrame.rotQuat.inverted() * rotQuat;
+									nodeTransVec += transVec - firstFrame.transVec;
+									nodeScaleVec.x *= 1 / firstFrame.scaleVec.x * scaleVec.x;
+									nodeScaleVec.y *= 1 / firstFrame.scaleVec.y * scaleVec.y;
+									nodeScaleVec.z *= 1 / firstFrame.scaleVec.z * scaleVec.z;
 								}
-								else if( node._weightAccum < 1.0f )
+								else if( weightAccum < 1.0f )
 								{
 									// Interpolate between animation and current state from previous animations
-									float blend = node._weightAccum / (node._weightAccum + weight);
+									float blend = weightAccum / (weightAccum + weight);
 									
-									node._rotQuat = rotQuat.slerp( node._rotQuat, blend );
-									node._transVec = transVec.lerp( node._transVec, blend );
-									node._scaleVec = scaleVec.lerp( node._scaleVec, blend );
+									nodeRotQuat = rotQuat.slerp( nodeRotQuat, blend );
+									nodeTransVec = transVec.lerp( nodeTransVec, blend );
+									nodeScaleVec = scaleVec.lerp( nodeScaleVec, blend );
 
-									node._weightAccum += curStage.blendWeight;
+									weightAccum += curStage.blendWeight;
 								}
 							}
 						}
 					}
 				}
+
+				// Build matrix from animation data
+				Matrix4f &mat = _nodeList[i].node->_relTrans;
+				mat = Matrix4f::ScaleMat( nodeScaleVec.x, nodeScaleVec.y, nodeScaleVec.z );
+				mat = Matrix4f( nodeRotQuat ) * mat;
+				mat.translate( nodeTransVec.x, nodeTransVec.y, nodeTransVec.z );
 			}
 		}
 
 		// Mark transformed nodes as dirty
 		markDirty();
-		// Force update so that relative transformations are updated with animation data
-		update();
 	}
+}
 
+
+void ModelNode::onFinishedUpdate()
+{
 	// Update geometry for morphers or software skinning
-	if( updateGeometry( skinningDirty ) )
+	if( updateGeometry() )
 	{
 		update();	// Force update so that bounding boxes are adapted to skinned data
 	}

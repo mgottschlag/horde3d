@@ -29,30 +29,6 @@
 
 using namespace std;
 
-// *************************************************************************************************
-// Class AnimatableSceneNode
-// *************************************************************************************************
-
-void AnimatableSceneNode::onPreUpdate()
-{
-	if( _ignoreAnim )
-	{
-		_ignoreAnim = false;
-	}
-	else if( _animUpdateStamp != 0 )		// Node was updated by animation
-	{
-		_animUpdateStamp = 0;
-		_weightAccum = 0;
-
-		// Build matrix from animation data
-		Matrix4f mat;
-		mat.scale( _scaleVec.x, _scaleVec.y, _scaleVec.z );
-		mat = Matrix4f( _rotQuat ) * mat;
-		mat.translate( _transVec.x, _transVec.y, _transVec.z );
-		_relTrans = mat;
-	}
-}
-
 
 // *************************************************************************************************
 // Class MeshNode

@@ -110,14 +110,13 @@ protected:
 	PGeometryResource             _baseGeoRes;	// NULL if model does not have a private geometry copy
 	std::vector< Vec4f >          _skinMatRows;
 	
-	uint32                        _animTimeStamp;
 	uint32                        _meshCount;  // Number of meshes in _animatedNodes
 	std::vector< NodeListEntry >  _nodeList;  // List of the model's meshes followed by joints
 	AnimStage                     *_animStages[MaxNumAnimStages];
 
 	std::vector< Morpher >        _morphers;
-	bool                          _softwareSkinning;
-	bool                          _animDirty;  // Animation has changed		
+	bool                          _softwareSkinning, _skinningDirty;
+	bool                          _animDirty;  // Animation has changed	
 	bool                          _nodeListDirty;  // An animatable node has been attached to model
 	bool                          _morpherUsed, _morpherDirty;
 	
@@ -145,8 +144,9 @@ public:
 	bool setParami( int param, int value );
 
 	void onPostUpdate();
+	void onFinishedUpdate();
 
-	bool updateGeometry( bool skinningDirty );
+	bool updateGeometry();
 
 	GeometryResource *getGeometryResource() { return _geometryRes; }
 	bool jointExists( uint32 jointIndex ) { return jointIndex < _skinMatRows.size() / 3; }

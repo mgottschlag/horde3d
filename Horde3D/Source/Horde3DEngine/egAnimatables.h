@@ -38,21 +38,15 @@ class AnimatableSceneNode : public SceneNode
 {
 protected:
 
-	Quaternion  _rotQuat;
-	Vec3f       _transVec, _scaleVec;
 	ModelNode   *_parentModel;
-	uint32      _animUpdateStamp;
-	float       _weightAccum;
 	bool        _ignoreAnim;
 
 public:
 
 	AnimatableSceneNode( const SceneNodeTpl &tpl ) :
-		SceneNode( tpl ), _parentModel( 0x0 ), _ignoreAnim( false ), _animUpdateStamp( 0 ), _weightAccum( 0 )
+		SceneNode( tpl ), _parentModel( 0x0 ), _ignoreAnim( false )
 	{
 	}
-
-	virtual void onPreUpdate();
 
 	friend class SceneNode;
 	friend class ModelNode;

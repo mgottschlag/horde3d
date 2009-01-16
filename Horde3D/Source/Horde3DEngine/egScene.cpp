@@ -71,8 +71,7 @@ void SceneNode::setTransform( Vec3f trans, Vec3f rot, Vec3f scale )
 		((AnimatableSceneNode *)this)->_ignoreAnim = true;
 	}
 	
-	_relTrans = Matrix4f();
-	_relTrans.scale( scale.x, scale.y, scale.z );
+	_relTrans = Matrix4f::ScaleMat( scale.x, scale.y, scale.z );
 	_relTrans.rotate( degToRad( rot.x ), degToRad( rot.y ), degToRad( rot.z ) );
 	_relTrans.translate( trans.x, trans.y, trans.z );
 	
@@ -223,10 +222,10 @@ bool SceneNode::update()
 		_bBox.transform( _absTrans );
 		bBoxChanged = true;
 	}
-
-	_dirty = false;
 	
 	onPostUpdate();
+
+	_dirty = false;
 
 	// Visit children
 	for( uint32 i = 0, s = (uint32)_children.size(); i < s; ++i )
@@ -248,6 +247,8 @@ bool SceneNode::update()
 			bBoxChanged |= _bBox.makeUnion( _children[i]->_bBox ); 
 		}
 	}
+
+	onFinishedUpdate();
 	
 	return bBoxChanged;
 }
@@ -265,6 +266,11 @@ void SceneNode::onPreUpdate()
 
 
 void SceneNode::onPostUpdate()
+{
+}
+
+
+void SceneNode::onFinishedUpdate()
 {
 }
 
