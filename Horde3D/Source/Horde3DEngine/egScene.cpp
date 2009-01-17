@@ -557,7 +557,7 @@ NodeHandle SceneManager::addNode( SceneNode *node, SceneNode &parent )
 	if( !_freeList.empty() )
 	{
 		uint32 slot = _freeList.back();
-		ASSERT( _nodes[slot] != 0x0 );
+		ASSERT( _nodes[slot] == 0x0 );
 		_freeList.pop_back();
 
 		node->_handle = slot + 1;
