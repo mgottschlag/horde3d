@@ -133,6 +133,7 @@ protected:
 
 	int                     _statTriCount, _statBatchCount, _statLightPassCount;
 
+
 	static bool nodeFrontToBackOrder( NodeListEntry e1, NodeListEntry e2 )
 		{ return ((MeshNode *)e1.node)->tmpSortValue < ((MeshNode *)e2.node)->tmpSortValue; }
 	static bool nodeBackToFrontOrder( NodeListEntry e1, NodeListEntry e2 )
@@ -141,23 +142,27 @@ protected:
 		{ return ((MeshNode *)e1.node)->getMaterialRes() < ((MeshNode *)e2.node)->getMaterialRes(); }
 	
 	void setupViewMatrices( CameraNode *cam );
-	bool setMaterialRec( MaterialResource *materialRes, const std::string &shaderContext, bool firstRec = false );
-	void drawRenderables( const std::string &shaderContext, const std::string &theClass, bool debugView,
-		const Frustum *frust1, const Frustum *frust2, RenderingOrder::List order, int occSet );
 	
+	bool setMaterialRec( MaterialResource *materialRes, const std::string &shaderContext, bool firstRec = false );
+	
+	void setupShadowMap( bool noShadows );
 	Matrix4f calcLightMat( const Frustum &frustum );
 	void updateShadowMap();
-	void setupShadowMap( bool noShadows );
+
+	void drawOverlays( const std::string &shaderContext );
 
 	void bindBuffer( RenderBuffer *rb, uint32 texUnit, uint32 bufIndex );
 	void clear( bool depth, bool buf0, bool buf1, bool buf2, bool buf3, float r, float g, float b, float a );
-	void drawOverlays( const std::string &shaderContext );
 	void drawFSQuad( Resource *matRes, const std::string &shaderContext );
 	void drawGeometry( const std::string &shaderContext, const std::string &theClass,
-					   RenderingOrder::List order, int occSet );
+	                   RenderingOrder::List order, int occSet );
 	void drawLightGeometry( const std::string shaderContext, const std::string &theClass,
-							bool noShadows, RenderingOrder::List order, int occSet );
+	                        bool noShadows, RenderingOrder::List order, int occSet );
 	void drawLightShapes( const std::string shaderContext, bool noShadows, int occSet );
+	
+	void drawRenderables( const std::string &shaderContext, const std::string &theClass, bool debugView,
+		const Frustum *frust1, const Frustum *frust2, RenderingOrder::List order, int occSet );
+	
 	void renderDebugView();
 	void finishRendering();
 
@@ -172,11 +177,9 @@ public:
 	void initStates();
 	bool init();
 	void resize( int x, int y, int width, int height );
+	
 	float getStat( int param, bool reset );
 	void incStat( int param, float value );
-	void showOverlay( const Overlay &overlay, uint32 matRes );
-	void clearOverlays();
-
 	int registerOccSet();
 	void unregisterOccSet( int occSet );
 
@@ -186,9 +189,18 @@ public:
 	
 	bool createShadowBuffer( uint32 width, uint32 height );
 	void destroyShadowBuffer();
+
+	void showOverlay( const Overlay &overlay, uint32 matRes );
+	void clearOverlays();
 	
 	void drawAABB( const Vec3f &bbMin, const Vec3f &bbMax );
 	void drawDebugAABB( const Vec3f &bbMin, const Vec3f &bbMax, bool saveStates );
+	
+	static void drawModels( const std::string &shaderContext, const std::string &theClass, bool debugView,
+		const Frustum *frust1, const Frustum *frust2, RenderingOrder::List order, int occSet );
+	static void drawParticles( const std::string &shaderContext, const std::string &theClass, bool debugView,
+		const Frustum *frust1, const Frustum *frust2, RenderingOrder::List order, int occSet );
+
 	bool render( CameraNode *camNode );
 
 	uint32 getFrameID() { return _frameID; }
@@ -197,11 +209,6 @@ public:
 	ShaderCombination *getCurShader() { return _curShader; }
 	CameraNode *getCurCamera() { return _curCamera; }
 	uint32 getParticleVBO() { return _particleVBO; }
-
-	static void drawModels( const std::string &shaderContext, const std::string &theClass, bool debugView,
-		const Frustum *frust1, const Frustum *frust2, RenderingOrder::List order, int occSet );
-	static void drawParticles( const std::string &shaderContext, const std::string &theClass, bool debugView,
-		const Frustum *frust1, const Frustum *frust2, RenderingOrder::List order, int occSet );
 };
 
 #endif // _egRenderer_H_

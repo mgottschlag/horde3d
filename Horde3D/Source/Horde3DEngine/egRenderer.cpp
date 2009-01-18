@@ -89,6 +89,10 @@ Renderer::~Renderer()
 }
 
 
+// =================================================================================================
+// Basic Initialization and Setup
+// =================================================================================================
+
 void Renderer::initStates()
 {
 	glPixelStorei( GL_PACK_ALIGNMENT, 1 );
@@ -110,12 +114,12 @@ bool Renderer::init()
 	
 	if( !RendererBase::init() ) failed = true;
 
-	string vendor = (char *)glGetString( GL_VENDOR );
-	string renderer = (char *)glGetString( GL_RENDERER );
-	string version = (char *)glGetString( GL_VERSION );
+	char *vendor = (char *)glGetString( GL_VENDOR );
+	char *renderer = (char *)glGetString( GL_RENDERER );
+	char *version = (char *)glGetString( GL_VERSION );
 	
 	Modules::log().writeInfo( "Initializing OpenGL renderer using OGL '%s' by '%s' on '%s'",
-							  version.c_str(), vendor.c_str(), renderer.c_str() );
+	                          version, vendor, renderer );
 
 	// Check that OpenGL 2.0 is available
 	if( glExt::majorVersion < 2 || glExt::minorVersion < 0 )
@@ -156,8 +160,8 @@ bool Renderer::init()
 	if( failed )
 	{
 		Modules::log().writeError( "Failed to init renderer, debug info following" );
-		string exts = (char *)glGetString( GL_EXTENSIONS );
-		Modules::log().writeInfo( "Supported extensions: '%s'", exts.c_str() );
+		char *exts = (char *)glGetString( GL_EXTENSIONS );
+		Modules::log().writeInfo( "Supported extensions: '%s'", exts );
 
 		return false;
 	}
@@ -170,8 +174,7 @@ bool Renderer::init()
 	uploadShader( vsOccBox, fsOccBox, occShader );
 	
 	// Create shadow map
-	if( !createShadowBuffer( Modules::config().shadowMapSize,
-							 Modules::config().shadowMapSize ) )
+	if( !createShadowBuffer( Modules::config().shadowMapSize, Modules::config().shadowMapSize ) )
 	{
 		Modules::log().writeError( "Failed to create shadow map" );
 		return false;
@@ -179,9 +182,9 @@ bool Renderer::init()
 
 	// Create default shadow map
 	float shadowTex[] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-						  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-						  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-						  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+	                      1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+	                      1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+	                      1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
 	glGenTextures( 1, &_defShadowMap );
 	glBindTexture( GL_TEXTURE_2D, _defShadowMap );
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
@@ -191,7 +194,7 @@ bool Renderer::init()
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE );
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL );
 	glTexImage2D( GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, 8, 8, 0,
-				  GL_DEPTH_COMPONENT, GL_FLOAT, shadowTex );
+	              GL_DEPTH_COMPONENT, GL_FLOAT, shadowTex );
 
 	// Create particle geometry array
 	ParticleVert v0( 0, 0, 0 );
@@ -228,6 +231,10 @@ void Renderer::resize( int x, int y, int width, int height )
 	setRenderBuffer( _curRendBuf );
 }
 
+
+// =================================================================================================
+// Misc Helper Functions
+// =================================================================================================
 
 float Renderer::getStat( int param, bool reset )
 {
@@ -270,23 +277,6 @@ void Renderer::incStat( int param, float value )
 }
 
 
-void Renderer::showOverlay( const Overlay &overlay, uint32 matRes )
-{
-	Resource *res = Modules::resMan().resolveResHandle( matRes );
-	if( res != 0x0 && res->getType() == ResourceTypes::Material )
-	{
-		_overlays.push_back( overlay );
-		_overlays.back().materialRes = (MaterialResource *)res;
-	}
-}
-
-
-void Renderer::clearOverlays()
-{
-	_overlays.resize( 0 );
-}
-
-
 int Renderer::registerOccSet()
 {
 	for( int i = 0; i < (int)_occSets.size(); ++i )
@@ -309,6 +299,19 @@ void Renderer::unregisterOccSet( int occSet )
 		_occSets[occSet] = 0;
 }
 
+
+void Renderer::setupViewMatrices( CameraNode *cam )
+{
+	glMatrixMode( GL_PROJECTION );
+	glLoadMatrixf( cam->calcProjectionMatrix().x );
+	glMatrixMode( GL_MODELVIEW );
+	glLoadMatrixf( cam->_invTrans.x );
+}
+
+
+// =================================================================================================
+// Material System
+// =================================================================================================
 
 bool Renderer::uploadShader( const char *vertexShader, const char *fragmentShader, ShaderCombination &sc )
 {
@@ -560,7 +563,7 @@ bool Renderer::setMaterialRec( MaterialResource *materialRes, const string &shad
 		if( itr != _curShader->customUniforms.end() )
 		{
 			glUniform4f( (*itr).second, uniform.values[0], uniform.values[1],
-						 uniform.values[2], uniform.values[3] );
+			             uniform.values[2], uniform.values[3] );
 		}
 	}
 
@@ -607,41 +610,9 @@ bool Renderer::setMaterial( MaterialResource *materialRes, const string &shaderC
 }
 
 
-void Renderer::setupViewMatrices( CameraNode *cam )
-{
-	glMatrixMode( GL_PROJECTION );
-	glLoadMatrixf( cam->calcProjectionMatrix().x );
-	glMatrixMode( GL_MODELVIEW );
-	glLoadMatrixf( cam->_invTrans.x );
-}
-
-
-void Renderer::drawRenderables( const string &shaderContext, const string &theClass, bool debugView,
-							    const Frustum *frust1, const Frustum *frust2, RenderingOrder::List order,
-								int occSet )
-{
-	if( Modules::config().wireframeMode && !Modules::config().debugViewMode )
-	{
-		glDisable( GL_CULL_FACE );
-		glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-	}
-	
-	map< int, NodeRegEntry >::const_iterator itr = Modules::sceneMan()._registry.begin();
-	while( itr != Modules::sceneMan()._registry.end() )
-	{
-		if( itr->second.renderFunc != 0x0 )
-			(*itr->second.renderFunc)( shaderContext, theClass, debugView, frust1, frust2, order, occSet );
-
-		++itr;
-	}
-
-	if( Modules::config().wireframeMode && !Modules::config().debugViewMode )
-	{
-		glEnable( GL_CULL_FACE );
-		glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-	}
-}
-
+// =================================================================================================
+// Shadowing
+// =================================================================================================
 
 bool Renderer::createShadowBuffer( uint32 width, uint32 height )
 {
@@ -691,6 +662,17 @@ void Renderer::destroyShadowBuffer()
 	if( _smFBO != 0 ) glDeleteFramebuffersEXT( 1, &_smFBO );
 
 	_smTex = 0; _smFBO = 0;
+}
+
+
+void Renderer::setupShadowMap( bool noShadows )
+{
+	// Bind shadow map
+	glActiveTexture( GL_TEXTURE12 );
+	if( !noShadows && _curLight->_shadowMapCount > 0 )glBindTexture( GL_TEXTURE_2D, _smTex );
+	else glBindTexture( GL_TEXTURE_2D, _defShadowMap );
+	
+	glActiveTexture( GL_TEXTURE0 );
 }
 
 
@@ -861,13 +843,13 @@ void Renderer::updateShadowMap()
 			float newBottom = _curCamera->_frustBottom * _splitPlanes[i] / _curCamera->_frustNear;
 			float newTop = _curCamera->_frustTop * _splitPlanes[i] / _curCamera->_frustNear;
 			splitFrust.buildViewFrustum( _curCamera->_absTrans, newLeft, newRight, newBottom, newTop,
-										 _splitPlanes[i], _splitPlanes[i + 1] );
+			                             _splitPlanes[i], _splitPlanes[i + 1] );
 		}
 		else
 		{
 			splitFrust.buildBoxFrustum( _curCamera->_absTrans, _curCamera->_frustLeft, _curCamera->_frustRight,
-										_curCamera->_frustBottom, _curCamera->_frustTop,
-										-_splitPlanes[i], -_splitPlanes[i + 1] );
+			                            _curCamera->_frustBottom, _curCamera->_frustTop,
+			                            -_splitPlanes[i], -_splitPlanes[i + 1] );
 		}
 		
 		// Build light projection matrix
@@ -928,383 +910,9 @@ void Renderer::updateShadowMap()
 }
 
 
-void Renderer::setupShadowMap( bool noShadows )
-{
-	// Bind shadow map
-	glActiveTexture( GL_TEXTURE12 );
-	if( !noShadows && _curLight->_shadowMapCount > 0 )glBindTexture( GL_TEXTURE_2D, _smTex );
-	else glBindTexture( GL_TEXTURE_2D, _defShadowMap );
-	
-	glActiveTexture( GL_TEXTURE0 );
-}
-
-
-void Renderer::bindBuffer( RenderBuffer *rb, uint32 texUnit, uint32 bufIndex )
-{
-	if( rb == 0x0 )
-	{
-		for( uint32 i = 0; i < 12; ++i )
-		{
-			glActiveTexture( GL_TEXTURE0 + i );
-			glBindTexture( GL_TEXTURE_2D, 0 );
-		}
-	}
-	else
-	{
-		if( texUnit < 12 )
-		{
-			glActiveTexture( GL_TEXTURE0 + texUnit );
-			if( bufIndex < 4 && rb->colBufs[bufIndex] != 0 )
-				glBindTexture( GL_TEXTURE_2D, rb->colBufs[bufIndex] );
-			else if( bufIndex == 32 && rb->depthBuf != 0 )
-				glBindTexture( GL_TEXTURE_2D, rb->depthBuf );
-		}
-	}
-
-	glActiveTexture( GL_TEXTURE0 );
-}
-
-
-void Renderer::clear( bool depth, bool buf0, bool buf1, bool buf2, bool buf3,
-					  float r, float g, float b, float a )
-{
-	int mask = 0;
-
-	glPushAttrib( GL_COLOR_BUFFER_BIT );	// Store state of glDrawBuffers
-	
-	glDisable( GL_BLEND );	// Clearing floating point buffers causes problems when blending is enabled on Radeon 9600
-	glDepthMask( GL_TRUE );
-	glClearColor( r, g, b, a );
-
-	if( _curRendBuf != 0x0 )
-	{
-		uint32 buffers[4], cnt = 0;
-
-		if( depth && _curRendBuf->depthBuf != 0 ) mask |= GL_DEPTH_BUFFER_BIT;
-		
-		if( buf0 && _curRendBuf->colBufs[0] != 0 ) buffers[cnt++] = GL_COLOR_ATTACHMENT0_EXT;
-		if( buf1 && _curRendBuf->colBufs[1] != 0 ) buffers[cnt++] = GL_COLOR_ATTACHMENT1_EXT;
-		if( buf2 && _curRendBuf->colBufs[2] != 0 ) buffers[cnt++] = GL_COLOR_ATTACHMENT2_EXT;
-		if( buf3 && _curRendBuf->colBufs[3] != 0 ) buffers[cnt++] = GL_COLOR_ATTACHMENT3_EXT;
-
-		if( cnt > 0 )
-		{	
-			mask |= GL_COLOR_BUFFER_BIT;
-			glDrawBuffers( cnt, buffers );
-		}
-	}
-	else
-	{
-		if( depth ) mask |= GL_DEPTH_BUFFER_BIT;
-		if( buf0 ) mask |= GL_COLOR_BUFFER_BIT;
-		glScissor( _vpX, _vpY, _vpWidth, _vpHeight );
-		glEnable( GL_SCISSOR_TEST );
-	}
-	
-	if( mask != 0 ) glClear( mask );
-	glDisable( GL_SCISSOR_TEST );
-	glPopAttrib();
-}
-
-
-void Renderer::drawOverlays( const string &shaderContext )
-{
-	setMaterial( 0x0, "" );
-	++_curUpdateStamp;
-	
-	glMatrixMode( GL_PROJECTION );
-	glLoadIdentity();
-	glOrtho( 0, 1, 0, 1, -1, 1 );
-	glMatrixMode( GL_MODELVIEW );
-	glLoadIdentity();
-	
-	glDisable( GL_DEPTH_TEST );
-	
-	for( int i = 0; i < 8; ++i )
-	{
-		for( uint32 j = 0; j < _overlays.size(); ++j )
-		{
-			if( _overlays[j].layer != i ) continue;
-
-			Overlay &overlay = _overlays[j];
-
-			if( !setMaterial( overlay.materialRes, shaderContext ) ) continue;
-			
-			glBegin( GL_QUADS );
-			glTexCoord2fv( &overlay.u_ll ); glVertex2fv( &overlay.x_ll );
-			glTexCoord2fv( &overlay.u_lr ); glVertex2fv( &overlay.x_lr );
-			glTexCoord2fv( &overlay.u_ur ); glVertex2fv( &overlay.x_ur );
-			glTexCoord2fv( &overlay.u_ul ); glVertex2fv( &overlay.x_ul );
-			glEnd();
-		}
-	}
-
-	glEnable( GL_DEPTH_TEST );
-}
-
-
-void Renderer::drawFSQuad( Resource *matRes, const string &shaderContext )
-{
-	if( matRes == 0x0 || matRes->getType() != ResourceTypes::Material ) return;
-	
-	// Reset current material
-	setMaterial( 0x0, "" );
-	++_curUpdateStamp;
-
-	if( !setMaterial( (MaterialResource *)matRes, shaderContext ) ) return;
-	
-	glMatrixMode( GL_PROJECTION );
-	glLoadIdentity();
-	glOrtho( 0, 1, 0, 1, -1, 1 );
-	glMatrixMode( GL_MODELVIEW );
-	if( _curCamera != 0x0 )
-		glLoadMatrixf( _curCamera->_invTrans.x );
-	else
-		glLoadIdentity();
-	
-	glDepthFunc( GL_ALWAYS );
-	
-	glBegin(GL_QUADS);
-	glTexCoord2f( 0, 0 ); glVertex2f( 0, 0 );
-	glTexCoord2f( 1, 0 ); glVertex2f( 1, 0 );
-	glTexCoord2f( 1, 1 ); glVertex2f( 1, 1 );
-	glTexCoord2f( 0, 1 ); glVertex2f( 0, 1 );
-	glEnd();
-
-	glDepthFunc( GL_LEQUAL );
-}
-
-
-void Renderer::drawGeometry( const string &shaderContext, const string &theClass,
-							 RenderingOrder::List order, int occSet )
-{
-	if( _curCamera == 0x0 ) return;
-	
-	++_curUpdateStamp;
-	
-	_curCamera->genFrustum( _camFrustum );
-	Modules::sceneMan().updateQueues( _camFrustum, 0x0, order, false, true );
-	
-	setupViewMatrices( _curCamera );
-	
-	drawRenderables( shaderContext, theClass, false, &_camFrustum, 0x0, order, occSet );
-}
-
-
-void Renderer::drawLightGeometry( const string shaderContext, const string &theClass,
-								  bool noShadows, RenderingOrder::List order, int occSet )
-{
-	if( _curCamera == 0x0 ) return;
-	
-	string context = shaderContext;
-	
-	_curCamera->genFrustum( _camFrustum );
-	Modules::sceneMan().updateQueues( _camFrustum, 0x0, RenderingOrder::None, true, false );
-	
-	for( size_t i = 0, s = Modules::sceneMan().getLightQueue().size(); i < s; ++i )
-	{
-		++_curUpdateStamp;
-		_curLight = (LightNode *)Modules::sceneMan().getLightQueue()[i];
-		_curLight->genFrustum( _lightFrustum );
-
-		// Check if light is not visible
-		if( _camFrustum.cullFrustum( _lightFrustum ) ) continue;
-
-		setupViewMatrices( _curCamera );
-
-		// Check if light is occluded
-		if( occSet >= 0 )
-		{
-			if( occSet > (int)_curLight->_occQueries.size() - 1 )
-			{
-				_curLight->_occQueries.resize( occSet + 1, 0 );
-				_curLight->_lastVisited.resize( occSet + 1, 0 );
-			}
-			if( _curLight->_occQueries[occSet] == 0 )
-			{
-				_curLight->_occQueries[occSet] = Modules::renderer().createOccQuery();
-				_curLight->_lastVisited[occSet] = 0;
-			}
-			else
-			{
-				if( _curLight->_lastVisited[occSet] != Modules::renderer().getFrameID() )
-				{
-					_curLight->_lastVisited[occSet] = Modules::renderer().getFrameID();
-				
-					Vec3f mins, maxs;
-					_lightFrustum.calcAABB( mins, maxs );
-					
-					// Check that viewer is outside light bounds
-					if( nearestDistToAABB( _camFrustum.getOrigin(), mins, maxs ) )
-					{
-						// Draw occlusion box
-						glColorMask( 0, 0, 0, 0 );
-						glDepthMask( 0 );
-						Modules::renderer().beginOccQuery( _curLight->_occQueries[occSet] );
-						Modules::renderer().setShader( &Modules::renderer().occShader );
-						Modules::renderer().drawAABB( mins, maxs );
-						Modules::renderer().endOccQuery( _curLight->_occQueries[occSet] );
-						Modules::renderer().setMaterial( 0x0, "" );
-						glDepthMask( 1 );
-						glColorMask( 1, 1, 1, 1 );
-
-						// Check query result from previous frame
-						if( Modules::renderer().getOccQueryResult( _curLight->_occQueries[occSet] ) < 1 )
-						{
-							continue;
-						}
-					}
-				}
-			}
-		}
-	
-		// Calculate light screen space position
-		float bbx, bby, bbw, bbh;
-		_curLight->calcScreenSpaceAABB( _curCamera->calcProjectionMatrix() * _curCamera->_invTrans,
-										bbx, bby, bbw, bbh );
-
-		// Update shadow map
-		if( !noShadows && _curLight->_shadowMapCount > 0 ) updateShadowMap();
-
-		// Set scissor rectangle
-		if( bbx != 0 || bby != 0 || bbw != 1 || bbh != 1 )
-		{
-			glScissor( (int)(bbx * _fbWidth), (int)(bby * _fbHeight),
-					   (int)(bbw * _fbWidth), (int)(bbh * _fbHeight) );
-			glEnable( GL_SCISSOR_TEST );
-		}
-		
-		setupShadowMap( noShadows );
-
-		if( shaderContext == "" ) context = _curLight->_lightingContext;
-		
-		// Render
-		_curCamera->genFrustum( _camFrustum );
-		_curLight->genFrustum( _lightFrustum );
-		Modules::sceneMan().updateQueues( _camFrustum, &_lightFrustum, RenderingOrder::None, false, true );
-		setupViewMatrices( _curCamera );
-		drawRenderables( context, theClass, false, &_camFrustum, &_lightFrustum, order, occSet );
-		incStat( EngineStats::LightPassCount, 1 );
-
-		// Reset
-		glDisable( GL_SCISSOR_TEST );
-		glActiveTexture( GL_TEXTURE12 );
-		glBindTexture( GL_TEXTURE_2D, 0 );
-		glActiveTexture( GL_TEXTURE0 );
-	}
-
-	_curLight = 0x0;
-}
-
-
-void Renderer::drawLightShapes( const string shaderContext, bool noShadows, int occSet )
-{
-	if( _curCamera == 0x0 ) return;
-	
-	string context = shaderContext;
-	
-	_curCamera->genFrustum( _camFrustum );
-	Modules::sceneMan().updateQueues( _camFrustum, 0x0, RenderingOrder::None, true, false );
-	
-	for( size_t i = 0, s = Modules::sceneMan().getLightQueue().size(); i < s; ++i )
-	{
-		++_curUpdateStamp;
-		_curLight = (LightNode *)Modules::sceneMan().getLightQueue()[i];
-		_curLight->genFrustum( _lightFrustum );
-		
-		// Check if light is not visible
-		if( _camFrustum.cullFrustum( _lightFrustum ) ) continue;
-
-		setupViewMatrices( _curCamera );
-		
-		// Check if light is occluded
-		if( occSet >= 0 )
-		{
-			if( occSet > (int)_curLight->_occQueries.size() - 1 )
-			{
-				_curLight->_occQueries.resize( occSet + 1, 0 );
-				_curLight->_lastVisited.resize( occSet + 1, 0 );
-			}
-			if( _curLight->_occQueries[occSet] == 0 )
-			{
-				_curLight->_occQueries[occSet] = Modules::renderer().createOccQuery();
-				_curLight->_lastVisited[occSet] = 0;
-			}
-			else
-			{
-				if( _curLight->_lastVisited[occSet] != Modules::renderer().getFrameID() )
-				{
-					_curLight->_lastVisited[occSet] = Modules::renderer().getFrameID();
-				
-					Vec3f mins, maxs;
-					_lightFrustum.calcAABB( mins, maxs );
-					
-					// Check that viewer is outside light bounds
-					if( nearestDistToAABB( _camFrustum.getOrigin(), mins, maxs ) )
-					{
-						// Draw occlusion box
-						glColorMask( 0, 0, 0, 0 );
-						glDepthMask( 0 );
-						Modules::renderer().beginOccQuery( _curLight->_occQueries[occSet] );
-						Modules::renderer().setShader( &Modules::renderer().occShader );
-						Modules::renderer().drawAABB( mins, maxs );
-						Modules::renderer().endOccQuery( _curLight->_occQueries[occSet] );
-						Modules::renderer().setMaterial( 0x0, "" );
-						glDepthMask( 1 );
-						glColorMask( 1, 1, 1, 1 );
-
-						// Check query result from previous frame
-						if( Modules::renderer().getOccQueryResult( _curLight->_occQueries[occSet] ) < 1 )
-						{
-							continue;
-						}
-					}
-				}
-			}
-		}
-		
-		// Calculate light screen space position
-		float bbx, bby, bbw, bbh;
-		_curLight->calcScreenSpaceAABB( _curCamera->calcProjectionMatrix() * _curCamera->_invTrans,
-										bbx, bby, bbw, bbh );
-		
-		// Update shadow map
-		if( !noShadows && _curLight->_shadowMapCount > 0 ) updateShadowMap();
-
-		// Prepare postprocessing step (set the camera transformation in MV matrix)
-		glDisable( GL_DEPTH_TEST );
-		glMatrixMode( GL_PROJECTION );
-		glLoadIdentity();
-		glOrtho( 0, 1, 0, 1, -1, 1 );
-		glMatrixMode( GL_MODELVIEW );
-		glLoadMatrixf( _curCamera->_invTrans.x );
-		
-		setupShadowMap( noShadows );
-
-		if( shaderContext == "" ) context = _curLight->_lightingContext;
-
-		setMaterial( 0x0, "" );		// Reset material
-		if( !setMaterial( _curLight->_materialRes, context ) ) continue;
-		
-		// Draw quad
-		glBegin( GL_QUADS );
-		glTexCoord2f( bbx, bby ); glVertex2f( bbx, bby );
-		glTexCoord2f( bbx + bbw, bby ); glVertex2f( bbx + bbw, bby );
-		glTexCoord2f( bbx + bbw, bby + bbh ); glVertex2f( bbx + bbw, bby + bbh );
-		glTexCoord2f( bbx, bby + bbh ); glVertex2f( bbx, bby + bbh );
-		glEnd();
-		incStat( EngineStats::LightPassCount, 1 );
-
-		// Reset
-		glEnable( GL_DEPTH_TEST );
-		glActiveTexture( GL_TEXTURE12 );
-		glBindTexture( GL_TEXTURE_2D, 0 );
-		glActiveTexture( GL_TEXTURE0 );
-	}
-
-	_curLight = 0x0;
-}
-
+// =================================================================================================
+// Rendering Helper Functions
+// =================================================================================================
 
 void Renderer::drawAABB( const Vec3f &bbMin, const Vec3f &bbMax )
 {
@@ -1410,253 +1018,432 @@ void Renderer::drawDebugAABB( const Vec3f &bbMin, const Vec3f &bbMax, bool saveS
 }
 
 
-void Renderer::renderDebugView()
+// =================================================================================================
+// Overlays
+// =================================================================================================
+
+void Renderer::showOverlay( const Overlay &overlay, uint32 matRes )
+{
+	Resource *res = Modules::resMan().resolveResHandle( matRes );
+	if( res != 0x0 && res->getType() == ResourceTypes::Material )
+	{
+		_overlays.push_back( overlay );
+		_overlays.back().materialRes = (MaterialResource *)res;
+	}
+}
+
+
+void Renderer::clearOverlays()
+{
+	_overlays.resize( 0 );
+}
+
+
+void Renderer::drawOverlays( const string &shaderContext )
+{
+	setMaterial( 0x0, "" );
+	++_curUpdateStamp;
+	
+	glMatrixMode( GL_PROJECTION );
+	glLoadIdentity();
+	glOrtho( 0, 1, 0, 1, -1, 1 );
+	glMatrixMode( GL_MODELVIEW );
+	glLoadIdentity();
+	
+	glDisable( GL_DEPTH_TEST );
+	
+	for( int i = 0; i < 8; ++i )
+	{
+		for( uint32 j = 0; j < _overlays.size(); ++j )
+		{
+			if( _overlays[j].layer != i ) continue;
+
+			Overlay &overlay = _overlays[j];
+
+			if( !setMaterial( overlay.materialRes, shaderContext ) ) continue;
+			
+			glBegin( GL_QUADS );
+			glTexCoord2fv( &overlay.u_ll ); glVertex2fv( &overlay.x_ll );
+			glTexCoord2fv( &overlay.u_lr ); glVertex2fv( &overlay.x_lr );
+			glTexCoord2fv( &overlay.u_ur ); glVertex2fv( &overlay.x_ur );
+			glTexCoord2fv( &overlay.u_ul ); glVertex2fv( &overlay.x_ul );
+			glEnd();
+		}
+	}
+
+	glEnable( GL_DEPTH_TEST );
+}
+
+
+// =================================================================================================
+// Pipeline Functions
+// =================================================================================================
+
+void Renderer::bindBuffer( RenderBuffer *rb, uint32 texUnit, uint32 bufIndex )
+{
+	if( rb == 0x0 )
+	{
+		for( uint32 i = 0; i < 12; ++i )
+		{
+			glActiveTexture( GL_TEXTURE0 + i );
+			glBindTexture( GL_TEXTURE_2D, 0 );
+		}
+	}
+	else
+	{
+		if( texUnit < 12 )
+		{
+			glActiveTexture( GL_TEXTURE0 + texUnit );
+			if( bufIndex < 4 && rb->colBufs[bufIndex] != 0 )
+				glBindTexture( GL_TEXTURE_2D, rb->colBufs[bufIndex] );
+			else if( bufIndex == 32 && rb->depthBuf != 0 )
+				glBindTexture( GL_TEXTURE_2D, rb->depthBuf );
+		}
+	}
+
+	glActiveTexture( GL_TEXTURE0 );
+}
+
+
+void Renderer::clear( bool depth, bool buf0, bool buf1, bool buf2, bool buf3,
+                      float r, float g, float b, float a )
+{
+	int mask = 0;
+
+	glPushAttrib( GL_COLOR_BUFFER_BIT );	// Store state of glDrawBuffers
+	
+	glDisable( GL_BLEND );	// Clearing floating point buffers causes problems when blending is enabled on Radeon 9600
+	glDepthMask( GL_TRUE );
+	glClearColor( r, g, b, a );
+
+	if( _curRendBuf != 0x0 )
+	{
+		uint32 buffers[4], cnt = 0;
+
+		if( depth && _curRendBuf->depthBuf != 0 ) mask |= GL_DEPTH_BUFFER_BIT;
+		
+		if( buf0 && _curRendBuf->colBufs[0] != 0 ) buffers[cnt++] = GL_COLOR_ATTACHMENT0_EXT;
+		if( buf1 && _curRendBuf->colBufs[1] != 0 ) buffers[cnt++] = GL_COLOR_ATTACHMENT1_EXT;
+		if( buf2 && _curRendBuf->colBufs[2] != 0 ) buffers[cnt++] = GL_COLOR_ATTACHMENT2_EXT;
+		if( buf3 && _curRendBuf->colBufs[3] != 0 ) buffers[cnt++] = GL_COLOR_ATTACHMENT3_EXT;
+
+		if( cnt > 0 )
+		{	
+			mask |= GL_COLOR_BUFFER_BIT;
+			glDrawBuffers( cnt, buffers );
+		}
+	}
+	else
+	{
+		if( depth ) mask |= GL_DEPTH_BUFFER_BIT;
+		if( buf0 ) mask |= GL_COLOR_BUFFER_BIT;
+		glScissor( _vpX, _vpY, _vpWidth, _vpHeight );
+		glEnable( GL_SCISSOR_TEST );
+	}
+	
+	if( mask != 0 ) glClear( mask );
+	glDisable( GL_SCISSOR_TEST );
+	glPopAttrib();
+}
+
+
+void Renderer::drawFSQuad( Resource *matRes, const string &shaderContext )
+{
+	if( matRes == 0x0 || matRes->getType() != ResourceTypes::Material ) return;
+	
+	// Reset current material
+	setMaterial( 0x0, "" );
+	++_curUpdateStamp;
+
+	if( !setMaterial( (MaterialResource *)matRes, shaderContext ) ) return;
+	
+	glMatrixMode( GL_PROJECTION );
+	glLoadIdentity();
+	glOrtho( 0, 1, 0, 1, -1, 1 );
+	glMatrixMode( GL_MODELVIEW );
+	if( _curCamera != 0x0 )
+		glLoadMatrixf( _curCamera->_invTrans.x );
+	else
+		glLoadIdentity();
+	
+	glDepthFunc( GL_ALWAYS );
+	
+	glBegin(GL_QUADS);
+	glTexCoord2f( 0, 0 ); glVertex2f( 0, 0 );
+	glTexCoord2f( 1, 0 ); glVertex2f( 1, 0 );
+	glTexCoord2f( 1, 1 ); glVertex2f( 1, 1 );
+	glTexCoord2f( 0, 1 ); glVertex2f( 0, 1 );
+	glEnd();
+
+	glDepthFunc( GL_LEQUAL );
+}
+
+
+void Renderer::drawGeometry( const string &shaderContext, const string &theClass,
+                             RenderingOrder::List order, int occSet )
 {
 	if( _curCamera == 0x0 ) return;
 	
-	setRenderBuffer( 0x0 );
-	glDisable( GL_BLEND );
-	glDepthMask( GL_TRUE );
-	glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-	glDisable( GL_CULL_FACE );
-
-	glClearColor( 0, 0, 0, 1 );
-	glClear( GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT );
-
+	++_curUpdateStamp;
+	
 	_curCamera->genFrustum( _camFrustum );
-	Modules::sceneMan().updateQueues( _camFrustum, 0x0, RenderingOrder::None, true, true );
+	Modules::sceneMan().updateQueues( _camFrustum, 0x0, order, false, true );
+	
 	setupViewMatrices( _curCamera );
+	
+	drawRenderables( shaderContext, theClass, false, &_camFrustum, 0x0, order, occSet );
+}
 
-	// Draw nodes
-	glColor4f( 0.5f, 0.75f, 1, 1 );
-	drawRenderables( "", "", true, &_camFrustum, 0x0, RenderingOrder::None, -1 );
 
-	// Draw bounding boxes
-	setShader( &defColorShader );
-	glUniformMatrix4fv( defColorShader.uni_worldMat, 1, false, &Matrix4f().x[0] );
-	glColor4f( 0.4f, 0.4f, 0.4f, 1 );
-	for( uint32 i = 0, s = (uint32)Modules::sceneMan().getRenderableQueue().size(); i < s; ++i )
-	{
-		SceneNode *sn = Modules::sceneMan().getRenderableQueue()[i];
-		
-		drawDebugAABB( sn->_bBox.getMinCoords(), sn->_bBox.getMaxCoords(), false );
-	}
-
-	// Draw light volumes
-	glColor4f( 1, 1, 0, 0.25f );
-	glLineWidth( 2 );
-	for( size_t i = 0, s = Modules::sceneMan().getLightQueue().size(); i < s; ++i )
-	{
-		LightNode *lightNode = (LightNode *)Modules::sceneMan().getLightQueue()[i];
-		
-		if( lightNode->_fov < 180 )
-		{
-			glPushMatrix();
-			glMultMatrixf( lightNode->_absTrans.x );
-			
-			// Render cone
-			float r = lightNode->_radius * tanf( degToRad( lightNode->_fov / 2 ) );
-			glBegin( GL_TRIANGLE_FAN );
-			glVertex3f( 0, 0, 0 );
-			for( int j = 32; j >= 0; --j )
-			{
-				glVertex3f( r * sinf( j / 32.0f * Math::TwoPi ),
-							r * cosf( j / 32.0f * Math::TwoPi ),
-							-lightNode->_radius );
-			}
-			glEnd();
-
-			glPopMatrix();
-		}
-		else
-		{
-			drawDebugAABB( Vec3f( lightNode->_absPos.x - lightNode->_radius,
-								  lightNode->_absPos.y - lightNode->_radius,
-								  lightNode->_absPos.z - lightNode->_radius ),
-						   Vec3f( lightNode->_absPos.x + lightNode->_radius,
-								  lightNode->_absPos.y + lightNode->_radius,
-								  lightNode->_absPos.z + lightNode->_radius ), 
-								  false );
-		}
-	}
-	glLineWidth( 1 );
-
-	// Draw screen space projection of light sources
-	glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-	glDisable( GL_DEPTH_TEST );
-	glEnable( GL_BLEND );
-	glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-	glColor4f( 1, 1, 1, 0.25f );
+void Renderer::drawLightGeometry( const string shaderContext, const string &theClass,
+                                  bool noShadows, RenderingOrder::List order, int occSet )
+{
+	if( _curCamera == 0x0 ) return;
+	
+	string context = shaderContext;
+	
+	_curCamera->genFrustum( _camFrustum );
+	Modules::sceneMan().updateQueues( _camFrustum, 0x0, RenderingOrder::None, true, false );
 	
 	for( size_t i = 0, s = Modules::sceneMan().getLightQueue().size(); i < s; ++i )
 	{
-		LightNode *lightNode = (LightNode *)Modules::sceneMan().getLightQueue()[i];
-		lightNode->genFrustum( _lightFrustum );
-		
+		++_curUpdateStamp;
+		_curLight = (LightNode *)Modules::sceneMan().getLightQueue()[i];
+		_curLight->genFrustum( _lightFrustum );
+
+		// Check if light is not visible
 		if( _camFrustum.cullFrustum( _lightFrustum ) ) continue;
 
+		setupViewMatrices( _curCamera );
+
+		// Check if light is occluded
+		if( occSet >= 0 )
+		{
+			if( occSet > (int)_curLight->_occQueries.size() - 1 )
+			{
+				_curLight->_occQueries.resize( occSet + 1, 0 );
+				_curLight->_lastVisited.resize( occSet + 1, 0 );
+			}
+			if( _curLight->_occQueries[occSet] == 0 )
+			{
+				_curLight->_occQueries[occSet] = Modules::renderer().createOccQuery();
+				_curLight->_lastVisited[occSet] = 0;
+			}
+			else
+			{
+				if( _curLight->_lastVisited[occSet] != Modules::renderer().getFrameID() )
+				{
+					_curLight->_lastVisited[occSet] = Modules::renderer().getFrameID();
+				
+					Vec3f mins, maxs;
+					_lightFrustum.calcAABB( mins, maxs );
+					
+					// Check that viewer is outside light bounds
+					if( nearestDistToAABB( _camFrustum.getOrigin(), mins, maxs ) )
+					{
+						// Draw occlusion box
+						glColorMask( 0, 0, 0, 0 );
+						glDepthMask( 0 );
+						Modules::renderer().beginOccQuery( _curLight->_occQueries[occSet] );
+						Modules::renderer().setShader( &Modules::renderer().occShader );
+						Modules::renderer().drawAABB( mins, maxs );
+						Modules::renderer().endOccQuery( _curLight->_occQueries[occSet] );
+						Modules::renderer().setMaterial( 0x0, "" );
+						glDepthMask( 1 );
+						glColorMask( 1, 1, 1, 1 );
+
+						// Check query result from previous frame
+						if( Modules::renderer().getOccQueryResult( _curLight->_occQueries[occSet] ) < 1 )
+						{
+							continue;
+						}
+					}
+				}
+			}
+		}
+	
 		// Calculate light screen space position
 		float bbx, bby, bbw, bbh;
-		lightNode->calcScreenSpaceAABB( _curCamera->calcProjectionMatrix() * _curCamera->_invTrans,
-										bbx, bby, bbw, bbh );
+		_curLight->calcScreenSpaceAABB( _curCamera->calcProjectionMatrix() * _curCamera->_invTrans,
+		                                bbx, bby, bbw, bbh );
 
+		// Update shadow map
+		if( !noShadows && _curLight->_shadowMapCount > 0 ) updateShadowMap();
+
+		// Set scissor rectangle
+		if( bbx != 0 || bby != 0 || bbw != 1 || bbh != 1 )
+		{
+			glScissor( (int)(bbx * _fbWidth), (int)(bby * _fbHeight),
+			           (int)(bbw * _fbWidth), (int)(bbh * _fbHeight) );
+			glEnable( GL_SCISSOR_TEST );
+		}
+		
+		setupShadowMap( noShadows );
+
+		if( shaderContext == "" ) context = _curLight->_lightingContext;
+		
+		// Render
+		_curCamera->genFrustum( _camFrustum );
+		_curLight->genFrustum( _lightFrustum );
+		Modules::sceneMan().updateQueues( _camFrustum, &_lightFrustum, RenderingOrder::None, false, true );
+		setupViewMatrices( _curCamera );
+		drawRenderables( context, theClass, false, &_camFrustum, &_lightFrustum, order, occSet );
+		incStat( EngineStats::LightPassCount, 1 );
+
+		// Reset
+		glDisable( GL_SCISSOR_TEST );
+		glActiveTexture( GL_TEXTURE12 );
+		glBindTexture( GL_TEXTURE_2D, 0 );
+		glActiveTexture( GL_TEXTURE0 );
+	}
+
+	_curLight = 0x0;
+}
+
+
+void Renderer::drawLightShapes( const string shaderContext, bool noShadows, int occSet )
+{
+	if( _curCamera == 0x0 ) return;
+	
+	string context = shaderContext;
+	
+	_curCamera->genFrustum( _camFrustum );
+	Modules::sceneMan().updateQueues( _camFrustum, 0x0, RenderingOrder::None, true, false );
+	
+	for( size_t i = 0, s = Modules::sceneMan().getLightQueue().size(); i < s; ++i )
+	{
+		++_curUpdateStamp;
+		_curLight = (LightNode *)Modules::sceneMan().getLightQueue()[i];
+		_curLight->genFrustum( _lightFrustum );
+		
+		// Check if light is not visible
+		if( _camFrustum.cullFrustum( _lightFrustum ) ) continue;
+
+		setupViewMatrices( _curCamera );
+		
+		// Check if light is occluded
+		if( occSet >= 0 )
+		{
+			if( occSet > (int)_curLight->_occQueries.size() - 1 )
+			{
+				_curLight->_occQueries.resize( occSet + 1, 0 );
+				_curLight->_lastVisited.resize( occSet + 1, 0 );
+			}
+			if( _curLight->_occQueries[occSet] == 0 )
+			{
+				_curLight->_occQueries[occSet] = Modules::renderer().createOccQuery();
+				_curLight->_lastVisited[occSet] = 0;
+			}
+			else
+			{
+				if( _curLight->_lastVisited[occSet] != Modules::renderer().getFrameID() )
+				{
+					_curLight->_lastVisited[occSet] = Modules::renderer().getFrameID();
+				
+					Vec3f mins, maxs;
+					_lightFrustum.calcAABB( mins, maxs );
+					
+					// Check that viewer is outside light bounds
+					if( nearestDistToAABB( _camFrustum.getOrigin(), mins, maxs ) )
+					{
+						// Draw occlusion box
+						glColorMask( 0, 0, 0, 0 );
+						glDepthMask( 0 );
+						Modules::renderer().beginOccQuery( _curLight->_occQueries[occSet] );
+						Modules::renderer().setShader( &Modules::renderer().occShader );
+						Modules::renderer().drawAABB( mins, maxs );
+						Modules::renderer().endOccQuery( _curLight->_occQueries[occSet] );
+						Modules::renderer().setMaterial( 0x0, "" );
+						glDepthMask( 1 );
+						glColorMask( 1, 1, 1, 1 );
+
+						// Check query result from previous frame
+						if( Modules::renderer().getOccQueryResult( _curLight->_occQueries[occSet] ) < 1 )
+						{
+							continue;
+						}
+					}
+				}
+			}
+		}
+		
+		// Calculate light screen space position
+		float bbx, bby, bbw, bbh;
+		_curLight->calcScreenSpaceAABB( _curCamera->calcProjectionMatrix() * _curCamera->_invTrans,
+		                                bbx, bby, bbw, bbh );
+		
+		// Update shadow map
+		if( !noShadows && _curLight->_shadowMapCount > 0 ) updateShadowMap();
+
+		// Prepare postprocessing step (set the camera transformation in MV matrix)
+		glDisable( GL_DEPTH_TEST );
 		glMatrixMode( GL_PROJECTION );
 		glLoadIdentity();
 		glOrtho( 0, 1, 0, 1, -1, 1 );
 		glMatrixMode( GL_MODELVIEW );
-		glLoadIdentity();
+		glLoadMatrixf( _curCamera->_invTrans.x );
 		
+		setupShadowMap( noShadows );
+
+		if( shaderContext == "" ) context = _curLight->_lightingContext;
+
+		setMaterial( 0x0, "" );		// Reset material
+		if( !setMaterial( _curLight->_materialRes, context ) ) continue;
+		
+		// Draw quad
 		glBegin( GL_QUADS );
-		glVertex2f( bbx, bby );
-		glVertex2f( bbx + bbw, bby );
-		glVertex2f( bbx + bbw, bby + bbh );
-		glVertex2f( bbx, bby + bbh );
+		glTexCoord2f( bbx, bby ); glVertex2f( bbx, bby );
+		glTexCoord2f( bbx + bbw, bby ); glVertex2f( bbx + bbw, bby );
+		glTexCoord2f( bbx + bbw, bby + bbh ); glVertex2f( bbx + bbw, bby + bbh );
+		glTexCoord2f( bbx, bby + bbh ); glVertex2f( bbx, bby + bbh );
 		glEnd();
+		incStat( EngineStats::LightPassCount, 1 );
+
+		// Reset
+		glEnable( GL_DEPTH_TEST );
+		glActiveTexture( GL_TEXTURE12 );
+		glBindTexture( GL_TEXTURE_2D, 0 );
+		glActiveTexture( GL_TEXTURE0 );
 	}
 
-	glEnable( GL_CULL_FACE );
-	glEnable( GL_DEPTH_TEST );
-	glDisable( GL_BLEND );
+	_curLight = 0x0;
 }
 
 
-void Renderer::finishRendering()
+// =================================================================================================
+// Scene Node Rendering Functions
+// =================================================================================================
+
+void Renderer::drawRenderables( const string &shaderContext, const string &theClass, bool debugView,
+                                const Frustum *frust1, const Frustum *frust2, RenderingOrder::List order,
+                                int occSet )
 {
-	// Reset states for apps using debug mode to draw custom geometry
-	// with direct OpenGL calls (e.g. Horde scene editor)
-	setRenderBuffer( 0x0 );
-	glDisable( GL_BLEND );
-	glDepthMask( 1 );
-	glDepthFunc( GL_LEQUAL );
-	setShader( 0x0 );
-	glBindBuffer( GL_ARRAY_BUFFER, 0 );
-	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
-	if( _curCamera != 0x0 ) setupViewMatrices( _curCamera );
-}
-
-
-bool Renderer::render( CameraNode *camNode )
-{
-	_curCamera = camNode;
-	if( _curCamera == 0x0 ) return false;
-
-	++_frameID;
-	
-	if( Modules::config().debugViewMode || _curCamera->_pipelineRes == 0x0 )
+	if( Modules::config().wireframeMode && !Modules::config().debugViewMode )
 	{
-		renderDebugView();
-		finishRendering();
-		return true;
+		glDisable( GL_CULL_FACE );
+		glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 	}
 	
-	// Initialize
-	_outputBufferIndex = _curCamera->_outputBufferIndex;
-	if( _curCamera->_outputTex != 0x0 )
-		setRenderBuffer( _curCamera->_outputTex->getRenderBuffer() );
-	else 
-		setRenderBuffer( 0x0 );
-
-	// Process pipeline commands
-	for( uint32 i = 0; i < _curCamera->_pipelineRes->_stages.size(); ++i )
+	map< int, NodeRegEntry >::const_iterator itr = Modules::sceneMan()._registry.begin();
+	while( itr != Modules::sceneMan()._registry.end() )
 	{
-		PipelineStage &stage = _curCamera->_pipelineRes->_stages[i];
-		if( !stage.enabled ) continue;
-		_curStageMatLink = stage.matLink;
-		
-		for( uint32 j = 0; j < stage.commands.size(); ++j )
-		{
-			PipelineCommand &pc = stage.commands[j];
-			RenderTarget *rt;
+		if( itr->second.renderFunc != 0x0 )
+			(*itr->second.renderFunc)( shaderContext, theClass, debugView, frust1, frust2, order, occSet );
 
-			switch( pc.command )
-			{
-			case PipelineCommands::SwitchTarget:
-				// Unbind all textures
-				bindBuffer( 0x0, 0, 0 );
-				if( _curRenderTarget != 0x0 && _curRenderTarget->samples > 0 )
-				{
-					// Current render target is multisampled, so resolve it now
-					blitRenderBuffer( _curRenderTarget->rendBufMultisample, _curRenderTarget->rendBuf );
-				}
-				
-				// Bind new render target
-				rt = (RenderTarget *)pc.refParams[0];
-				_curRenderTarget = rt;
-
-				if( rt != 0x0 )
-				{
-					if( rt->samples > 0 ) setRenderBuffer( &rt->rendBufMultisample );
-					else setRenderBuffer( &rt->rendBuf );
-				}
-				else
-				{
-					if( _curCamera->_outputTex != 0x0 )
-						setRenderBuffer( _curCamera->_outputTex->getRenderBuffer() );
-					else 
-						setRenderBuffer( 0x0 );
-				}
-				break;
-
-			case PipelineCommands::BindBuffer:
-				rt = (RenderTarget *)pc.refParams[0];
-			
-				bindBuffer( &rt->rendBuf, (uint32)((PCFloatParam *)pc.valParams[0])->get(),
-							(uint32)((PCFloatParam *)pc.valParams[1])->get() );
-				break;
-
-			case PipelineCommands::ClearTarget:
-				clear( ((PCBoolParam *)pc.valParams[0])->get(), ((PCBoolParam *)pc.valParams[1])->get(),
-					   ((PCBoolParam *)pc.valParams[2])->get(), ((PCBoolParam *)pc.valParams[3])->get(),
-					   ((PCBoolParam *)pc.valParams[4])->get(), ((PCFloatParam *)pc.valParams[5])->get(),
-					   ((PCFloatParam *)pc.valParams[6])->get(), ((PCFloatParam *)pc.valParams[7])->get(),
-					   ((PCFloatParam *)pc.valParams[8])->get() );
-				break;
-
-			case PipelineCommands::DrawGeometry:
-				drawGeometry( ((PCStringParam *)pc.valParams[0])->get(), ((PCStringParam *)pc.valParams[1])->get(),
-					(RenderingOrder::List)((PCIntParam *)pc.valParams[2])->get(), _curCamera->_occSet );
-				break;
-
-			case PipelineCommands::DrawOverlays:
-				drawOverlays( ((PCStringParam *)pc.valParams[0])->get() );
-				break;
-
-			case PipelineCommands::DrawQuad:
-				drawFSQuad( pc.resParams[0], ((PCStringParam *)pc.valParams[0])->get() );
-			break;
-
-			case PipelineCommands::DoForwardLightLoop:
-				drawLightGeometry( ((PCStringParam *)pc.valParams[0])->get(), ((PCStringParam *)pc.valParams[1])->get(),
-					((PCBoolParam *)pc.valParams[2])->get(), (RenderingOrder::List)((PCIntParam *)pc.valParams[3])->get(),
-					_curCamera->_occSet );
-				break;
-
-			case PipelineCommands::DoDeferredLightLoop:
-				drawLightShapes( ((PCStringParam *)pc.valParams[0])->get(), ((PCBoolParam *)pc.valParams[1])->get(),
-					_curCamera->_occSet );
-				break;
-
-			case PipelineCommands::SetUniform:
-				if( pc.resParams[0] != 0x0 && pc.resParams[0]->getType() == ResourceTypes::Material )
-				{
-					((MaterialResource *)pc.resParams[0].getPtr())->setUniform(
-						((PCStringParam *)pc.valParams[0])->get(), ((PCFloatParam *)pc.valParams[1])->get(),
-						((PCFloatParam *)pc.valParams[2])->get(), ((PCFloatParam *)pc.valParams[3])->get(),
-						((PCFloatParam *)pc.valParams[4])->get() );
-				}
-				break;
-			}
-		}
+		++itr;
 	}
-	
-	finishRendering();
-	return true;
+
+	if( Modules::config().wireframeMode && !Modules::config().debugViewMode )
+	{
+		glEnable( GL_CULL_FACE );
+		glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+	}
 }
 
 
 void Renderer::drawModels( const string &shaderContext, const string &theClass, bool debugView,
-						   const Frustum *frust1, const Frustum *frust2, RenderingOrder::List order,
-						   int occSet )
+                           const Frustum *frust1, const Frustum *frust2, RenderingOrder::List order,
+                           int occSet )
 {
 	if( frust1 == 0x0 ) return;
 	
@@ -1699,7 +1486,7 @@ void Renderer::drawModels( const string &shaderContext, const string &theClass, 
 				
 					// Check query result (viewer must be outside of bounding box)
 					if( nearestDistToAABB( frust1->getOrigin(), modelNode->getBBox().getMinCoords(),
-										   modelNode->getBBox().getMaxCoords() ) != 0 &&
+					                       modelNode->getBBox().getMaxCoords() ) != 0 &&
 						Modules::renderer().getOccQueryResult( modelNode->_occQueries[occSet] ) < 1 )
 					{
 						// Draw occlusion box
@@ -1708,7 +1495,7 @@ void Renderer::drawModels( const string &shaderContext, const string &theClass, 
 						Modules::renderer().beginOccQuery( modelNode->_occQueries[occSet] );
 						Modules::renderer().setShader( &Modules::renderer().occShader );
 						Modules::renderer().drawAABB( modelNode->getBBox().getMinCoords(),
-													  modelNode->getBBox().getMaxCoords() );
+						                              modelNode->getBBox().getMaxCoords() );
 						Modules::renderer().endOccQuery( modelNode->_occQueries[occSet] );
 						Modules::renderer().setMaterial( 0x0, "" );
 						glDepthMask( 1 );
@@ -1739,13 +1526,13 @@ void Renderer::drawModels( const string &shaderContext, const string &theClass, 
 			glVertexAttribPointer( 2, 3, GL_FLOAT, GL_FALSE, 0, (char *)0 + vertCount * 24 );
 			glVertexAttribPointer( 3, 3, GL_FLOAT, GL_FALSE, 0, (char *)0 + vertCount * 36 );
 			glVertexAttribPointer( 4, 4, GL_FLOAT, GL_FALSE,
-								   sizeof( VertexDataStatic ), (char *)0 + vertCount * 48 + 8 );
+			                       sizeof( VertexDataStatic ), (char *)0 + vertCount * 48 + 8 );
 			glVertexAttribPointer( 5, 4, GL_FLOAT, GL_FALSE,
-								   sizeof( VertexDataStatic ), (char *)0 + vertCount * 48 + 24 );
+			                       sizeof( VertexDataStatic ), (char *)0 + vertCount * 48 + 24 );
 			glVertexAttribPointer( 6, 2, GL_FLOAT, GL_FALSE,
-								   sizeof( VertexDataStatic ), (char *)0 + vertCount * 48 );
+			                       sizeof( VertexDataStatic ), (char *)0 + vertCount * 48 );
 			glVertexAttribPointer( 7, 2, GL_FLOAT, GL_FALSE,
-								   sizeof( VertexDataStatic ), (char *)0 + vertCount * 48 + 40 );
+			                       sizeof( VertexDataStatic ), (char *)0 + vertCount * 48 + 40 );
 		}
 		
 		// Sort meshes
@@ -1762,14 +1549,14 @@ void Renderer::drawModels( const string &shaderContext, const string &theClass, 
 
 		if( order == RenderingOrder::FrontToBack )
 			std::sort( modelNode->_nodeList.begin(), modelNode->_nodeList.begin() + modelNode->_meshCount,
-					   nodeFrontToBackOrder );
+			           nodeFrontToBackOrder );
 		else if( order == RenderingOrder::BackToFront )
 			std::sort( modelNode->_nodeList.begin(), modelNode->_nodeList.begin() + modelNode->_meshCount,
-					   nodeBackToFrontOrder );
+			           nodeBackToFrontOrder );
 		else if( order == RenderingOrder::StateChanges )
 			// Sort meshes by material to minimize state changes
 			std::sort( modelNode->_nodeList.begin(), modelNode->_nodeList.begin() + modelNode->_meshCount,
-					   meshMaterialOrder );
+			           meshMaterialOrder );
 		
 		
 		if( occCulling )
@@ -1783,7 +1570,7 @@ void Renderer::drawModels( const string &shaderContext, const string &theClass, 
 
 			// Frustum culling for meshes
 			if( (frust1 != 0x0 && frust1->cullBox( meshNode->_bBox )) ||
-				(frust2 != 0x0 && frust2->cullBox( meshNode->_bBox )) )
+			    (frust2 != 0x0 && frust2->cullBox( meshNode->_bBox )) )
 			{
 				continue;
 			}
@@ -1815,7 +1602,7 @@ void Renderer::drawModels( const string &shaderContext, const string &theClass, 
 					//			hardware so it would require 4 instead of 3 uniform slots per joint
 					
 					glUniform4fv( curShader->uni_skinMatRows, (int)modelNode->_skinMatRows.size(),
-								  (float *)&modelNode->_skinMatRows[0] );
+					              (float *)&modelNode->_skinMatRows[0] );
 				}
 
 				modelChanged = false;
@@ -1831,8 +1618,8 @@ void Renderer::drawModels( const string &shaderContext, const string &theClass, 
 				// TODO: Optimize this
 				Matrix4f normalMat4 = meshNode->_absTrans.inverted().transposed();
 				float normalMat[9] = { normalMat4.x[0], normalMat4.x[1], normalMat4.x[2],
-									   normalMat4.x[4], normalMat4.x[5], normalMat4.x[6],
-									   normalMat4.x[8], normalMat4.x[9], normalMat4.x[10] };
+				                       normalMat4.x[4], normalMat4.x[5], normalMat4.x[6],
+				                       normalMat4.x[8], normalMat4.x[9], normalMat4.x[10] };
 				glUniformMatrix3fv( curShader->uni_worldNormalMat, 1, false, normalMat );
 			}
 
@@ -1857,10 +1644,10 @@ void Renderer::drawModels( const string &shaderContext, const string &theClass, 
 
 			// Render
 			glDrawRangeElements( GL_TRIANGLES, meshNode->getVertRStart(), meshNode->getVertREnd(),
-								 meshNode->getBatchCount(), 
-								 curGeoRes->_16BitIndices ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT,
-								 (char *)0 + meshNode->getBatchStart() *
-								 (curGeoRes->_16BitIndices ? sizeof( short ) : sizeof( int )) );
+			                     meshNode->getBatchCount(), 
+			                     curGeoRes->_16BitIndices ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT,
+			                     (char *)0 + meshNode->getBatchStart() *
+			                     (curGeoRes->_16BitIndices ? sizeof( short ) : sizeof( int )) );
 			Modules::renderer().incStat( EngineStats::BatchCount, 1 );
 			Modules::renderer().incStat( EngineStats::TriCount, meshNode->getBatchCount() / 3.0f );
 		}
@@ -1876,11 +1663,11 @@ void Renderer::drawModels( const string &shaderContext, const string &theClass, 
 
 
 void Renderer::drawParticles( const string &shaderContext, const string &theClass, bool debugView,
-							  const Frustum *frust1, const Frustum * /*frust2*/, RenderingOrder::List /*order*/,
-							  int occSet )
+                              const Frustum *frust1, const Frustum * /*frust2*/, RenderingOrder::List /*order*/,
+                              int occSet )
 {
 	if( frust1 == 0x0 ) return;
-	if( debugView ) return;		// Don't render particles in debug view
+	if( debugView ) return;  // Don't render particles in debug view
 	
 	Modules::renderer().setMaterial( 0x0, "" );
 
@@ -1934,7 +1721,7 @@ void Renderer::drawParticles( const string &shaderContext, const string &theClas
 				
 					// Check query result (viewer must be outside of bounding box)
 					if( nearestDistToAABB( frust1->getOrigin(), emitter->getLocalBBox()->getMinCoords(),
-										   emitter->getLocalBBox()->getMaxCoords() ) != 0 &&
+					                       emitter->getLocalBBox()->getMaxCoords() ) != 0 &&
 						Modules::renderer().getOccQueryResult( emitter->_occQueries[occSet] ) < 1 )
 					{
 						// Draw occlusion box
@@ -1943,7 +1730,7 @@ void Renderer::drawParticles( const string &shaderContext, const string &theClas
 						Modules::renderer().beginOccQuery( emitter->_occQueries[occSet] );
 						Modules::renderer().setShader( &Modules::renderer().occShader );
 						Modules::renderer().drawAABB( emitter->getLocalBBox()->getMinCoords(),
-													  emitter->getLocalBBox()->getMaxCoords() );
+						                              emitter->getLocalBBox()->getMaxCoords() );
 						Modules::renderer().endOccQuery( emitter->_occQueries[occSet] );
 						Modules::renderer().setMaterial( 0x0, "" );
 						glDepthMask( 1 );
@@ -2032,4 +1819,252 @@ void Renderer::drawParticles( const string &shaderContext, const string &theClas
 	glDisableVertexAttribArray( 1 );
 	glDisableVertexAttribArray( 2 );
 	glDisableVertexAttribArray( 6 );
+}
+
+
+// =================================================================================================
+// Main Rendering Functions
+// =================================================================================================
+
+bool Renderer::render( CameraNode *camNode )
+{
+	_curCamera = camNode;
+	if( _curCamera == 0x0 ) return false;
+
+	++_frameID;
+	
+	if( Modules::config().debugViewMode || _curCamera->_pipelineRes == 0x0 )
+	{
+		renderDebugView();
+		finishRendering();
+		return true;
+	}
+	
+	// Initialize
+	_outputBufferIndex = _curCamera->_outputBufferIndex;
+	if( _curCamera->_outputTex != 0x0 )
+		setRenderBuffer( _curCamera->_outputTex->getRenderBuffer() );
+	else 
+		setRenderBuffer( 0x0 );
+
+	// Process pipeline commands
+	for( uint32 i = 0; i < _curCamera->_pipelineRes->_stages.size(); ++i )
+	{
+		PipelineStage &stage = _curCamera->_pipelineRes->_stages[i];
+		if( !stage.enabled ) continue;
+		_curStageMatLink = stage.matLink;
+		
+		for( uint32 j = 0; j < stage.commands.size(); ++j )
+		{
+			PipelineCommand &pc = stage.commands[j];
+			RenderTarget *rt;
+
+			switch( pc.command )
+			{
+			case PipelineCommands::SwitchTarget:
+				// Unbind all textures
+				bindBuffer( 0x0, 0, 0 );
+				if( _curRenderTarget != 0x0 && _curRenderTarget->samples > 0 )
+				{
+					// Current render target is multisampled, so resolve it now
+					blitRenderBuffer( _curRenderTarget->rendBufMultisample, _curRenderTarget->rendBuf );
+				}
+				
+				// Bind new render target
+				rt = (RenderTarget *)pc.refParams[0];
+				_curRenderTarget = rt;
+
+				if( rt != 0x0 )
+				{
+					if( rt->samples > 0 ) setRenderBuffer( &rt->rendBufMultisample );
+					else setRenderBuffer( &rt->rendBuf );
+				}
+				else
+				{
+					if( _curCamera->_outputTex != 0x0 )
+						setRenderBuffer( _curCamera->_outputTex->getRenderBuffer() );
+					else 
+						setRenderBuffer( 0x0 );
+				}
+				break;
+
+			case PipelineCommands::BindBuffer:
+				rt = (RenderTarget *)pc.refParams[0];
+			
+				bindBuffer( &rt->rendBuf, (uint32)((PCFloatParam *)pc.valParams[0])->get(),
+				            (uint32)((PCFloatParam *)pc.valParams[1])->get() );
+				break;
+
+			case PipelineCommands::ClearTarget:
+				clear( ((PCBoolParam *)pc.valParams[0])->get(), ((PCBoolParam *)pc.valParams[1])->get(),
+				       ((PCBoolParam *)pc.valParams[2])->get(), ((PCBoolParam *)pc.valParams[3])->get(),
+				       ((PCBoolParam *)pc.valParams[4])->get(), ((PCFloatParam *)pc.valParams[5])->get(),
+				       ((PCFloatParam *)pc.valParams[6])->get(), ((PCFloatParam *)pc.valParams[7])->get(),
+				       ((PCFloatParam *)pc.valParams[8])->get() );
+				break;
+
+			case PipelineCommands::DrawGeometry:
+				drawGeometry( ((PCStringParam *)pc.valParams[0])->get(), ((PCStringParam *)pc.valParams[1])->get(),
+					(RenderingOrder::List)((PCIntParam *)pc.valParams[2])->get(), _curCamera->_occSet );
+				break;
+
+			case PipelineCommands::DrawOverlays:
+				drawOverlays( ((PCStringParam *)pc.valParams[0])->get() );
+				break;
+
+			case PipelineCommands::DrawQuad:
+				drawFSQuad( pc.resParams[0], ((PCStringParam *)pc.valParams[0])->get() );
+			break;
+
+			case PipelineCommands::DoForwardLightLoop:
+				drawLightGeometry( ((PCStringParam *)pc.valParams[0])->get(), ((PCStringParam *)pc.valParams[1])->get(),
+					((PCBoolParam *)pc.valParams[2])->get(), (RenderingOrder::List)((PCIntParam *)pc.valParams[3])->get(),
+					_curCamera->_occSet );
+				break;
+
+			case PipelineCommands::DoDeferredLightLoop:
+				drawLightShapes( ((PCStringParam *)pc.valParams[0])->get(), ((PCBoolParam *)pc.valParams[1])->get(),
+					_curCamera->_occSet );
+				break;
+
+			case PipelineCommands::SetUniform:
+				if( pc.resParams[0] != 0x0 && pc.resParams[0]->getType() == ResourceTypes::Material )
+				{
+					((MaterialResource *)pc.resParams[0].getPtr())->setUniform(
+						((PCStringParam *)pc.valParams[0])->get(), ((PCFloatParam *)pc.valParams[1])->get(),
+						((PCFloatParam *)pc.valParams[2])->get(), ((PCFloatParam *)pc.valParams[3])->get(),
+						((PCFloatParam *)pc.valParams[4])->get() );
+				}
+				break;
+			}
+		}
+	}
+	
+	finishRendering();
+	return true;
+}
+
+
+void Renderer::renderDebugView()
+{
+	if( _curCamera == 0x0 ) return;
+	
+	setRenderBuffer( 0x0 );
+	glDisable( GL_BLEND );
+	glDepthMask( GL_TRUE );
+	glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+	glDisable( GL_CULL_FACE );
+
+	glClearColor( 0, 0, 0, 1 );
+	glClear( GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT );
+
+	_curCamera->genFrustum( _camFrustum );
+	Modules::sceneMan().updateQueues( _camFrustum, 0x0, RenderingOrder::None, true, true );
+	setupViewMatrices( _curCamera );
+
+	// Draw nodes
+	glColor4f( 0.5f, 0.75f, 1, 1 );
+	drawRenderables( "", "", true, &_camFrustum, 0x0, RenderingOrder::None, -1 );
+
+	// Draw bounding boxes
+	setShader( &defColorShader );
+	glUniformMatrix4fv( defColorShader.uni_worldMat, 1, false, &Matrix4f().x[0] );
+	glColor4f( 0.4f, 0.4f, 0.4f, 1 );
+	for( uint32 i = 0, s = (uint32)Modules::sceneMan().getRenderableQueue().size(); i < s; ++i )
+	{
+		SceneNode *sn = Modules::sceneMan().getRenderableQueue()[i];
+		
+		drawDebugAABB( sn->_bBox.getMinCoords(), sn->_bBox.getMaxCoords(), false );
+	}
+
+	// Draw light volumes
+	glColor4f( 1, 1, 0, 0.25f );
+	glLineWidth( 2 );
+	for( size_t i = 0, s = Modules::sceneMan().getLightQueue().size(); i < s; ++i )
+	{
+		LightNode *lightNode = (LightNode *)Modules::sceneMan().getLightQueue()[i];
+		
+		if( lightNode->_fov < 180 )
+		{
+			glPushMatrix();
+			glMultMatrixf( lightNode->_absTrans.x );
+			
+			// Render cone
+			float r = lightNode->_radius * tanf( degToRad( lightNode->_fov / 2 ) );
+			glBegin( GL_TRIANGLE_FAN );
+			glVertex3f( 0, 0, 0 );
+			for( int j = 32; j >= 0; --j )
+			{
+				glVertex3f( r * sinf( j / 32.0f * Math::TwoPi ),
+				            r * cosf( j / 32.0f * Math::TwoPi ),
+				            -lightNode->_radius );
+			}
+			glEnd();
+
+			glPopMatrix();
+		}
+		else
+		{
+			drawDebugAABB( Vec3f( lightNode->_absPos.x - lightNode->_radius,
+			                      lightNode->_absPos.y - lightNode->_radius,
+			                      lightNode->_absPos.z - lightNode->_radius ),
+						   Vec3f( lightNode->_absPos.x + lightNode->_radius,
+			                      lightNode->_absPos.y + lightNode->_radius,
+			                      lightNode->_absPos.z + lightNode->_radius ), 
+			                      false );
+		}
+	}
+	glLineWidth( 1 );
+
+	// Draw screen space projection of light sources
+	glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+	glDisable( GL_DEPTH_TEST );
+	glEnable( GL_BLEND );
+	glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+	glColor4f( 1, 1, 1, 0.25f );
+	
+	for( size_t i = 0, s = Modules::sceneMan().getLightQueue().size(); i < s; ++i )
+	{
+		LightNode *lightNode = (LightNode *)Modules::sceneMan().getLightQueue()[i];
+		lightNode->genFrustum( _lightFrustum );
+		
+		if( _camFrustum.cullFrustum( _lightFrustum ) ) continue;
+
+		// Calculate light screen space position
+		float bbx, bby, bbw, bbh;
+		lightNode->calcScreenSpaceAABB( _curCamera->calcProjectionMatrix() * _curCamera->_invTrans,
+		                                bbx, bby, bbw, bbh );
+
+		glMatrixMode( GL_PROJECTION );
+		glLoadIdentity();
+		glOrtho( 0, 1, 0, 1, -1, 1 );
+		glMatrixMode( GL_MODELVIEW );
+		glLoadIdentity();
+		
+		glBegin( GL_QUADS );
+		glVertex2f( bbx, bby );
+		glVertex2f( bbx + bbw, bby );
+		glVertex2f( bbx + bbw, bby + bbh );
+		glVertex2f( bbx, bby + bbh );
+		glEnd();
+	}
+
+	glEnable( GL_CULL_FACE );
+	glEnable( GL_DEPTH_TEST );
+	glDisable( GL_BLEND );
+}
+
+
+void Renderer::finishRendering()
+{
+	// Reset states for apps using debug mode to draw custom geometry
+	// with direct OpenGL calls (e.g. Horde scene editor)
+	setRenderBuffer( 0x0 );
+	glDisable( GL_BLEND );
+	glDepthMask( 1 );
+	glDepthFunc( GL_LEQUAL );
+	setShader( 0x0 );
+	glBindBuffer( GL_ARRAY_BUFFER, 0 );
+	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
+	if( _curCamera != 0x0 ) setupViewMatrices( _curCamera );
 }
