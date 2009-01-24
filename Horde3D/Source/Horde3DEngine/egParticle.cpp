@@ -312,6 +312,7 @@ EmitterNode::EmitterNode( const EmitterNodeTpl &emitterTpl ) :
 	_spreadAngle = emitterTpl.spreadAngle;
 	_force = Vec3f( emitterTpl.fx, emitterTpl.fy, emitterTpl.fz );
 
+	_timeDelta = 0;
 	_emissionAccum = 0;
 
 	_particles = 0x0;
@@ -548,15 +549,39 @@ float randomF( float min, float max )
 
 void EmitterNode::advanceTime( float timeDelta )
 {
-	if( _effectRes == 0x0 ) return;
+	_timeDelta += timeDelta;
+
+	markDirty();
+}
+
+
+bool EmitterNode::hasFinished()
+{
+	if( _respawnCount < 0 ) return false;
+
+	for( uint32 i = 0; i < _particleCount; ++i )
+	{	
+		if( _particles[i].life > 0 || (int)_particles[i].respawnCounter < _respawnCount )
+		{
+			return false;
+		}
+	}
+	
+	return true;
+}
+
+
+void EmitterNode::onPostUpdate()
+{	
+	if( _timeDelta == 0 || _effectRes == 0x0 ) return;
 	
 	Vec3f bBMin( Math::MaxFloat, Math::MaxFloat, Math::MaxFloat );
 	Vec3f bBMax( -Math::MaxFloat, -Math::MaxFloat, -Math::MaxFloat );
 	
 	if( _delay <= 0 )
-		_emissionAccum += _emissionRate * timeDelta;
+		_emissionAccum += _emissionRate * _timeDelta;
 	else
-		_delay -= timeDelta;
+		_delay -= _timeDelta;
 	
 	for( uint32 i = 0; i < _particleCount; ++i )
 	{
@@ -616,12 +641,12 @@ void EmitterNode::advanceTime( float timeDelta )
 			_parColors[i * 4 + 3] = p.a0 * (1.0f + (_effectRes->_colA.endRate - 1.0f) * fac);
 
 			// Update particle position and rotation
-			_parPositions[i] += p.dir * moveVel * timeDelta;
-			_parPositions[i] += _force * timeDelta;
-			_parSizesANDRotations[i * 2+ 1] +=  rotVel * timeDelta;
+			_parPositions[i] += p.dir * moveVel * _timeDelta;
+			_parPositions[i] += _force * _timeDelta;
+			_parSizesANDRotations[i * 2+ 1] +=  rotVel * _timeDelta;
 
 			// Decrease lifetime
-			p.life -= timeDelta;
+			p.life -= _timeDelta;
 			
 			// Check if particle is dying
 			if( p.life <= 0 )
@@ -645,27 +670,8 @@ void EmitterNode::advanceTime( float timeDelta )
 	if( bBMax.y - bBMin.y == 0 ) bBMax.y += 0.1f;
 	if( bBMax.z - bBMin.z == 0 ) bBMax.z += 0.1f;
 	
-	_localBBox.getMinCoords() = bBMin;
-	_localBBox.getMaxCoords() = bBMax;
+	_bBox.getMinCoords() = bBMin;
+	_bBox.getMaxCoords() = bBMax;
 
-	markDirty();
+	_timeDelta = 0;
 }
-
-
-bool EmitterNode::hasFinished()
-{
-	if( _respawnCount < 0 ) return false;
-
-	for( uint32 i = 0; i < _particleCount; ++i )
-	{	
-		if( _particles[i].life > 0 || (int)_particles[i].respawnCounter < _respawnCount )
-		{
-			return false;
-		}
-	}
-	
-	return true;
-}
-
-
-

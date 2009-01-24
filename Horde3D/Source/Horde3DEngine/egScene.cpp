@@ -402,33 +402,15 @@ void SceneManager::updateQueuesRec( const Frustum &frustum1, const Frustum *frus
 	}
 	else if( renderableQueue && node._renderable )
 	{
-		if( node._type == SceneNodeTypes::Emitter )
+		if( !frustum1.cullBox( node._bBox ) &&
+		    (frustum2 == 0x0 || !frustum2->cullBox( node._bBox )) )
 		{
-			// Emitters are a special case since we have to use their local bounding box
-			// If the emitter is transformed particle positions don't change
-			if( !frustum1.cullBox( *node.getLocalBBox() ) &&
-				(frustum2 == 0x0 || !frustum2->cullBox( *node.getLocalBBox() )) )
+			if( sorted )
 			{
-				if( sorted )
-				{
-					node.tmpSortValue = nearestDistToAABB( frustum1.getOrigin(),
-						node.getLocalBBox()->getMinCoords(), node.getLocalBBox()->getMaxCoords() );
-				}
-				_renderableQueue.push_back( &node );
+				node.tmpSortValue = nearestDistToAABB( frustum1.getOrigin(),
+					node._bBox.getMinCoords(), node._bBox.getMaxCoords() );
 			}
-		}
-		else
-		{
-			if( !frustum1.cullBox( node._bBox ) &&
-				(frustum2 == 0x0 || !frustum2->cullBox( node._bBox )) )
-			{
-				if( sorted )
-				{
-					node.tmpSortValue = nearestDistToAABB( frustum1.getOrigin(),
-						node._bBox.getMinCoords(), node._bBox.getMaxCoords() );
-				}
-				_renderableQueue.push_back( &node );
-			}
+			_renderableQueue.push_back( &node );
 		}
 	}
 			

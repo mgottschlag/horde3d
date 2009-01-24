@@ -175,9 +175,8 @@ class EmitterNode : public SceneNode
 {
 protected:
 
-	BoundingBox            _localBBox;
-
 	// Emitter data
+	float                  _timeDelta;
 	float                  _emissionAccum;
 	
 	// Emitter params
@@ -207,7 +206,6 @@ public:
 	static SceneNodeTpl *parsingFunc( std::map< std::string, std::string > &attribs );
 	static SceneNode *factoryFunc( const SceneNodeTpl &nodeTpl );
 
-	BoundingBox *getLocalBBox() { return &_localBBox; }
 	float getParamf( int param );
 	bool setParamf( int param, float value );
 	int getParami( int param );
@@ -215,6 +213,8 @@ public:
 
 	void advanceTime( float timeDelta );
 	bool hasFinished();
+
+	void onPostUpdate();
 
 	friend class Renderer;
 };
