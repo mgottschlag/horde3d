@@ -683,7 +683,7 @@ Matrix4f Renderer::calcLightMat( const Frustum &frustum )
 	BoundingBox bBox;
 	for( size_t j = 0, s = Modules::sceneMan().getRenderableQueue().size(); j < s; ++j )
 	{
-		bBox.makeUnion( Modules::sceneMan().getRenderableQueue()[j]->getBBox() ); 
+		bBox.makeUnion( Modules::sceneMan().getRenderableQueue()[j].node->getBBox() ); 
 	}
 	
 	// Get light matrix
@@ -792,7 +792,7 @@ void Renderer::updateShadowMap()
 	BoundingBox bBox;
 	for( size_t j = 0, s = Modules::sceneMan().getRenderableQueue().size(); j < s; ++j )
 	{
-		bBox.makeUnion( Modules::sceneMan().getRenderableQueue()[j]->getBBox() ); 
+		bBox.makeUnion( Modules::sceneMan().getRenderableQueue()[j].node->getBBox() ); 
 	}
 	// Adjust camera planes
 	float minDist = Math::MaxFloat, maxDist = 0.0f;
@@ -1464,9 +1464,9 @@ void Renderer::drawModels( const string &shaderContext, const string &theClass, 
 	// Loop over model queue
 	for( size_t i = 0, s = Modules::sceneMan().getRenderableQueue().size(); i < s; ++i )
 	{
-		if( Modules::sceneMan().getRenderableQueue()[i]->getType() != SceneNodeTypes::Model ) continue;
+		if( Modules::sceneMan().getRenderableQueue()[i].type != SceneNodeTypes::Model ) continue;
 		
-		ModelNode *modelNode = (ModelNode *)Modules::sceneMan().getRenderableQueue()[i];
+		ModelNode *modelNode = (ModelNode *)Modules::sceneMan().getRenderableQueue()[i].node;
 		if( modelNode->getGeometryResource() == 0x0 ) continue;
 
 		bool occCulling = false;
@@ -1707,9 +1707,9 @@ void Renderer::drawParticles( const string &shaderContext, const string &theClas
 	// Loop through emitter queue
 	for( uint32 i = 0; i < Modules::sceneMan().getRenderableQueue().size(); ++i )
 	{
-		if( Modules::sceneMan().getRenderableQueue()[i]->getType() != SceneNodeTypes::Emitter ) continue; 
+		if( Modules::sceneMan().getRenderableQueue()[i].type != SceneNodeTypes::Emitter ) continue; 
 		
-		EmitterNode *emitter = (EmitterNode *)Modules::sceneMan().getRenderableQueue()[i];
+		EmitterNode *emitter = (EmitterNode *)Modules::sceneMan().getRenderableQueue()[i].node;
 		
 		if( emitter->_particleCount == 0 ) continue;
 		if( !emitter->_materialRes->isOfClass( theClass ) ) continue;
@@ -1987,7 +1987,7 @@ void Renderer::renderDebugView()
 	glColor4f( 0.4f, 0.4f, 0.4f, 1 );
 	for( uint32 i = 0, s = (uint32)Modules::sceneMan().getRenderableQueue().size(); i < s; ++i )
 	{
-		SceneNode *sn = Modules::sceneMan().getRenderableQueue()[i];
+		SceneNode *sn = Modules::sceneMan().getRenderableQueue()[i].node;
 		
 		drawDebugAABB( sn->_bBox.getMinCoords(), sn->_bBox.getMaxCoords(), false );
 	}

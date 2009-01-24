@@ -246,9 +246,9 @@ namespace Horde3DTerrain
 		// Loop through terrain queue
 		for( uint32 i = 0, s = (uint32)Modules::sceneMan().getRenderableQueue().size(); i < s; ++i )
 		{
-			if( Modules::sceneMan().getRenderableQueue()[i]->getType() != SNT_TerrainNode ) continue;
+			if( Modules::sceneMan().getRenderableQueue()[i].type != SNT_TerrainNode ) continue;
 			
-			TerrainNode *terrain = (TerrainNode *)Modules::sceneMan().getRenderableQueue()[i];
+			TerrainNode *terrain = (TerrainNode *)Modules::sceneMan().getRenderableQueue()[i].node;
 			
 			if( !debugView )
 			{

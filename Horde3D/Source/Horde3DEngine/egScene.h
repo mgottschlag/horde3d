@@ -98,6 +98,7 @@ protected:
 	SceneNode                   *_parent;  // Parent node
 	int                         _type;
 	NodeHandle                  _handle;
+	uint32                      _sgHandle;  // Spatial graph handle
 	bool                        _dirty;  // Does the node need to be updated?
 	bool                        _transformed;
 	bool                        _renderable;
@@ -114,11 +115,6 @@ protected:
 public:
 
 	float                       tmpSortValue;
-	
-	static bool frontToBackOrder( SceneNode *n1, SceneNode *n2 )
-		{ return n1->tmpSortValue < n2->tmpSortValue; }
-	static bool backToFrontOrder( SceneNode *n1, SceneNode *n2 )
-		{ return n1->tmpSortValue > n2->tmpSortValue; }
 	
 	SceneNode( const SceneNodeTpl &tpl );
 	virtual ~SceneNode();
@@ -162,6 +158,7 @@ public:
 		{ bool b = _transformed; if( reset ) _transformed = false; return b; }
 
 	friend class SceneManager;
+	friend class SpatialGraph;
 	friend class Renderer;
 };
 
@@ -200,6 +197,47 @@ public:
 
 
 // =================================================================================================
+// Spatial Graph
+// =================================================================================================
+
+struct RendQueueEntry
+{
+	SceneNode  *node;
+	int        type;  // Type is stored explicitly for better cache efficiency when iterating over list
+
+	RendQueueEntry() {}
+	RendQueueEntry( int type, SceneNode *node ) : type( type ), node( node ) {}
+};
+
+class SpatialGraph
+{
+protected:
+	std::vector< SceneNode * >     _nodes;		// Renderable nodes and lights
+	std::vector< uint32 >          _freeList;
+	std::vector< SceneNode * >     _lightQueue;
+	std::vector< RendQueueEntry >  _renderableQueue;
+
+	static bool frontToBackOrder( RendQueueEntry n1, RendQueueEntry n2 )
+		{ return n1.node->tmpSortValue < n2.node->tmpSortValue; }
+	static bool backToFrontOrder( RendQueueEntry n1, RendQueueEntry n2 )
+		{ return n1.node->tmpSortValue > n2.node->tmpSortValue; }
+
+public:
+	SpatialGraph();
+	
+	void addNode( SceneNode &sceneNode );
+	void removeNode( uint32 sgHandle );
+	void updateNode( uint32 sgHandle );
+
+	void updateQueues( const Frustum &frustum1, const Frustum *frustum2,
+	                   RenderingOrder::List order, bool lightQueue, bool renderQueue );
+
+	std::vector< SceneNode * > &getLightQueue() { return _lightQueue; }
+	std::vector< RendQueueEntry > &getRenderableQueue() { return _renderableQueue; }
+};
+
+
+// =================================================================================================
 // Scene Manager
 // =================================================================================================
 
@@ -232,10 +270,9 @@ protected:
 
 	std::vector< SceneNode *>      _nodes;  // _nodes[0] is root node
 	std::vector< uint32 >          _freeList;  // List of free slots
-	std::vector< SceneNode *>      _lightQueue;
-	std::vector< SceneNode *>      _renderableQueue;
 	std::vector< SceneNode * >     _findResults;
 	std::vector< CastRayResult >   _castRayResults;
+	SpatialGraph                   *_spatialGraph;
 
 	std::map< int, NodeRegEntry >  _registry;  // Registry of node types
 
@@ -243,8 +280,6 @@ protected:
 	Vec3f                          _rayDirection;  // Ditto
 	int                            _rayNum;  // Ditto
 
-	void updateQueuesRec( const Frustum &frustum1, const Frustum *frustum2, bool sorted, 
-	                      SceneNode &node, bool lightQueue, bool renderableQueue );
 	NodeHandle parseNode( SceneNodeTpl &tpl, SceneNode *parent );
 	void removeNodeRec( SceneNode *node );
 
@@ -260,6 +295,7 @@ public:
 	NodeRegEntry *findType( const std::string &typeString );
 	
 	void updateNodes();
+	void updateSpatialNode( uint32 sgHandle ) { _spatialGraph->updateNode( sgHandle ); }
 	void updateQueues( const Frustum &frustum1, const Frustum *frustum2,
 	                   RenderingOrder::List order, bool lightQueue, bool renderableQueue );
 	
@@ -277,8 +313,8 @@ public:
 
 	SceneNode &getRootNode() { return *_nodes[0]; }
 	SceneNode &getDefCamNode() { return *_nodes[1]; }
-	std::vector< SceneNode * > &getLightQueue() { return _lightQueue; }
-	std::vector< SceneNode * > &getRenderableQueue() { return _renderableQueue; }
+	std::vector< SceneNode * > &getLightQueue() { return _spatialGraph->getLightQueue(); }
+	std::vector< RendQueueEntry > &getRenderableQueue() { return _spatialGraph->getRenderableQueue(); }
 	
 	SceneNode *resolveNodeHandle( NodeHandle handle )
 		{ return (handle != 0 && (unsigned)(handle - 1) < _nodes.size()) ? _nodes[handle - 1] : 0x0; }
