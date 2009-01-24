@@ -1446,6 +1446,13 @@ void Renderer::drawModels( const string &shaderContext, const string &theClass, 
                            int occSet )
 {
 	if( frust1 == 0x0 ) return;
+
+	Vec3f camPos( frust1->getOrigin() );
+	if( Modules::renderer().getCurCamera() != 0x0 )
+	{
+		Matrix4f &camMat = Modules::renderer().getCurCamera()->getAbsTrans();
+		Vec3f camPos( camMat.c[3][0], camMat.c[3][1], camMat.c[3][2] );
+	}
 	
 	GeometryResource *curGeoRes = 0x0;
 
@@ -1558,6 +1565,14 @@ void Renderer::drawModels( const string &shaderContext, const string &theClass, 
 			std::sort( modelNode->_nodeList.begin(), modelNode->_nodeList.begin() + modelNode->_meshCount,
 			           meshMaterialOrder );
 		
+		// LOD
+		Vec3f modelPos( modelNode->_absTrans.c[3][0], modelNode->_absTrans.c[3][1], modelNode->_absTrans.c[3][2] );
+		float dist = (modelPos - camPos).length();
+		uint32 curLod = 4;
+		if( dist < modelNode->_lodDist1 ) curLod = 0;
+		else if( dist < modelNode->_lodDist2 ) curLod = 1;
+		else if( dist < modelNode->_lodDist3 ) curLod = 2;
+		else if( dist < modelNode->_lodDist4 ) curLod = 3;
 		
 		if( occCulling )
 			Modules::renderer().beginOccQuery( modelNode->_occQueries[occSet] );
@@ -1566,7 +1581,7 @@ void Renderer::drawModels( const string &shaderContext, const string &theClass, 
 		{
 			MeshNode *meshNode = (MeshNode *)modelNode->_nodeList[j].node;
 
-			if( !meshNode->_active ) continue;
+			if( !meshNode->_active || meshNode->getLodLevel() != curLod ) continue;
 
 			// Frustum culling for meshes
 			if( (frust1 != 0x0 && frust1->cullBox( meshNode->_bBox )) ||

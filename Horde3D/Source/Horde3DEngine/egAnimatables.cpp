@@ -37,7 +37,7 @@ using namespace std;
 MeshNode::MeshNode( const MeshNodeTpl &meshTpl ) :
 	AnimatableSceneNode( meshTpl ), _bBoxDirty( true ),
 	_materialRes( meshTpl.matRes ), _batchStart( meshTpl.batchStart ), _batchCount( meshTpl.batchCount ),
-	_vertRStart( meshTpl.vertRStart ), _vertREnd( meshTpl.vertREnd )
+	_vertRStart( meshTpl.vertRStart ), _vertREnd( meshTpl.vertREnd ), _lodLevel( meshTpl.lodLevel )
 {
 }
 
@@ -69,6 +69,9 @@ SceneNodeTpl *MeshNode::parsingFunc( map< string, string > &attribs )
 	itr = attribs.find( "vertREnd" );
 	if( itr != attribs.end() ) meshTpl->vertREnd = atoi( itr->second.c_str() );
 	else result = false;
+
+	itr = attribs.find( "lodLevel" );
+	if( itr != attribs.end() ) meshTpl->lodLevel = atoi( itr->second.c_str() );
 
 	if( !result )
 	{
@@ -123,6 +126,8 @@ int MeshNode::getParami( int param )
 		return _vertRStart;
 	case MeshNodeParams::VertREnd:
 		return _vertREnd;
+	case MeshNodeParams::LodLevel:
+		return _lodLevel;
 	default:
 		return SceneNode::getParami( param );
 	}
@@ -144,6 +149,9 @@ bool MeshNode::setParami( int param, int value )
 		}
 		_materialRes = (MaterialResource *)res;
 		return true;
+	case MeshNodeParams::LodLevel:
+		_lodLevel = value;
+		return true;
 	default:
 		return SceneNode::setParami( param, value );
 	}
@@ -152,6 +160,9 @@ bool MeshNode::setParami( int param, int value )
 
 bool MeshNode::checkIntersection( const Vec3f &rayOrig, const Vec3f &rayDir, Vec3f &intsPos ) const
 {
+	// Collision check is only done for base LOD
+	if( _lodLevel != 0 ) return false;
+	
 	GeometryResource *geoRes = _parentModel->getGeometryResource();
 	if( geoRes == 0x0 || geoRes->getVertData() == 0x0 ) return false;
 	

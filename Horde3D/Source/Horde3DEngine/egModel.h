@@ -46,7 +46,11 @@ struct ModelNodeParams
 	enum List
 	{
 		GeometryRes = 200,
-		SoftwareSkinning
+		SoftwareSkinning,
+		LodDist1,
+		LodDist2,
+		LodDist3,
+		LodDist4
 	};
 };
 
@@ -55,10 +59,13 @@ struct ModelNodeParams
 struct ModelNodeTpl : public SceneNodeTpl
 {
 	PGeometryResource  geoRes;
+	float              lodDist1, lodDist2, lodDist3, lodDist4;
 	bool               softwareSkinning;
 
 	ModelNodeTpl( const std::string &name, GeometryResource *geoRes ) :
-		SceneNodeTpl( SceneNodeTypes::Model, name ), geoRes( geoRes ), softwareSkinning( false )
+		SceneNodeTpl( SceneNodeTypes::Model, name ), geoRes( geoRes ), softwareSkinning( false ),
+			lodDist1( Math::MaxFloat ), lodDist2( Math::MaxFloat ),
+			lodDist3( Math::MaxFloat ), lodDist4( Math::MaxFloat )
 	{
 	}
 };
@@ -108,6 +115,7 @@ protected:
 
 	PGeometryResource             _geometryRes;
 	PGeometryResource             _baseGeoRes;	// NULL if model does not have a private geometry copy
+	float                         _lodDist1, _lodDist2, _lodDist3, _lodDist4;
 	std::vector< Vec4f >          _skinMatRows;
 	
 	uint32                        _meshCount;  // Number of meshes in _animatedNodes
@@ -140,6 +148,8 @@ public:
 	bool setAnimParams( int stage, float time, float weight );
 	bool setMorphParam( const std::string &targetName, float weight );
 
+	float getParamf( int param );
+	bool setParamf( int param, float value );
 	int getParami( int param );
 	bool setParami( int param, int value );
 

@@ -89,11 +89,13 @@ struct SceneNode
 struct Mesh : public SceneNode
 {
 	std::vector< TriGroup >  triGroups;
+	unsigned int             lodLevel;
 	
 	Mesh()
 	{
 		typeJoint = false;
 		parent = 0x0;
+		lodLevel = 0;
 	}
 };
 
@@ -140,7 +142,9 @@ private:
 	std::vector< Joint * >       _joints;
 	std::vector< MorphTarget >   _morphTargets;
 
+	float                        _lodDist1, _lodDist2, _lodDist3, _lodDist4;
 	unsigned int                 _frameCount;
+	unsigned int                 _maxLodLevel;
 
 
 	Matrix4f getNodeTransform( ColladaDocument &doc, DaeNode &node, unsigned int frame );
@@ -156,7 +160,7 @@ private:
 
 public:
 
-	Converter();
+	Converter( float *lodDists );
 	~Converter();
 	
 	bool convertModel( ColladaDocument &doc, bool optimize );

@@ -44,9 +44,15 @@ using namespace std;
 #endif
 
 
-Converter::Converter()
+Converter::Converter( float *lodDists )
 {
+	_lodDist1 = lodDists[0];
+	_lodDist2 = lodDists[1];
+	_lodDist3 = lodDists[2];
+	_lodDist4 = lodDists[3];
+	
 	_frameCount = 0;
+	_maxLodLevel = 0;
 }
 
 
@@ -354,6 +360,22 @@ void Converter::processMeshes( ColladaDocument &doc, bool optimize )
 	// Note: At the moment the geometry for all nodes is copied and not referenced
 	for( unsigned int i = 0; i < _meshes.size(); ++i )
 	{
+		// Interpret mesh LOD level
+		if( strstr( _meshes[i]->name, "_lod1" ) == _meshes[i]->name + strlen( _meshes[i]->name ) - 5 )
+			_meshes[i]->lodLevel = 1;
+		else if( strstr( _meshes[i]->name, "_lod2" ) == _meshes[i]->name + strlen( _meshes[i]->name ) - 5 )
+			_meshes[i]->lodLevel = 2;
+		else if( strstr( _meshes[i]->name, "_lod3" ) == _meshes[i]->name + strlen( _meshes[i]->name ) - 5 )
+			_meshes[i]->lodLevel = 3;
+		else if( strstr( _meshes[i]->name, "_lod4" ) == _meshes[i]->name + strlen( _meshes[i]->name ) - 5 )
+			_meshes[i]->lodLevel = 4;
+		
+		if( _meshes[i]->lodLevel > 0 )
+		{
+			if( _meshes[i]->lodLevel > _maxLodLevel ) _maxLodLevel = _meshes[i]->lodLevel;
+			_meshes[i]->name[strlen( _meshes[i]->name ) - 5] ='\0';  // Cut off lod postfix from name
+		}
+		
 		// Find geometry/controller for node
 		string id = _meshes[i]->daeInstance->url;
 		
@@ -976,6 +998,7 @@ void Converter::writeSGNode( const string &modelName, SceneNode *node, unsigned 
 			if( i > 0 ) outf << "\t";
 			outf << "<Mesh ";
 			outf << "name=\"" << (i > 0 ? "#" : "") << mesh->name << "\" ";
+			if( mesh->lodLevel > 0 ) outf << "lodLevel=\"" << mesh->lodLevel << "\" ";
 			outf << "material=\"";
 			outf << modelName + "/" + mesh->triGroups[i].matName + ".material.xml\" ";
 			
@@ -1060,7 +1083,12 @@ bool Converter::writeSceneGraph( const string &name )
 	ofstream outf;
 	outf.open( (name + ".scene.xml").c_str(), ios::out );
 	
-	outf << "<Model name=\"" << name << "\" geometry=\"" << name << ".geo\">\n";
+	outf << "<Model name=\"" << name << "\" geometry=\"" << name << ".geo\"";
+	if( _maxLodLevel >= 1 ) outf << " lodDist1=\"" << _lodDist1 << "\"";
+	if( _maxLodLevel >= 2 ) outf << " lodDist2=\"" << _lodDist2 << "\"";
+	if( _maxLodLevel >= 3 ) outf << " lodDist3=\"" << _lodDist3 << "\"";
+	if( _maxLodLevel >= 4 ) outf << " lodDist4=\"" << _lodDist4 << "\"";
+	outf << ">\n";
 
 	// Output morph target names as comment
 	if( !_morphTargets.empty() )

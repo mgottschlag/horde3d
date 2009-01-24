@@ -316,12 +316,12 @@ which are described in the following:
         <td>filename of the Collada document</td>
     </tr>
     <tr>
-        <td><b>-o outputName</b></td>
-        <td>name of the output files, without file extension (optional)</td>
+        <td><b>-o</b> <i>outputName</i></td>
+        <td>name of the output files, without file extension (optional, default: <i>inputName</i>)</td>
     </tr>
     <tr>
-        <td><b>-s shaderName</b></td>
-        <td>filename of the default shader that is used for the created material files (optional)</td>
+        <td><b>-s</b> <i>shaderName</i></td>
+        <td>filename of the default shader that is used for the created material files (optional, default: skinning.shader.xml)</td>
     </tr>
     <tr>
         <td><b>-noopt</b></td>
@@ -331,15 +331,42 @@ which are described in the following:
         <td><b>-anim</b></td>
         <td>export animation only and no geometry data (optional)</td>
     </tr>
+	<tr>
+        <td><b>-lodDist1</b> <i>dist</i></td>
+        <td>distance for LOD1 (optional, default: 10)</td>
+    </tr>
+	<tr>
+        <td><b>-lodDist2</b> <i>dist</i></td>
+        <td>distance for LOD2 (optional, default: 20)</td>
+    </tr>
+	<tr>
+        <td><b>-lodDist3</b> <i>dist</i></td>
+        <td>distance for LOD3 (optional, default: 40)</td>
+    </tr>
+	<tr>
+        <td><b>-lodDist4</b> <i>dist</i></td>
+        <td>distance for LOD4 (optional, default: 80)</td>
+    </tr>
 </table>
 </div>
 <br />
 
 <p>
-<b>Important Note:</b>
+<b>LOD Support</b>
+<br /><br />
+The converter has support for level of detail (LOD) meshes. By default a mesh is considered as base LOD (LOD0).
+To define simplified LODs, a special naming convention is used. Use the postfixes <b>_lod1</b>, <b>_lod2</b>,
+<b>_lod3</b> or <b>_lod4</b> at the end of a mesh name to define the corresponding LOD level. The converter will
+automatically remove the postfix from the name and assign the specified LOD level to the output mesh. The command
+line arguments lodDist1 to lodDist4 can be used to define the distances from which on a detail level is activated.
+</p>
 <br />
+
+<p>
+<b>Important Note</b>
+<br /><br />
 At the moment there are some restrictions for Collada files to be compatible with the converter:
-All geometry has to stored as triangle data and animations should be exported as sampled keyframe data.
+All geometry should be stored as triangle data and animations have to be exported as sampled keyframe data.
 </p>
 <br /><br />
 

@@ -291,7 +291,7 @@ void SceneNode::onDetach( SceneNode &/*parentNode*/ )
 // *************************************************************************************************
 
 GroupNode::GroupNode( const GroupNodeTpl &groupTpl ) :
-	SceneNode( groupTpl ), _minDist( 0 ), _maxDist( Math::MaxFloat )
+	SceneNode( groupTpl )
 {
 }
 
@@ -300,11 +300,6 @@ SceneNodeTpl *GroupNode::parsingFunc( map< string, string > &attribs )
 {
 	map< string, string >::iterator itr;
 	GroupNodeTpl *groupTpl = new GroupNodeTpl( "" );
-
-	itr = attribs.find( "minDist" );
-	if( itr != attribs.end() ) groupTpl->minDist = (float)atof( itr->second.c_str() );
-	itr = attribs.find( "maxDist" );
-	if( itr != attribs.end() ) groupTpl->maxDist = (float)atof( itr->second.c_str() );
 	
 	return groupTpl;
 }
@@ -320,31 +315,13 @@ SceneNode *GroupNode::factoryFunc( const SceneNodeTpl &nodeTpl )
 
 float GroupNode::getParamf( int param )
 {
-	switch( param )
-	{
-	case GroupNodeParams::MinDist:
-		return _minDist;
-	case GroupNodeParams::MaxDist:
-		return _maxDist;
-	default:
-		return SceneNode::getParamf( param );
-	}
+	return SceneNode::getParamf( param );
 }
 
 
 bool GroupNode::setParamf( int param, float value )
 {
-	switch( param )
-	{
-	case GroupNodeParams::MinDist:
-		_minDist = value;
-		return true;
-	case GroupNodeParams::MaxDist:
-		_maxDist = value;
-		return true;
-	default:
-		return SceneNode::setParamf( param, value );
-	}
+	return SceneNode::setParamf( param, value );
 }
 
 
@@ -419,16 +396,7 @@ void SceneManager::updateQueuesRec( const Frustum &frustum1, const Frustum *frus
 {
 	if( !node._active ) return;
 	
-	if( node._type == SceneNodeTypes::Group )
-	{
-		// LOD
-		Vec3f nodePos( node._absTrans.c[3][0], node._absTrans.c[3][1], node._absTrans.c[3][2] );
-		float dist = (nodePos - frustum1.getOrigin()).length();
-		
-		GroupNode *gn = (GroupNode *)&node;
-		if( dist < gn->_minDist || dist >= gn->_maxDist ) return;
-	}
-	else if( lightQueue && node._type == SceneNodeTypes::Light )
+	if( lightQueue && node._type == SceneNodeTypes::Light )
 	{
 		_lightQueue.push_back( &node );
 	}

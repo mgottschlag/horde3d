@@ -170,21 +170,8 @@ public:
 // Group Node
 // =================================================================================================
 
-struct GroupNodeParams
-{
-	enum List
-	{
-		MinDist = 100,
-		MaxDist
-	};
-};
-
-// =================================================================================================
-
 struct GroupNodeTpl : public SceneNodeTpl
 {
-	float  minDist, maxDist;
-
 	GroupNodeTpl( const std::string &name ) :
 		SceneNodeTpl( SceneNodeTypes::Group, name )
 	{
@@ -196,8 +183,6 @@ struct GroupNodeTpl : public SceneNodeTpl
 class GroupNode : public SceneNode
 {
 protected:
-
-	float  _minDist, _maxDist;
 
 	GroupNode( const GroupNodeTpl &groupTpl );
 

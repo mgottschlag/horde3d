@@ -49,6 +49,10 @@ int main( int argc, char **argv )
 		log( "-s shaderName:  filename of the default shader for materials" );
 		log( "-noopt:         disable geometry optimization" );
 		log( "-anim:          export animations only" );
+		log( "-lodDist1:      distance for LOD1" );
+		log( "-lodDist2:      distance for LOD2" );
+		log( "-lodDist3:      distance for LOD3" );
+		log( "-lodDist4:      distance for LOD4" );
 		return 0;
 	}
 	
@@ -56,6 +60,7 @@ int main( int argc, char **argv )
 	string outName = extractFileName( inName, false );
 	string defShader = "skinning.shader.xml";
 	bool optimize = true, animsOnly = false;
+	float lodDists[4] = { 10, 20, 40, 80 };
 
 	for( int i = 2; i < argc; ++i )
 	{
@@ -91,6 +96,26 @@ int main( int argc, char **argv )
 		{
 			animsOnly = true;
 		}
+		else if( strcmp( argv[i], "-lodDist1" ) == 0 ||
+		         strcmp( argv[i], "-lodDist2" ) == 0 ||
+		         strcmp( argv[i], "-lodDist3" ) == 0 ||
+		         strcmp( argv[i], "-lodDist4" ) == 0 )
+		{
+			if( argc > i + 1 )
+			{	
+				int index = 0;
+				if( strcmp( argv[i], "-lodDist2" ) == 0 ) index = 1;
+				else if( strcmp( argv[i], "-lodDist3" ) == 0 ) index = 2;
+				else if( strcmp( argv[i], "-lodDist4" ) == 0 ) index = 3;
+				
+				lodDists[index] = (float)atof( argv[++i] );
+			}
+			else
+			{
+				log( "Invalid argument" );
+				return 0;
+			}
+		}
 		else
 		{
 			log( "Invalid argument" );
@@ -118,7 +143,7 @@ int main( int argc, char **argv )
 	// Convert
 	log( "Converting data for model " + outName + "..." );
 	if( !optimize ) log( "Geometry optimization disabled" );
-	Converter *converter = new Converter();
+	Converter *converter = new Converter( lodDists );
 	converter->convertModel( *colladaFile, optimize );
 	log( "Done." );
 	

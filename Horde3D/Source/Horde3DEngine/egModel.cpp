@@ -33,7 +33,9 @@ using namespace std;
 ModelNode::ModelNode( const ModelNodeTpl &modelTpl ) :
 	SceneNode( modelTpl ), _geometryRes( modelTpl.geoRes ), _baseGeoRes( 0x0 ),
 	_softwareSkinning( modelTpl.softwareSkinning ), _morpherUsed( false ), _morpherDirty( false ),
-	_animDirty( false ), _nodeListDirty( false ), _skinningDirty( false ), _meshCount( 0 )
+	_animDirty( false ), _nodeListDirty( false ), _skinningDirty( false ), _meshCount( 0 ),
+	_lodDist1( modelTpl.lodDist1 ), _lodDist2( modelTpl.lodDist2 ), _lodDist3( modelTpl.lodDist3 ),
+	_lodDist4( modelTpl.lodDist4 )
 {
 	_renderable = true;
 	
@@ -79,6 +81,15 @@ SceneNodeTpl *ModelNode::parsingFunc( map< string, string > &attribs )
 		else
 			modelTpl->softwareSkinning = false;
 	}
+
+	itr = attribs.find( "lodDist1" );
+	if( itr != attribs.end() ) modelTpl->lodDist1 = (float)atof( itr->second.c_str() );
+	itr = attribs.find( "lodDist2" );
+	if( itr != attribs.end() ) modelTpl->lodDist2 = (float)atof( itr->second.c_str() );
+	itr = attribs.find( "lodDist3" );
+	if( itr != attribs.end() ) modelTpl->lodDist3 = (float)atof( itr->second.c_str() );
+	itr = attribs.find( "lodDist4" );
+	if( itr != attribs.end() ) modelTpl->lodDist4 = (float)atof( itr->second.c_str() );
 
 	if( !result )
 	{
@@ -302,6 +313,46 @@ void ModelNode::markMeshBBoxesDirty()
 	}
 
 	markDirty();
+}
+
+
+float ModelNode::getParamf( int param )
+{
+	switch( param )
+	{
+	case ModelNodeParams::LodDist1:
+		return _lodDist1;
+	case ModelNodeParams::LodDist2:
+		return _lodDist2;
+	case ModelNodeParams::LodDist3:
+		return _lodDist3;
+	case ModelNodeParams::LodDist4:
+		return _lodDist4;
+	default:
+		return SceneNode::getParamf( param );
+	}
+}
+
+
+bool ModelNode::setParamf( int param, float value )
+{
+	switch( param )
+	{
+	case ModelNodeParams::LodDist1:
+		_lodDist1 = value;
+		return true;
+	case ModelNodeParams::LodDist2:
+		_lodDist2 = value;
+		return true;
+	case ModelNodeParams::LodDist3:
+		_lodDist3 = value;
+		return true;
+	case ModelNodeParams::LodDist4:
+		_lodDist4 = value;
+		return true;
+	default:	
+		return SceneNode::setParamf( param, value );
+	}
 }
 
 

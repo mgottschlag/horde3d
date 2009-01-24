@@ -414,22 +414,6 @@ struct SceneNodeParams
 	};
 };
 
-struct GroupNodeParams
-{
-	/*	Enum: GroupNodeParams
-			The available Group node parameters.
-	
-		MinDist	- Minimal distance from the viewer for the node to be visible
-				  (default: 0.0); used for level of detail [type: float]
-		MaxDist	- Maximal distance from the viewer for the node to be visible
-				  (default: infinite); used for level of detail [type: float]
-	*/
-	enum List
-	{
-		MinDist = 100,
-		MaxDist
-	};
-};
 
 struct ModelNodeParams
 {
@@ -438,11 +422,23 @@ struct ModelNodeParams
 
 		GeometryRes			- Geometry resource used for the model [type: ResHandle]
 		SoftwareSkinning	- Enables or disables software skinning (default: 0) [type: int]
+		LodDist1            - Distance to camera from which on LOD1 is used (default: infinite) [type: float]
+		                      (must be a positive value larger than 0.0)
+		LodDist2            - Distance to camera from which on LOD2 is used
+		                      (may not be smaller than LodDist1) (default: infinite) [type: float]
+		LodDist3            - Distance to camera from which on LOD3 is used
+		                      (may not be smaller than LodDist2) (default: infinite) [type: float]
+		LodDist4            - Distance to camera from which on LOD4 is used
+		                      (may not be smaller than LodDist3) (default: infinite) [type: float]
 	*/
 	enum List
 	{
 		GeometryRes = 200,
-		SoftwareSkinning
+		SoftwareSkinning,
+		LodDist1,
+		LodDist2,
+		LodDist3,
+		LodDist4
 	};
 };
 
@@ -456,6 +452,8 @@ struct MeshNodeParams
 		BatchCount	- Number of triangle indices used for drawing mesh [type: int, read-only]
 		VertRStart	- First vertex in Geometry resource of parent Model node [type: int, read-only]
 		VertREnd	- Last vertex in Geometry resource of parent Model node [type: int, read-only]
+		LodLevel    - LOD level of Mesh; the mesh is only rendered if its LOD level corresponds to
+		              the model's current LOD level which is calculated based on the LOD distances (default: 0) [type: int]
 	*/
 	enum List
 	{
@@ -463,7 +461,8 @@ struct MeshNodeParams
 		BatchStart,
 		BatchCount,
 		VertRStart,
-		VertREnd
+		VertREnd,
+		LodLevel
 	};
 };
 
@@ -1552,6 +1551,7 @@ namespace Horde3D
         The function finds intersections relative to the ray origin and returns the number of intersecting scene
         nodes. The ray is a line segment and is specified by a starting point (the origin) and a finite direction
 		vector which also defines its length. Currently this function is limited to returning intersections with Meshes.
+		For Meshes, the base LOD (LOD0) is always used for performing the ray-triangle intersection tests.
 		
 		Parameters:
 			node		- node at which intersection check is beginning

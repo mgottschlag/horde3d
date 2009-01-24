@@ -65,7 +65,8 @@ struct MeshNodeParams
 		BatchStart,
 		BatchCount,
 		VertRStart,
-		VertREnd
+		VertREnd,
+		LodLevel
 	};
 };
 
@@ -76,11 +77,12 @@ struct MeshNodeTpl : public SceneNodeTpl
 	PMaterialResource  matRes;
 	uint32             batchStart, batchCount;
 	uint32             vertRStart, vertREnd;
+	uint32             lodLevel;
 
 	MeshNodeTpl( const std::string &name, MaterialResource *materialRes, uint32 batchStart,
-	             uint32 batchCount, uint32 vertRStart, uint32 vertREnd) :
+	             uint32 batchCount, uint32 vertRStart, uint32 vertREnd ) :
 		SceneNodeTpl( SceneNodeTypes::Mesh, name ), matRes( materialRes ), batchStart( batchStart ),
-		batchCount( batchCount ), vertRStart( vertRStart ), vertREnd( vertREnd )
+		batchCount( batchCount ), vertRStart( vertRStart ), vertREnd( vertREnd ), lodLevel( 0 )
 	{
 	}
 };
@@ -94,6 +96,7 @@ protected:
 	PMaterialResource   _materialRes;
 	uint32              _batchStart, _batchCount;
 	uint32              _vertRStart, _vertREnd;
+	uint32              _lodLevel;
 	
 	BoundingBox         _localBBox;
 	bool                _bBoxDirty;
@@ -121,6 +124,7 @@ public:
 	uint32 getBatchCount() { return _batchCount; }
 	uint32 getVertRStart() { return _vertRStart; }
 	uint32 getVertREnd() { return _vertREnd; }
+	uint32 getLodLevel() { return _lodLevel; }
 
 	friend class ModelNode;
 };

@@ -361,14 +361,6 @@ The following XML elements and attributes are supported for defining the scene n
         <td>
             Group scene node {*}
             <table>
-                <tr>
-                    <td><b>minDist</b></td>
-                    <td>see <a href="_api.html#GroupNodeParams">GroupNodeParams</a> {optional}</td>
-                </tr>
-                <tr>
-                    <td><b>maxDist</b></td>
-                    <td>see <a href="_api.html#GroupNodeParams">GroupNodeParams</a> {optional}</td>
-                </tr>
             </table>
         </td>
     </tr>
@@ -398,6 +390,22 @@ The following XML elements and attributes are supported for defining the scene n
                     <td><b>softwareSkinning</b></td>
 					<td>see <a href="_api.html#ModelNodeParams">ModelNodeParams</a> {optional}</td>
                 </tr>
+				<tr>
+                    <td><b>lodDist1</b></td>
+					<td>see <a href="_api.html#ModelNodeParams">ModelNodeParams</a> {optional}</td>
+                </tr>
+				<tr>
+                    <td><b>lodDist2</b></td>
+					<td>see <a href="_api.html#ModelNodeParams">ModelNodeParams</a> {optional}</td>
+                </tr>
+				<tr>
+                    <td><b>lodDist3</b></td>
+					<td>see <a href="_api.html#ModelNodeParams">ModelNodeParams</a> {optional}</td>
+                </tr>
+				<tr>
+                    <td><b>lodDist4</b></td>
+					<td>see <a href="_api.html#ModelNodeParams">ModelNodeParams</a> {optional}</td>
+                </tr>
             </table>
         </td>
     </tr>
@@ -425,6 +433,10 @@ The following XML elements and attributes are supported for defining the scene n
                 <tr>
                     <td><b>vertREnd</b></td>
                     <td>maximum vertex array index contained in indices of geometry resource of parent model {required}</td>
+                </tr>
+				<tr>
+                    <td><b>lodLevel</b></td>
+                    <td>see <a href="_api.html#MeshNodeParams">MeshNodeParams</a> {optional}</td>
                 </tr>
             </table>
         </td>
