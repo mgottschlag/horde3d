@@ -90,6 +90,19 @@ struct BlendModes
 	};
 };
 
+struct TestModes
+{
+	enum List
+	{
+		Always,  // Same as disabled
+		Equal,
+		Less,
+		LessEqual,
+		Greater,
+		GreaterEqual
+	};
+};
+
 
 struct ShaderCombination
 {
@@ -131,7 +144,11 @@ struct ShaderContext
 	
 	// RenderConfig
 	BlendModes::List                  blendMode;
+	TestModes::List                   depthTest;
+	TestModes::List                   alphaTest;
+	float                             alphaRef;
 	bool                              writeDepth;
+	bool                              alphaToCoverage;
 	
 	// Shaders
 	std::vector< ShaderCombination >  shaderCombs;
@@ -140,7 +157,9 @@ struct ShaderContext
 
 
 	ShaderContext() :
-		compiled( false ), writeDepth( true ), blendMode( BlendModes::Replace )
+		compiled( false ), writeDepth( true ), blendMode( BlendModes::Replace ),
+		depthTest( TestModes::LessEqual ), alphaTest( TestModes::Always ),
+		alphaRef( 0.0f ), alphaToCoverage( false )
 	{
 	}
 

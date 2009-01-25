@@ -386,12 +386,14 @@ bool ShaderResource::parseFXSection( const char *data, bool oldFormat )
 		XMLNode node2 = node1.getChildNode( "RenderConfig" );
 		if( !node2.isEmpty() )
 		{
+			// Depth mask
 			if( _stricmp( node2.getAttribute( "writeDepth", "true" ), "false" ) == 0 ||
 				_stricmp( node2.getAttribute( "writeDepth", "1" ), "0" ) == 0 )
 				context.writeDepth = false;
 			else
 				context.writeDepth = true;
 
+			// Blending
 			if( _stricmp( node2.getAttribute( "blendMode", "REPLACE" ), "BLEND" ) == 0 )
 				context.blendMode = BlendModes::Blend;
 			else if( _stricmp( node2.getAttribute( "blendMode", "REPLACE" ), "ADD" ) == 0 )
@@ -402,6 +404,43 @@ bool ShaderResource::parseFXSection( const char *data, bool oldFormat )
 				context.blendMode = BlendModes::Mult;
 			else
 				context.blendMode = BlendModes::Replace;
+
+			// Depth test
+			if( _stricmp( node2.getAttribute( "depthTest", "LESS_EQUAL" ), "ALWAYS" ) == 0 )
+				context.depthTest = TestModes::Always;
+			else if( _stricmp( node2.getAttribute( "depthTest", "LESS_EQUAL" ), "EQUAL" ) == 0 )
+				context.depthTest = TestModes::Equal;
+			else if( _stricmp( node2.getAttribute( "depthTest", "LESS_EQUAL" ), "LESS" ) == 0 )
+				context.depthTest = TestModes::Less;
+			else if( _stricmp( node2.getAttribute( "depthTest", "LESS_EQUAL" ), "GREATER" ) == 0 )
+				context.depthTest = TestModes::Greater;
+			else if( _stricmp( node2.getAttribute( "depthTest", "LESS_EQUAL" ), "GREATER_EQUAL" ) == 0 )
+				context.depthTest = TestModes::GreaterEqual;
+			else
+				context.depthTest = TestModes::LessEqual;
+
+			// Alpha test
+			if( _stricmp( node2.getAttribute( "alphaTest", "ALWAYS" ), "EQUAL" ) == 0 )
+				context.alphaTest = TestModes::Equal;
+			else if( _stricmp( node2.getAttribute( "alphaTest", "ALWAYS" ), "LESS" ) == 0 )
+				context.alphaTest = TestModes::Less;
+			else if( _stricmp( node2.getAttribute( "alphaTest", "ALWAYS" ), "LESS_EQUAL" ) == 0 )
+				context.alphaTest = TestModes::LessEqual;
+			else if( _stricmp( node2.getAttribute( "alphaTest", "ALWAYS" ), "GREATER" ) == 0 )
+				context.alphaTest = TestModes::Greater;
+			else if( _stricmp( node2.getAttribute( "alphaTest", "ALWAYS" ), "GREATER_EQUAL" ) == 0 )
+				context.alphaTest = TestModes::GreaterEqual;
+			else
+				context.alphaTest = TestModes::Always;
+			
+			context.alphaRef = (float)atof( node2.getAttribute( "alphaRef", "0" ) );
+
+			// Alpha-to-coverage
+			if( _stricmp( node2.getAttribute( "alphaToCoverage", "false" ), "true" ) == 0 ||
+				_stricmp( node2.getAttribute( "alphaToCoverage", "0" ), "1" ) == 0 )
+				context.alphaToCoverage = true;
+			else
+				context.alphaToCoverage = false;
 		}
 		
 		if( oldFormat )

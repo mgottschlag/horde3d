@@ -240,11 +240,29 @@ The following XML node elements with the described attributes are supported for 
             <table>
                 <tr>
                     <td><b>writeDepth</b></td>
-                    <td>enable writing to depth buffer (Values: false, true) (Default: true)  {optional}</td>
+                    <td>enables writing to depth buffer (Values: false, true) (Default: true)  {optional}</td>
                 </tr>
                 <tr>
                     <td><b>blendMode</b></td>
-                    <td>blend function (Values: REPLACE, BLEND, ADD, ADD_BLENDED, MULT) (Default: REPLACE)  {optional}</td>
+                    <td>blend mode (Values: REPLACE, BLEND, ADD, ADD_BLENDED, MULT) (Default: REPLACE)  {optional}</td>
+                </tr>
+				<tr>
+                    <td><b>depthTest</b></td>
+                    <td>depth test function; use ALWAYS to disable depth test
+					    (Values: ALWAYS, EQUAL, LESS, LESS_EQUAL, GREATER, GREATER_EQUAL) (Default: LESS_EQUAL)  {optional}</td>
+                </tr>
+				<tr>
+                    <td><b>alphaTest</b></td>
+                    <td>alpha test function; use ALWAYS to disable alpha test
+					    (Values: ALWAYS, EQUAL, LESS, LESS_EQUAL, GREATER, GREATER_EQUAL) (Default: ALWAYS)  {optional}</td>
+                </tr>
+				<tr>
+                    <td><b>alphaRef</b></td>
+                    <td>reference value for alpha test (Default: 0.0)  {optional}</td>
+                </tr>
+				<tr>
+                    <td><b>alphaToCoverage</b></td>
+                    <td>enables alpha-to-coverage (Values: false, true) (Default: false)  {optional}</td>
                 </tr>
             </table>
         </td>

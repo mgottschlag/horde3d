@@ -101,8 +101,10 @@ void Renderer::initStates()
 	glDepthFunc( GL_LEQUAL );
 	glShadeModel( GL_SMOOTH );
 	glDisable( GL_MULTISAMPLE );
+	glDisable( GL_SAMPLE_ALPHA_TO_COVERAGE );
 	glEnable( GL_DEPTH_TEST );
 	glEnable( GL_CULL_FACE );
+	glDisable( GL_ALPHA_TEST );
 	glClearDepth( 1.0f );
 	glClearColor( 0.0f, 0.0f, 0.0f, 1.0f );	
 }
@@ -455,32 +457,98 @@ bool Renderer::setMaterialRec( MaterialResource *materialRes, const string &shad
 		ShaderCombination *sc = materialRes->_shaderRes->getCombination( *context, materialRes->_combMask );
 		if( sc != _curShader ) setShader( sc );	
 
+		// Depth mask
 		if( context->writeDepth ) glDepthMask( GL_TRUE );
 		else glDepthMask( GL_FALSE );
 
-		if( context->blendMode == BlendModes::Replace )
+		// Blending
+		switch( context->blendMode )
 		{
+		case BlendModes::Replace:
 			glDisable( GL_BLEND );
-		}
-		else if( context->blendMode == BlendModes::Blend )
-		{
+			break;
+		case BlendModes::Blend:
 			glEnable( GL_BLEND );
 			glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-		}
-		else if( context->blendMode == BlendModes::Add )
-		{
+			break;
+		case BlendModes::Add:
 			glEnable( GL_BLEND );
 			glBlendFunc( GL_ONE, GL_ONE );
-		}
-		else if( context->blendMode == BlendModes::AddBlended )
-		{
+			break;
+		case BlendModes::AddBlended:
 			glEnable( GL_BLEND );
 			glBlendFunc( GL_SRC_ALPHA, GL_ONE );
-		}
-		else if( context->blendMode == BlendModes::Mult )
-		{
+			break;
+		case BlendModes::Mult:
 			glEnable( GL_BLEND );
 			glBlendFunc( GL_DST_COLOR, GL_ZERO );
+			break;
+		}
+
+		// Depth test
+		switch( context->depthTest )
+		{
+		case TestModes::LessEqual:
+			glEnable( GL_DEPTH_TEST );
+			glDepthFunc( GL_LEQUAL );
+			break;
+		case TestModes::Equal:
+			glEnable( GL_DEPTH_TEST );
+			glDepthFunc( GL_EQUAL );
+			break;
+		case TestModes::Always:
+			glDisable( GL_DEPTH_TEST );
+			break;
+		case TestModes::Less:
+			glEnable( GL_DEPTH_TEST );
+			glDepthFunc( GL_LESS );
+			break;
+		case TestModes::Greater:
+			glEnable( GL_DEPTH_TEST );
+			glDepthFunc( GL_GREATER );
+			break;
+		case TestModes::GreaterEqual:
+			glEnable( GL_DEPTH_TEST );
+			glDepthFunc( GL_GEQUAL );
+			break;
+		}
+
+		// Alpha test and alpha-to-coverage
+		if( context->alphaToCoverage && Modules::config().sampleCount > 0 )
+		{
+			glDisable( GL_ALPHA_TEST );
+			glEnable( GL_SAMPLE_ALPHA_TO_COVERAGE );
+		}
+		else
+		{
+			glDisable( GL_SAMPLE_ALPHA_TO_COVERAGE );
+			
+			switch( context->alphaTest )
+			{
+			case TestModes::Always:
+				glDisable( GL_ALPHA_TEST );
+				break;
+			case TestModes::Less:
+				glEnable( GL_ALPHA_TEST );
+				glAlphaFunc( GL_LESS, context->alphaRef );
+				break;
+			case TestModes::LessEqual:
+				glEnable( GL_ALPHA_TEST );
+				glAlphaFunc( GL_LEQUAL, context->alphaRef );
+				break;
+			case TestModes::Greater:
+				glEnable( GL_ALPHA_TEST );
+				glAlphaFunc( GL_GREATER, context->alphaRef );
+				break;
+			case TestModes::GreaterEqual:
+				glEnable( GL_ALPHA_TEST );
+				glAlphaFunc( GL_GEQUAL, context->alphaRef );
+				break;
+			case TestModes::Equal:
+				glEnable( GL_ALPHA_TEST );
+				glAlphaFunc( GL_EQUAL, context->alphaRef );
+				break;
+			}
 		}
 	}
 	if( _curShader == 0x0 ) return false;
@@ -592,6 +660,11 @@ bool Renderer::setMaterial( MaterialResource *materialRes, const string &shaderC
 	{	
 		_curMatRes = 0x0;
 		_curShader = 0x0;
+		glDisable( GL_BLEND );
+		glDisable( GL_ALPHA_TEST );
+		glEnable( GL_DEPTH_TEST );
+		glDepthFunc( GL_LEQUAL );
+		glDepthMask( 1 );
 		return false;
 	}
 	else if( _curShader != 0x0 && materialRes == _curMatRes ) return true;
@@ -1050,8 +1123,6 @@ void Renderer::drawOverlays( const string &shaderContext )
 	glMatrixMode( GL_MODELVIEW );
 	glLoadIdentity();
 	
-	glDisable( GL_DEPTH_TEST );
-	
 	for( int i = 0; i < 8; ++i )
 	{
 		for( uint32 j = 0; j < _overlays.size(); ++j )
@@ -1063,15 +1134,13 @@ void Renderer::drawOverlays( const string &shaderContext )
 			if( !setMaterial( overlay.materialRes, shaderContext ) ) continue;
 			
 			glBegin( GL_QUADS );
-			glTexCoord2fv( &overlay.u_ll ); glVertex2fv( &overlay.x_ll );
-			glTexCoord2fv( &overlay.u_lr ); glVertex2fv( &overlay.x_lr );
-			glTexCoord2fv( &overlay.u_ur ); glVertex2fv( &overlay.x_ur );
-			glTexCoord2fv( &overlay.u_ul ); glVertex2fv( &overlay.x_ul );
+			glTexCoord2fv( &overlay.u_ll ); glVertex3f( overlay.x_ll, overlay.y_ll, 1 );
+			glTexCoord2fv( &overlay.u_lr ); glVertex3f( overlay.x_lr, overlay.y_lr, 1 );
+			glTexCoord2fv( &overlay.u_ur ); glVertex3f( overlay.x_ur, overlay.y_ur, 1 );
+			glTexCoord2fv( &overlay.u_ul ); glVertex3f( overlay.x_ul, overlay.y_ul, 1 );
 			glEnd();
 		}
 	}
-
-	glEnable( GL_DEPTH_TEST );
 }
 
 
@@ -1166,16 +1235,12 @@ void Renderer::drawFSQuad( Resource *matRes, const string &shaderContext )
 	else
 		glLoadIdentity();
 	
-	glDepthFunc( GL_ALWAYS );
-	
 	glBegin(GL_QUADS);
-	glTexCoord2f( 0, 0 ); glVertex2f( 0, 0 );
-	glTexCoord2f( 1, 0 ); glVertex2f( 1, 0 );
-	glTexCoord2f( 1, 1 ); glVertex2f( 1, 1 );
-	glTexCoord2f( 0, 1 ); glVertex2f( 0, 1 );
+	glTexCoord2f( 0, 0 ); glVertex3f( 0, 0, 1 );
+	glTexCoord2f( 1, 0 ); glVertex3f( 1, 0, 1 );
+	glTexCoord2f( 1, 1 ); glVertex3f( 1, 1, 1 );
+	glTexCoord2f( 0, 1 ); glVertex3f( 0, 1, 1 );
 	glEnd();
-
-	glDepthFunc( GL_LEQUAL );
 }
 
 
@@ -1244,6 +1309,7 @@ void Renderer::drawLightGeometry( const string shaderContext, const string &theC
 						// Draw occlusion box
 						glColorMask( 0, 0, 0, 0 );
 						glDepthMask( 0 );
+						Modules::renderer().setMaterial( 0x0, "" );
 						Modules::renderer().beginOccQuery( _curLight->_occQueries[occSet] );
 						Modules::renderer().setShader( &Modules::renderer().occShader );
 						Modules::renderer().drawAABB( mins, maxs );
@@ -1349,6 +1415,7 @@ void Renderer::drawLightShapes( const string shaderContext, bool noShadows, int 
 						// Draw occlusion box
 						glColorMask( 0, 0, 0, 0 );
 						glDepthMask( 0 );
+						Modules::renderer().setMaterial( 0x0, "" );
 						Modules::renderer().beginOccQuery( _curLight->_occQueries[occSet] );
 						Modules::renderer().setShader( &Modules::renderer().occShader );
 						Modules::renderer().drawAABB( mins, maxs );
@@ -1376,7 +1443,6 @@ void Renderer::drawLightShapes( const string shaderContext, bool noShadows, int 
 		if( !noShadows && _curLight->_shadowMapCount > 0 ) updateShadowMap();
 
 		// Prepare postprocessing step (set the camera transformation in MV matrix)
-		glDisable( GL_DEPTH_TEST );
 		glMatrixMode( GL_PROJECTION );
 		glLoadIdentity();
 		glOrtho( 0, 1, 0, 1, -1, 1 );
@@ -1392,15 +1458,14 @@ void Renderer::drawLightShapes( const string shaderContext, bool noShadows, int 
 		
 		// Draw quad
 		glBegin( GL_QUADS );
-		glTexCoord2f( bbx, bby ); glVertex2f( bbx, bby );
-		glTexCoord2f( bbx + bbw, bby ); glVertex2f( bbx + bbw, bby );
-		glTexCoord2f( bbx + bbw, bby + bbh ); glVertex2f( bbx + bbw, bby + bbh );
-		glTexCoord2f( bbx, bby + bbh ); glVertex2f( bbx, bby + bbh );
+		glTexCoord2f( bbx, bby ); glVertex3f( bbx, bby, 1 );
+		glTexCoord2f( bbx + bbw, bby ); glVertex3f( bbx + bbw, bby, 1 );
+		glTexCoord2f( bbx + bbw, bby + bbh ); glVertex3f( bbx + bbw, bby + bbh, 1 );
+		glTexCoord2f( bbx, bby + bbh ); glVertex3f( bbx, bby + bbh, 1 );
 		glEnd();
 		incStat( EngineStats::LightPassCount, 1 );
 
 		// Reset
-		glEnable( GL_DEPTH_TEST );
 		glActiveTexture( GL_TEXTURE12 );
 		glBindTexture( GL_TEXTURE_2D, 0 );
 		glActiveTexture( GL_TEXTURE0 );
@@ -1499,6 +1564,7 @@ void Renderer::drawModels( const string &shaderContext, const string &theClass, 
 						// Draw occlusion box
 						glColorMask( 0, 0, 0, 0 );
 						glDepthMask( 0 );
+						Modules::renderer().setMaterial( 0x0, "" );
 						Modules::renderer().beginOccQuery( modelNode->_occQueries[occSet] );
 						Modules::renderer().setShader( &Modules::renderer().occShader );
 						Modules::renderer().drawAABB( modelNode->getBBox().getMinCoords(),
@@ -1742,6 +1808,7 @@ void Renderer::drawParticles( const string &shaderContext, const string &theClas
 						// Draw occlusion box
 						glColorMask( 0, 0, 0, 0 );
 						glDepthMask( 0 );
+						Modules::renderer().setMaterial( 0x0, "" );
 						Modules::renderer().beginOccQuery( emitter->_occQueries[occSet] );
 						Modules::renderer().setShader( &Modules::renderer().occShader );
 						Modules::renderer().drawAABB( emitter->getLocalBBox()->getMinCoords(),
@@ -1965,8 +2032,7 @@ void Renderer::renderDebugView()
 	if( _curCamera == 0x0 ) return;
 	
 	setRenderBuffer( 0x0 );
-	glDisable( GL_BLEND );
-	glDepthMask( GL_TRUE );
+	setMaterial( 0x0, "" );
 	glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 	glDisable( GL_CULL_FACE );
 
@@ -1982,6 +2048,7 @@ void Renderer::renderDebugView()
 	drawRenderables( "", "", true, &_camFrustum, 0x0, RenderingOrder::None, -1 );
 
 	// Draw bounding boxes
+	setMaterial( 0x0, "" );
 	setShader( &defColorShader );
 	glUniformMatrix4fv( defColorShader.uni_worldMat, 1, false, &Matrix4f().x[0] );
 	glColor4f( 0.4f, 0.4f, 0.4f, 1 );
@@ -2033,7 +2100,6 @@ void Renderer::renderDebugView()
 
 	// Draw screen space projection of light sources
 	glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-	glDisable( GL_DEPTH_TEST );
 	glEnable( GL_BLEND );
 	glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 	glColor4f( 1, 1, 1, 0.25f );
@@ -2057,15 +2123,14 @@ void Renderer::renderDebugView()
 		glLoadIdentity();
 		
 		glBegin( GL_QUADS );
-		glVertex2f( bbx, bby );
-		glVertex2f( bbx + bbw, bby );
-		glVertex2f( bbx + bbw, bby + bbh );
-		glVertex2f( bbx, bby + bbh );
+		glVertex3f( bbx, bby, 1 );
+		glVertex3f( bbx + bbw, bby, 1 );
+		glVertex3f( bbx + bbw, bby + bbh, 1 );
+		glVertex3f( bbx, bby + bbh, 1 );
 		glEnd();
 	}
 
 	glEnable( GL_CULL_FACE );
-	glEnable( GL_DEPTH_TEST );
 	glDisable( GL_BLEND );
 }
 
@@ -2076,7 +2141,10 @@ void Renderer::finishRendering()
 	// with direct OpenGL calls (e.g. Horde scene editor)
 	setRenderBuffer( 0x0 );
 	glDisable( GL_BLEND );
+	glDisable( GL_ALPHA_TEST );
+	glDisable( GL_SAMPLE_ALPHA_TO_COVERAGE );
 	glDepthMask( 1 );
+	glEnable( GL_DEPTH_TEST );
 	glDepthFunc( GL_LEQUAL );
 	setShader( 0x0 );
 	glBindBuffer( GL_ARRAY_BUFFER, 0 );
