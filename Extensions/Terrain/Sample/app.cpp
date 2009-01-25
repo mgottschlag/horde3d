@@ -138,7 +138,10 @@ void Application::mainLoop( float fps )
 	
 	// Render scene
 	Horde3D::render( _cam );
-	
+
+	// Finish rendering of frame
+	Horde3D::finalizeFrame();
+
 	// Remove all overlays
 	Horde3D::clearOverlays();
 
@@ -157,7 +160,7 @@ void Application::release()
 void Application::resize( int width, int height )
 {
 	// Resize viewport
-	Horde3D::resize( 0, 0, width, height );
+	Horde3D::setupViewport( 0, 0, width, height, true );
 	
 	// Set virtual camera parameters
 	Horde3D::setupCameraView( _cam, 45.0f, (float)width / height, 0.5f, 2048.0f );

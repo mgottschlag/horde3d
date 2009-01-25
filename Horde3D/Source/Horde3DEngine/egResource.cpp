@@ -197,9 +197,24 @@ void ResourceManager::registerType( int type, const string &typeString, ResTypeI
 
 Resource *ResourceManager::findResource( int type, const string &name )
 {
-	for( uint32 i = 0; i < _resources.size(); ++i )
+	for( size_t i = 0, s = _resources.size(); i < s; ++i )
 	{
 		if( _resources[i] != 0x0 && _resources[i]->_type == type && _resources[i]->_name == name )
+		{
+			return _resources[i];
+		}
+	}
+	
+	return 0x0;
+}
+
+
+Resource *ResourceManager::getNextResource( int type, ResHandle start )
+{
+	for( size_t i = start, s = _resources.size(); i < s; ++i )
+	{
+		if( _resources[i] != 0x0 &&
+		    (type == ResourceTypes::Undefined || _resources[i]->_type == type) )
 		{
 			return _resources[i];
 		}

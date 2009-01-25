@@ -633,22 +633,28 @@ namespace Horde3D
 	*/
 	DLL void release();
 	
-	/* 	Function: resize
-			Resizes the viewport.
+	/* 	Function: setupViewport
+			Sets the location and size of the viewport.
 		
-		This function sets the dimensions of the rendering viewport. It has to be called after
-		initialization and whenever the viewport size changes.
+		This function sets the location and size of the viewport. It has to be called
+		after engine initialization and whenever the size of the rendering context/window
+		changes. The resizeBuffers parameter specifies whether render targets with a size
+		relative to the viewport dimensions should be resized. This is usually desired
+		after engine initialization and when the window is resized but not for just rendering
+		to a part of the framebuffer.
+
 		
 		Parameters:
-			x		- the x-position of the viewport in the rendering context
-			y		- the y-position of the viewport in the rendering context
-			width	- the width of the viewport
-			height	- the height of the viewport
+			x				- the x-position of the lower left corner of the viewport rectangle
+			y				- the y-position of the lower left corner of the viewport rectangle
+			width			- the width of the viewport
+			height			- the height of the viewport
+			resizeBuffers	- specifies whether render targets should be adapted to new size
 			
 		Returns:
 			nothing
 	*/
-	DLL void resize( int x, int y, int width, int height );
+	DLL void setupViewport( int x, int y, int width, int height, bool resizeBuffers );
 	
 	/* 	Function: render
 			Main rendering function.
@@ -664,6 +670,20 @@ namespace Horde3D
 			true in case of success, otherwise false
 	*/
 	DLL bool render( NodeHandle cameraNode );
+	
+	/* 	Function: finalizeFrame
+			Marker for end of frame.
+		
+		This function tells the engine that the current frame is finished and that all
+		subsequent rendering operations will be for the next frame.
+		
+		Parameters:
+			none
+			
+		Returns:
+			true in case of success, otherwise false
+	*/
+	DLL bool finalizeFrame();
 	
 	/* 	Function: clear
 			Removes all resources and scene nodes.
@@ -813,6 +833,24 @@ namespace Horde3D
 			name of the resource or empty string in case of failure
 	*/
 	DLL const char *getResourceName( ResHandle res );
+	
+	/* 	Function: getNextResource
+			Returns the next resource of the specified type.
+		
+		This function searches the next resource of the specified type and returns its handle.
+		The search begins after the specified start handle. If a further resource of the queried type
+		does not exist, a zero handle is returned. The function can be used to iterate over all
+		resources of a given type by using as start the return value of the previous iteration step.
+		The first iteration step should start at 0 and iteration can be ended when the function returns 0.
+		
+		Parameters:
+			type	- type of resource to be searched (ResourceTypes::Undefined for all types)
+			start	- resource handle after which the search begins (can be 0 for beginning of resource list)
+			
+		Returns:
+			handle to the found resource or 0 if it does not exist
+	*/
+	DLL ResHandle getNextResource( int type, ResHandle start );
 	
 	/* 	Function: findResource
 			Finds a resource and returns its handle.

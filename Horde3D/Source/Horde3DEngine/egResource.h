@@ -184,6 +184,7 @@ public:
 	void registerType( int type, const std::string &typeString, ResTypeInitializationFunc inf,
 	                   ResTypeReleaseFunc rf, ResTypeFactoryFunc ff );
 	
+	Resource *getNextResource( int type, ResHandle start );
 	Resource *findResource( int type, const std::string &name );
 	ResHandle addResource( int type, const std::string &name, int flags, bool userCall );
 	ResHandle addNonExistingResource( Resource &resource, bool userCall );

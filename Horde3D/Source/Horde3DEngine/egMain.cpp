@@ -146,11 +146,19 @@ namespace Horde3D
 	}
 
 
-	DLLEXP void resize( int x, int y, int width, int height )
+	DLLEXP bool finalizeFrame()
+	{
+		return true;
+	}
+
+
+	DLLEXP void setupViewport( int x, int y, int width, int height, bool resizeBuffers )
 	{
 		if( !initialized ) return;
 		
 		Modules::renderer().resize( x, y, width, height );
+
+		if( !resizeBuffers ) return;
 
 		// Update pipeline resources
 		for( uint32 i = 0; i < Modules::resMan().getResources().size(); ++i )
@@ -266,12 +274,19 @@ namespace Horde3D
 	}
 
 
+	DLLEXP ResHandle iterateResources( int type, ResHandle start )
+	{
+		Resource *res = Modules::resMan().getNextResource( type, start );
+		
+		return res != 0x0 ? res->getHandle() : 0;
+	}
+	
+	
 	DLLEXP ResHandle findResource( int type, const char *name )
 	{
 		Resource *res = Modules::resMan().findResource( type, safeStr( name ) );
 		
-		if( res != 0x0 ) return res->getHandle();
-		else return 0;
+		return res != 0x0 ? res->getHandle() : 0;
 	}
 
 	

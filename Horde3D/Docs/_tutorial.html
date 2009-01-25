@@ -31,7 +31,7 @@ that is done we can finally get to the engine related part.
 {
     <i>// Initialize engine</i>
     Horde3D::init();
-    Horde3D::resize( 0, 0, winWidth, winHeight );
+    Horde3D::setupViewport( 0, 0, winWidth, winHeight, true );
     
     <i>// Add pipeline resource</i>
     <b>ResHandle</b> pipeRes = Horde3D::addResource( ResourceTypes::Pipeline, <em>"standard.pipeline.xml"</em>, 0 );
@@ -111,8 +111,11 @@ It is added with the function <b>addCameraNode</b> and takes our loaded pipeline
                                            0, 0, 0,     <i>// Rotation</i>
                                            1, 1, 1 );   <i>// Scale</i>
 										   
-    <i>// Render scene </i>
+    <i>// Render scene</i>
     Horde3D::render( cam );
+	
+	<i>// Finish rendering of frame</i>
+	Horde3D::finalizeFrame();
 }
 
 
@@ -134,7 +137,8 @@ After that we tell the engine to update the model animation using the <b>setMode
 also specify a blend weight for combining animations here but since we have only one animation we don't need that.
 Now we can displace our character a bit so that it moves through the scene. This is achieved by updating the model
 node transformation. Finally we need to tell the engine to render the scene and recalculate the model animation. This
-happens with the function <b>render</b> that expects the camera from which the scene is viewed.
+happens with the function <b>render</b> that expects the camera from which the scene is viewed. The very last step is
+to inform the engine that rendering for the current frame is finished now.
 <br /><br />
 The last function <i>releaseGame</i> is called when the application is closed. All we have to do here is freeing the
 engine with the <b>release</b> function.
