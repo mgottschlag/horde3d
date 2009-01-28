@@ -34,6 +34,7 @@
 
 
 struct SceneNodeTpl;
+class CameraNode;
 class SceneGraphResource;
 
 const int RootNode = 1;
@@ -112,6 +113,12 @@ protected:
 	
 	void markChildrenDirty();
 
+	virtual void onPreUpdate();	// Called before absolute transformation is updated
+	virtual void onPostUpdate();	// Called after absolute transformation has been updated
+	virtual void onFinishedUpdate();  // Called after children have been updated
+	virtual void onAttach( SceneNode &parentNode );	// Called when node is attached to parent
+	virtual void onDetach( SceneNode &parentNode );	// Called when node is detached from parent
+
 public:
 
 	float                       tmpSortValue;
@@ -137,12 +144,6 @@ public:
 	void markDirty();
 	bool update();
 	virtual bool checkIntersection( const Vec3f &rayOrig, const Vec3f &rayDir, Vec3f &intsPos ) const;
-
-	virtual void onPreUpdate();	// Called before absolute transformation is updated
-	virtual void onPostUpdate();	// Called after absolute transformation has been updated
-	virtual void onFinishedUpdate();  // Called after children have been updated
-	virtual void onAttach( SceneNode &parentNode );	// Called when node is attached to parent
-	virtual void onDetach( SceneNode &parentNode );	// Called when node is detached from parent
 
 	int getType() { return _type; };
 	NodeHandle getHandle() { return _handle; }
@@ -310,6 +311,8 @@ public:
 	
 	int castRay( SceneNode *node, const Vec3f &rayOrig, const Vec3f &rayDir, int numNearest );
 	bool getCastRayResult( int index, CastRayResult &crr );
+
+	int checkNodeVisibility( SceneNode *node, CameraNode *cam, bool checkOcclusion, bool calcLod );
 
 	SceneNode &getRootNode() { return *_nodes[0]; }
 	SceneNode &getDefCamNode() { return *_nodes[1]; }

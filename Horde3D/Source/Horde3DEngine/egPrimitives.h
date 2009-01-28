@@ -152,11 +152,11 @@ public:
 	void buildViewFrustum( const Matrix4f &viewMat, const Matrix4f &projMat );
 	void buildBoxFrustum( const Matrix4f &transMat, float left, float right,
 	                      float bottom, float top, float front, float back );
-	bool cullSphere( Vec3f pos, float rad );
+	bool cullSphere( Vec3f pos, float rad ) const;
 	bool cullBox( BoundingBox &b ) const;
-	bool cullFrustum( const Frustum &frust );
+	bool cullFrustum( const Frustum &frust ) const;
 
-	void calcAABB( Vec3f &mins, Vec3f &maxs );
+	void calcAABB( Vec3f &mins, Vec3f &maxs ) const;
 };
 
 #endif // _egPrimitives_H_

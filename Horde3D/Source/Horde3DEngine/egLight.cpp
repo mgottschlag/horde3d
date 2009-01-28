@@ -108,19 +108,6 @@ SceneNode *LightNode::factoryFunc( const SceneNodeTpl &nodeTpl )
 }
 
 
-void LightNode::onPostUpdate()
-{
-	_invTrans = _absTrans.inverted();
-	
-	_absPos = Vec3f( _absTrans.c[3][0], _absTrans.c[3][1], _absTrans.c[3][2] );
-
-	Matrix4f m = _absTrans;
-	m.c[3][0] = 0; m.c[3][1] = 0; m.c[3][2] = 0;
-	_spotDir = m * Vec3f( 0, 0, -1 );
-	_spotDir = _spotDir.normalized();
-}
-
-
 float LightNode::getParamf( int param )
 {
 	switch( param )
@@ -226,19 +213,6 @@ void LightNode::setContexts( const char *lightingContext, const char *shadowCont
 }
 
 
-void LightNode::genFrustum( Frustum &frustum )
-{
-	Vec3f lightRot = _spotDir.toRotation();
-	lightRot.x = radToDeg( lightRot.x );
-	lightRot.y = radToDeg( lightRot.y );
-	
-	if( _fov < 180 )
-		frustum.buildViewFrustum( _absTrans, _fov, 1.0f, 0.1f, _radius );
-	else
-		frustum.buildBoxFrustum( _absTrans, -_radius, _radius, -_radius, _radius, _radius, -_radius );
-}
-
-
 void LightNode::calcScreenSpaceAABB( const Matrix4f &mat, float &x, float &y, float &w, float &h )
 {
 	uint32 numPoints = 0;
@@ -308,4 +282,24 @@ void LightNode::calcScreenSpaceAABB( const Matrix4f &mat, float &x, float &y, fl
 	{
 		x = 0; y = 0; w = 1; h = 1;
 	}
+}
+
+
+void LightNode::onPostUpdate()
+{
+	// Calculate view matrix
+	_viewMat = _absTrans.inverted();
+	
+	// Get position and spot direction
+	Matrix4f m = _absTrans;
+	m.c[3][0] = 0; m.c[3][1] = 0; m.c[3][2] = 0;
+	_spotDir = m * Vec3f( 0, 0, -1 );
+	_spotDir = _spotDir.normalized();
+	_absPos = Vec3f( _absTrans.c[3][0], _absTrans.c[3][1], _absTrans.c[3][2] );
+
+	// Generate frustum
+	if( _fov < 180 )
+		_frustum.buildViewFrustum( _absTrans, _fov, 1.0f, 0.1f, _radius );
+	else
+		_frustum.buildBoxFrustum( _absTrans, -_radius, _radius, -_radius, _radius, _radius, -_radius );
 }

@@ -136,6 +136,9 @@ protected:
 	void updateStageAnimations( uint32 stage, const std::string &startNode );
 	void markMeshBBoxesDirty();
 
+	void onPostUpdate();
+	void onFinishedUpdate();
+
 public:
 
 	~ModelNode();
@@ -153,10 +156,8 @@ public:
 	int getParami( int param );
 	bool setParami( int param, int value );
 
-	void onPostUpdate();
-	void onFinishedUpdate();
-
 	bool updateGeometry();
+	uint32 calcLodLevel( const Vec3f &viewPoint );
 
 	GeometryResource *getGeometryResource() { return _geometryRes; }
 	bool jointExists( uint32 jointIndex ) { return jointIndex < _skinMatRows.size() / 3; }
@@ -166,6 +167,7 @@ public:
 		  _skinMatRows[index * 3 + 2] = mat.getRow( 2 ); }
 	void markNodeListDirty() { _nodeListDirty = true; }
 
+	friend class SceneManager;
 	friend class Renderer;
 };
 

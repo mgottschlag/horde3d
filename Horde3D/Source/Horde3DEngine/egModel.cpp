@@ -531,6 +531,21 @@ bool ModelNode::updateGeometry()
 }
 
 
+uint32 ModelNode::calcLodLevel( const Vec3f &viewPoint )
+{
+	Vec3f pos( _absTrans.c[3][0], _absTrans.c[3][1], _absTrans.c[3][2] );
+	float dist = (pos - viewPoint).length();
+	uint32 curLod = 4;
+	
+	if( dist < _lodDist1 ) curLod = 0;
+	else if( dist < _lodDist2 ) curLod = 1;
+	else if( dist < _lodDist3 ) curLod = 2;
+	else if( dist < _lodDist4 ) curLod = 3;
+
+	return curLod;
+}
+
+
 void ModelNode::onPostUpdate()
 {
 	if( _nodeListDirty ) recreateNodeList();

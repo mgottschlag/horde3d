@@ -78,7 +78,8 @@ class LightNode : public SceneNode
 {
 private:
 
-	Matrix4f               _invTrans;
+	Frustum                _frustum;
+	Matrix4f               _viewMat;
 	Vec3f                  _absPos, _spotDir;
 
 	PMaterialResource      _materialRes;
@@ -107,9 +108,12 @@ public:
 	bool setParami( int param, int value );
 	void setContexts( const char *lightingContext, const char *shadowContext );
 
-	void genFrustum( Frustum &frustum );
 	void calcScreenSpaceAABB( const Matrix4f &mat, float &x, float &y, float &w, float &h );
 
+	const Frustum &getFrustum() { return _frustum; }
+	const Matrix4f &getViewMat() { return _viewMat; }
+
+	friend class SceneManager;
 	friend class Renderer;
 };
 

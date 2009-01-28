@@ -122,7 +122,6 @@ protected:
 	MaterialResource        *_curMatRes;
 	ShaderCombination       *_curShader;
 	RenderTarget            *_curRenderTarget;
-	Frustum                 _camFrustum, _lightFrustum;
 	uint32                  _curUpdateStamp;
 	
 	float                   _splitPlanes[5];

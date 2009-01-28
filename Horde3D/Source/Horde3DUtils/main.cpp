@@ -480,7 +480,7 @@ namespace Horde3DUtils
 		
 		// Get projection matrix
 		Matrix4f projMat;
-		Horde3D::calcCameraProjectionMatrix( cameraNode, projMat.x );
+		Horde3D::getCameraProjectionMatrix( cameraNode, projMat.x );
 		
 		// Get camera view matrix
 		const float *camTrans;

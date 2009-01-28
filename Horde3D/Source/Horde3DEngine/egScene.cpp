@@ -791,4 +791,44 @@ bool SceneManager::getCastRayResult( int index, CastRayResult &crr )
 }
 
 
+int SceneManager::checkNodeVisibility( SceneNode *node, CameraNode *cam, bool checkOcclusion, bool calcLod )
+{
+	// Note: This function is a bit hacky with all the hard-coded node types
+	
+	if( node->_dirty ) updateNodes();
 
+	// Check occlusion
+	if( checkOcclusion && cam->_occSet >= 0 )
+	{
+		if( node->getType() == SceneNodeTypes::Model )
+		{
+			if( Modules::renderer().getOccQueryResult( ((ModelNode *)node)->_occQueries[cam->_occSet] ) < 1 )
+				return -1;
+		}
+		else if( node->getType() == SceneNodeTypes::Emitter )
+		{
+			if( Modules::renderer().getOccQueryResult( ((EmitterNode *)node)->_occQueries[cam->_occSet] ) < 1 )
+				return -1;
+		}
+		else if( node->getType() == SceneNodeTypes::Light )
+		{
+			if( Modules::renderer().getOccQueryResult( ((LightNode *)node)->_occQueries[cam->_occSet] ) < 1 )
+				return -1;
+		}
+	}
+	
+	// Frustum culling
+	if( cam->getFrustum().cullBox( node->getBBox() ) )
+	{
+		return -1;
+	}
+	else if( node->getType() == SceneNodeTypes::Model )
+	{
+		// Calculate LOD level
+		return ((ModelNode *)node)->calcLodLevel( cam->getAbsPos() );
+	}
+	else
+	{
+		return 0;
+	}
+}

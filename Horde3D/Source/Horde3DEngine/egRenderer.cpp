@@ -305,9 +305,9 @@ void Renderer::unregisterOccSet( int occSet )
 void Renderer::setupViewMatrices( CameraNode *cam )
 {
 	glMatrixMode( GL_PROJECTION );
-	glLoadMatrixf( cam->calcProjectionMatrix().x );
+	glLoadMatrixf( cam->getProjMat().x );
 	glMatrixMode( GL_MODELVIEW );
-	glLoadMatrixf( cam->_invTrans.x );
+	glLoadMatrixf( cam->getViewMat().x );
 }
 
 
@@ -767,7 +767,7 @@ Matrix4f Renderer::calcLightMat( const Frustum &frustum )
 	glGetFloatv( GL_PROJECTION_MATRIX, projMat );
 	glMatrixMode( GL_MODELVIEW );
 
-	Matrix4f lightMat = Matrix4f( projMat ) * _curLight->_invTrans;
+	Matrix4f lightMat = Matrix4f( projMat ) * _curLight->getViewMat();
 
 	// Get frustum and bounding box extents in post-projective space
 	float frustMinX =  Math::MaxFloat, bbMinX =  Math::MaxFloat;
@@ -857,11 +857,10 @@ void Renderer::updateShadowMap()
 	// Cascaded Shadow Maps
 	// ********************************************************************************************
 
-	Frustum splitFrust;
+	Frustum frustum;
 	
 	// Find bounding box of lit geometry
-	_curLight->genFrustum( _lightFrustum );
-	Modules::sceneMan().updateQueues( _lightFrustum, 0x0, RenderingOrder::None, false, true );
+	Modules::sceneMan().updateQueues( _curLight->getFrustum(), 0x0, RenderingOrder::None, false, true );
 	BoundingBox bBox;
 	for( size_t j = 0, s = Modules::sceneMan().getRenderableQueue().size(); j < s; ++j )
 	{
@@ -871,7 +870,7 @@ void Renderer::updateShadowMap()
 	float minDist = Math::MaxFloat, maxDist = 0.0f;
 	for( uint32 i = 0; i < 8; ++i )
 	{
-		float dist = -(_curCamera->_invTrans * bBox.getCorner( i )).z;
+		float dist = -(_curCamera->getViewMat() * bBox.getCorner( i )).z;
 		if( dist < minDist ) minDist = dist;
 		if( dist > maxDist ) maxDist = dist;
 	}
@@ -903,7 +902,7 @@ void Renderer::updateShadowMap()
 	glEnable( GL_DEPTH_TEST );
 	//glCullFace( GL_FRONT );	// Front face culling reduces artefacts but produces more "peter-panning"
 	glMatrixMode( GL_MODELVIEW );
-	glLoadMatrixf( _curLight->_invTrans.x );
+	glLoadMatrixf( _curLight->getViewMat().x );
 	
 	// Build split frustums and render shadow maps
 	for( uint32 i = 0; i < numMaps; ++i )
@@ -915,26 +914,26 @@ void Renderer::updateShadowMap()
 			float newRight = _curCamera->_frustRight * _splitPlanes[i] / _curCamera->_frustNear;
 			float newBottom = _curCamera->_frustBottom * _splitPlanes[i] / _curCamera->_frustNear;
 			float newTop = _curCamera->_frustTop * _splitPlanes[i] / _curCamera->_frustNear;
-			splitFrust.buildViewFrustum( _curCamera->_absTrans, newLeft, newRight, newBottom, newTop,
-			                             _splitPlanes[i], _splitPlanes[i + 1] );
+			frustum.buildViewFrustum( _curCamera->_absTrans, newLeft, newRight, newBottom, newTop,
+			                          _splitPlanes[i], _splitPlanes[i + 1] );
 		}
 		else
 		{
-			splitFrust.buildBoxFrustum( _curCamera->_absTrans, _curCamera->_frustLeft, _curCamera->_frustRight,
-			                            _curCamera->_frustBottom, _curCamera->_frustTop,
-			                            -_splitPlanes[i], -_splitPlanes[i + 1] );
+			frustum.buildBoxFrustum( _curCamera->_absTrans, _curCamera->_frustLeft, _curCamera->_frustRight,
+			                         _curCamera->_frustBottom, _curCamera->_frustTop,
+			                         -_splitPlanes[i], -_splitPlanes[i + 1] );
 		}
 		
 		// Build light projection matrix
-		_lightMats[i] = calcLightMat( splitFrust );
+		_lightMats[i] = calcLightMat( frustum );
 		glMatrixMode( GL_PROJECTION );
 		glLoadMatrixf( &_lightMats[i].x[0] );
 		
 		// Frustum Culling
-		_lightFrustum.buildViewFrustum( _curLight->_invTrans, _lightMats[i] );
-		Modules::sceneMan().updateQueues( _lightFrustum, 0x0, RenderingOrder::None, false, true );
+		frustum.buildViewFrustum( _curLight->getViewMat(), _lightMats[i] );
+		Modules::sceneMan().updateQueues( frustum, 0x0, RenderingOrder::None, false, true );
 		
-		_lightMats[i] = _lightMats[i] * _curLight->_invTrans;
+		_lightMats[i] = _lightMats[i] * _curLight->getViewMat();
 
 		if( numMaps > 1 )
 		{
@@ -952,7 +951,8 @@ void Renderer::updateShadowMap()
 		}
 	
 		// Render
-		drawRenderables( _curLight->_shadowContext, "", false, &_lightFrustum, 0x0, RenderingOrder::None, -1 );
+		drawRenderables( _curLight->_shadowContext, "", false, &_curLight->getFrustum(), 0x0,
+		                 RenderingOrder::None, -1 );
 	}
 
 	// Setup light matrices for rendering:
@@ -1231,7 +1231,7 @@ void Renderer::drawFSQuad( Resource *matRes, const string &shaderContext )
 	glOrtho( 0, 1, 0, 1, -1, 1 );
 	glMatrixMode( GL_MODELVIEW );
 	if( _curCamera != 0x0 )
-		glLoadMatrixf( _curCamera->_invTrans.x );
+		glLoadMatrixf( _curCamera->getViewMat().x );
 	else
 		glLoadIdentity();
 	
@@ -1251,12 +1251,11 @@ void Renderer::drawGeometry( const string &shaderContext, const string &theClass
 	
 	++_curUpdateStamp;
 	
-	_curCamera->genFrustum( _camFrustum );
-	Modules::sceneMan().updateQueues( _camFrustum, 0x0, order, false, true );
+	Modules::sceneMan().updateQueues( _curCamera->getFrustum(), 0x0, order, false, true );
 	
 	setupViewMatrices( _curCamera );
 	
-	drawRenderables( shaderContext, theClass, false, &_camFrustum, 0x0, order, occSet );
+	drawRenderables( shaderContext, theClass, false, &_curCamera->getFrustum(), 0x0, order, occSet );
 }
 
 
@@ -1267,17 +1266,15 @@ void Renderer::drawLightGeometry( const string shaderContext, const string &theC
 	
 	string context = shaderContext;
 	
-	_curCamera->genFrustum( _camFrustum );
-	Modules::sceneMan().updateQueues( _camFrustum, 0x0, RenderingOrder::None, true, false );
+	Modules::sceneMan().updateQueues( _curCamera->getFrustum(), 0x0, RenderingOrder::None, true, false );
 	
 	for( size_t i = 0, s = Modules::sceneMan().getLightQueue().size(); i < s; ++i )
 	{
 		++_curUpdateStamp;
 		_curLight = (LightNode *)Modules::sceneMan().getLightQueue()[i];
-		_curLight->genFrustum( _lightFrustum );
 
 		// Check if light is not visible
-		if( _camFrustum.cullFrustum( _lightFrustum ) ) continue;
+		if( _curCamera->getFrustum().cullFrustum( _curLight->getFrustum() ) ) continue;
 
 		setupViewMatrices( _curCamera );
 
@@ -1301,22 +1298,22 @@ void Renderer::drawLightGeometry( const string shaderContext, const string &theC
 					_curLight->_lastVisited[occSet] = Modules::renderer().getFrameID();
 				
 					Vec3f mins, maxs;
-					_lightFrustum.calcAABB( mins, maxs );
+					_curLight->getFrustum().calcAABB( mins, maxs );
 					
 					// Check that viewer is outside light bounds
-					if( nearestDistToAABB( _camFrustum.getOrigin(), mins, maxs ) )
+					if( nearestDistToAABB( _curCamera->getFrustum().getOrigin(), mins, maxs ) )
 					{
 						// Draw occlusion box
+						Modules::renderer().setMaterial( 0x0, "" );
 						glColorMask( 0, 0, 0, 0 );
 						glDepthMask( 0 );
-						Modules::renderer().setMaterial( 0x0, "" );
 						Modules::renderer().beginOccQuery( _curLight->_occQueries[occSet] );
 						Modules::renderer().setShader( &Modules::renderer().occShader );
 						Modules::renderer().drawAABB( mins, maxs );
 						Modules::renderer().endOccQuery( _curLight->_occQueries[occSet] );
-						Modules::renderer().setMaterial( 0x0, "" );
 						glDepthMask( 1 );
 						glColorMask( 1, 1, 1, 1 );
+						Modules::renderer().setMaterial( 0x0, "" );
 
 						// Check query result from previous frame
 						if( Modules::renderer().getOccQueryResult( _curLight->_occQueries[occSet] ) < 1 )
@@ -1330,7 +1327,7 @@ void Renderer::drawLightGeometry( const string shaderContext, const string &theC
 	
 		// Calculate light screen space position
 		float bbx, bby, bbw, bbh;
-		_curLight->calcScreenSpaceAABB( _curCamera->calcProjectionMatrix() * _curCamera->_invTrans,
+		_curLight->calcScreenSpaceAABB( _curCamera->getProjMat() * _curCamera->getViewMat(),
 		                                bbx, bby, bbw, bbh );
 
 		// Update shadow map
@@ -1349,11 +1346,11 @@ void Renderer::drawLightGeometry( const string shaderContext, const string &theC
 		if( shaderContext == "" ) context = _curLight->_lightingContext;
 		
 		// Render
-		_curCamera->genFrustum( _camFrustum );
-		_curLight->genFrustum( _lightFrustum );
-		Modules::sceneMan().updateQueues( _camFrustum, &_lightFrustum, RenderingOrder::None, false, true );
+		Modules::sceneMan().updateQueues( _curCamera->getFrustum(), &_curLight->getFrustum(),
+		                                  RenderingOrder::None, false, true );
 		setupViewMatrices( _curCamera );
-		drawRenderables( context, theClass, false, &_camFrustum, &_lightFrustum, order, occSet );
+		drawRenderables( context, theClass, false, &_curCamera->getFrustum(),
+		                 &_curLight->getFrustum(), order, occSet );
 		incStat( EngineStats::LightPassCount, 1 );
 
 		// Reset
@@ -1373,17 +1370,15 @@ void Renderer::drawLightShapes( const string shaderContext, bool noShadows, int 
 	
 	string context = shaderContext;
 	
-	_curCamera->genFrustum( _camFrustum );
-	Modules::sceneMan().updateQueues( _camFrustum, 0x0, RenderingOrder::None, true, false );
+	Modules::sceneMan().updateQueues( _curCamera->getFrustum(), 0x0, RenderingOrder::None, true, false );
 	
 	for( size_t i = 0, s = Modules::sceneMan().getLightQueue().size(); i < s; ++i )
 	{
 		++_curUpdateStamp;
 		_curLight = (LightNode *)Modules::sceneMan().getLightQueue()[i];
-		_curLight->genFrustum( _lightFrustum );
 		
 		// Check if light is not visible
-		if( _camFrustum.cullFrustum( _lightFrustum ) ) continue;
+		if( _curCamera->getFrustum().cullFrustum( _curLight->getFrustum() ) ) continue;
 
 		setupViewMatrices( _curCamera );
 		
@@ -1407,22 +1402,22 @@ void Renderer::drawLightShapes( const string shaderContext, bool noShadows, int 
 					_curLight->_lastVisited[occSet] = Modules::renderer().getFrameID();
 				
 					Vec3f mins, maxs;
-					_lightFrustum.calcAABB( mins, maxs );
+					_curLight->getFrustum().calcAABB( mins, maxs );
 					
 					// Check that viewer is outside light bounds
-					if( nearestDistToAABB( _camFrustum.getOrigin(), mins, maxs ) )
+					if( nearestDistToAABB( _curCamera->getFrustum().getOrigin(), mins, maxs ) )
 					{
 						// Draw occlusion box
+						Modules::renderer().setMaterial( 0x0, "" );
 						glColorMask( 0, 0, 0, 0 );
 						glDepthMask( 0 );
-						Modules::renderer().setMaterial( 0x0, "" );
 						Modules::renderer().beginOccQuery( _curLight->_occQueries[occSet] );
 						Modules::renderer().setShader( &Modules::renderer().occShader );
 						Modules::renderer().drawAABB( mins, maxs );
 						Modules::renderer().endOccQuery( _curLight->_occQueries[occSet] );
-						Modules::renderer().setMaterial( 0x0, "" );
 						glDepthMask( 1 );
 						glColorMask( 1, 1, 1, 1 );
+						Modules::renderer().setMaterial( 0x0, "" );
 
 						// Check query result from previous frame
 						if( Modules::renderer().getOccQueryResult( _curLight->_occQueries[occSet] ) < 1 )
@@ -1436,7 +1431,7 @@ void Renderer::drawLightShapes( const string shaderContext, bool noShadows, int 
 		
 		// Calculate light screen space position
 		float bbx, bby, bbw, bbh;
-		_curLight->calcScreenSpaceAABB( _curCamera->calcProjectionMatrix() * _curCamera->_invTrans,
+		_curLight->calcScreenSpaceAABB( _curCamera->getProjMat() * _curCamera->getViewMat(),
 		                                bbx, bby, bbw, bbh );
 		
 		// Update shadow map
@@ -1447,7 +1442,7 @@ void Renderer::drawLightShapes( const string shaderContext, bool noShadows, int 
 		glLoadIdentity();
 		glOrtho( 0, 1, 0, 1, -1, 1 );
 		glMatrixMode( GL_MODELVIEW );
-		glLoadMatrixf( _curCamera->_invTrans.x );
+		glLoadMatrixf( _curCamera->getViewMat().x );
 		
 		setupShadowMap( noShadows );
 
@@ -1514,10 +1509,7 @@ void Renderer::drawModels( const string &shaderContext, const string &theClass, 
 
 	Vec3f camPos( frust1->getOrigin() );
 	if( Modules::renderer().getCurCamera() != 0x0 )
-	{
-		Matrix4f &camMat = Modules::renderer().getCurCamera()->getAbsTrans();
-		Vec3f camPos( camMat.c[3][0], camMat.c[3][1], camMat.c[3][2] );
-	}
+		camPos = Modules::renderer().getCurCamera()->getAbsPos();
 	
 	GeometryResource *curGeoRes = 0x0;
 
@@ -1562,17 +1554,17 @@ void Renderer::drawModels( const string &shaderContext, const string &theClass, 
 						Modules::renderer().getOccQueryResult( modelNode->_occQueries[occSet] ) < 1 )
 					{
 						// Draw occlusion box
+						Modules::renderer().setMaterial( 0x0, "" );
 						glColorMask( 0, 0, 0, 0 );
 						glDepthMask( 0 );
-						Modules::renderer().setMaterial( 0x0, "" );
 						Modules::renderer().beginOccQuery( modelNode->_occQueries[occSet] );
 						Modules::renderer().setShader( &Modules::renderer().occShader );
 						Modules::renderer().drawAABB( modelNode->getBBox().getMinCoords(),
 						                              modelNode->getBBox().getMaxCoords() );
 						Modules::renderer().endOccQuery( modelNode->_occQueries[occSet] );
-						Modules::renderer().setMaterial( 0x0, "" );
 						glDepthMask( 1 );
 						glColorMask( 1, 1, 1, 1 );
+						Modules::renderer().setMaterial( 0x0, "" );
 
 						continue;
 					}
@@ -1632,13 +1624,7 @@ void Renderer::drawModels( const string &shaderContext, const string &theClass, 
 			           meshMaterialOrder );
 		
 		// LOD
-		Vec3f modelPos( modelNode->_absTrans.c[3][0], modelNode->_absTrans.c[3][1], modelNode->_absTrans.c[3][2] );
-		float dist = (modelPos - camPos).length();
-		uint32 curLod = 4;
-		if( dist < modelNode->_lodDist1 ) curLod = 0;
-		else if( dist < modelNode->_lodDist2 ) curLod = 1;
-		else if( dist < modelNode->_lodDist3 ) curLod = 2;
-		else if( dist < modelNode->_lodDist4 ) curLod = 3;
+		uint32 curLod = modelNode->calcLodLevel( camPos );
 		
 		if( occCulling )
 			Modules::renderer().beginOccQuery( modelNode->_occQueries[occSet] );
@@ -1806,17 +1792,17 @@ void Renderer::drawParticles( const string &shaderContext, const string &theClas
 						Modules::renderer().getOccQueryResult( emitter->_occQueries[occSet] ) < 1 )
 					{
 						// Draw occlusion box
+						Modules::renderer().setMaterial( 0x0, "" );
 						glColorMask( 0, 0, 0, 0 );
 						glDepthMask( 0 );
-						Modules::renderer().setMaterial( 0x0, "" );
 						Modules::renderer().beginOccQuery( emitter->_occQueries[occSet] );
 						Modules::renderer().setShader( &Modules::renderer().occShader );
 						Modules::renderer().drawAABB( emitter->getLocalBBox()->getMinCoords(),
 						                              emitter->getLocalBBox()->getMaxCoords() );
 						Modules::renderer().endOccQuery( emitter->_occQueries[occSet] );
-						Modules::renderer().setMaterial( 0x0, "" );
 						glDepthMask( 1 );
 						glColorMask( 1, 1, 1, 1 );
+						Modules::renderer().setMaterial( 0x0, "" );
 
 						continue;
 					}
@@ -2039,13 +2025,12 @@ void Renderer::renderDebugView()
 	glClearColor( 0, 0, 0, 1 );
 	glClear( GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT );
 
-	_curCamera->genFrustum( _camFrustum );
-	Modules::sceneMan().updateQueues( _camFrustum, 0x0, RenderingOrder::None, true, true );
+	Modules::sceneMan().updateQueues( _curCamera->getFrustum(), 0x0, RenderingOrder::None, true, true );
 	setupViewMatrices( _curCamera );
 
 	// Draw nodes
 	glColor4f( 0.5f, 0.75f, 1, 1 );
-	drawRenderables( "", "", true, &_camFrustum, 0x0, RenderingOrder::None, -1 );
+	drawRenderables( "", "", true, &_curCamera->getFrustum(), 0x0, RenderingOrder::None, -1 );
 
 	// Draw bounding boxes
 	setMaterial( 0x0, "" );
@@ -2107,13 +2092,12 @@ void Renderer::renderDebugView()
 	for( size_t i = 0, s = Modules::sceneMan().getLightQueue().size(); i < s; ++i )
 	{
 		LightNode *lightNode = (LightNode *)Modules::sceneMan().getLightQueue()[i];
-		lightNode->genFrustum( _lightFrustum );
 		
-		if( _camFrustum.cullFrustum( _lightFrustum ) ) continue;
+		if( _curCamera->getFrustum().cullFrustum( lightNode->getFrustum() ) ) continue;
 
 		// Calculate light screen space position
 		float bbx, bby, bbw, bbh;
-		lightNode->calcScreenSpaceAABB( _curCamera->calcProjectionMatrix() * _curCamera->_invTrans,
+		lightNode->calcScreenSpaceAABB( _curCamera->getProjMat() * _curCamera->getViewMat(),
 		                                bbx, bby, bbw, bbh );
 
 		glMatrixMode( GL_PROJECTION );

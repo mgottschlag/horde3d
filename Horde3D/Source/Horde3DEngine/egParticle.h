@@ -199,6 +199,8 @@ protected:
 	EmitterNode( const EmitterNodeTpl &emitterTpl );
 	void setMaxParticleCount( uint32 maxParticleCount );
 
+	void onPostUpdate();
+
 public:
 	
 	~EmitterNode();
@@ -214,8 +216,7 @@ public:
 	void advanceTime( float timeDelta );
 	bool hasFinished();
 
-	void onPostUpdate();
-
+	friend class SceneManager;
 	friend class Renderer;
 };
 

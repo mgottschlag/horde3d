@@ -1602,7 +1602,6 @@ namespace Horde3D
 		*/
 	DLL int castRay( NodeHandle node, float ox, float oy, float oz, float dx, float dy, float dz, int numNearest );
 
-
 	/*	Function: getCastRayResult
 			Returns a result of a previous castRay query.
 
@@ -1619,6 +1618,27 @@ namespace Horde3D
 			true if index was valid and data could be copied, otherwise false
 	*/
 	DLL bool getCastRayResult( int index, NodeHandle *node, float *distance, float *intersection );
+
+	/*	Function: checkNodeVisibility
+			Checks if a node is visible.
+
+		This function checks if a specified node is visible from the perspective of a specified
+		camera. The function always checks if the node is in the camera's frustum. If checkOcclusion
+		is true, the function will take into account the occlusion culling information from the previous
+		frame (if occlusion culling is disabled the flag is ignored). The flag calcLod determines whether the
+		detail level for the node should be returned in case it is visible. The function returns -1 if the node
+		is not visible, otherwise 0 (base LOD level) or the computed LOD level.
+
+		Parameters:
+			node			- node to be checked for visibility
+			cameraNode		- camera node from which the visibility test is done
+			checkOcclusion	- specifies if occlusion info from previous frame should be taken into account
+			calcLod			- specifies if LOD level should be computed
+
+		Returns:
+			Computed LOD level or -1 if node is not visible
+	*/
+	DLL int checkNodeVisibility( NodeHandle node, NodeHandle cameraNode, bool checkOcclusion, bool calcLod );
 
 
 	/* Group: Group-specific scene graph functions */
@@ -1835,10 +1855,10 @@ namespace Horde3D
 	*/
 	DLL bool setupCameraView( NodeHandle cameraNode, float fov, float aspect, float nearDist, float farDist );
 	
-	/* 	Function: calcCameraProjectionMatrix
-			Calculates the camera projection matrix.
+	/* 	Function: getCameraProjectionMatrix
+			Gets the camera projection matrix.
 		
-		This function calculates the camera projection matrix used for bringing the geometry to
+		This function gets the camera projection matrix used for bringing the geometry to
         screen space and copies it to the specified array.
 		
 		Parameters:
@@ -1848,7 +1868,7 @@ namespace Horde3D
 		Returns:
 			 true in case of success otherwise false
 	*/
-	DLL bool calcCameraProjectionMatrix( NodeHandle cameraNode, float *projMat );
+	DLL bool getCameraProjectionMatrix( NodeHandle cameraNode, float *projMat );
 
 
 	/* Group: Emitter-specific scene graph functions */

@@ -85,7 +85,9 @@ private:
 
 	PPipelineResource   _pipelineRes;
 	PTexture2DResource  _outputTex;
-	Matrix4f            _invTrans;
+	Matrix4f            _viewMat, _projMat;
+	Frustum             _frustum;
+	Vec3f               _absPos;
 	float               _frustLeft, _frustRight, _frustBottom, _frustTop;
 	float               _frustNear, _frustFar;
 	int                 _outputBufferIndex;
@@ -110,9 +112,12 @@ public:
 
 	void setupViewParams( float fov, float aspect, float near, float far );
 
-	void genFrustum( Frustum &frustum );
-	Matrix4f calcProjectionMatrix();
+	const Frustum &getFrustum() { return _frustum; }
+	const Matrix4f &getViewMat() { return _viewMat; }
+	const Matrix4f &getProjMat() { return _projMat; }
+	const Vec3f &getAbsPos() { return _absPos; }
 
+	friend class SceneManager;
 	friend class Renderer;
 };
 

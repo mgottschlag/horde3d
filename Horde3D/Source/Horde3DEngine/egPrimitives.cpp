@@ -142,7 +142,7 @@ void Frustum::buildBoxFrustum( const Matrix4f &transMat, float left, float right
 }
 
 
-bool Frustum::cullSphere( Vec3f pos, float rad )
+bool Frustum::cullSphere( Vec3f pos, float rad ) const
 {
 	// Check the distance of the center to the planes
 	for( uint32 i = 0; i < 6; ++i )
@@ -173,7 +173,7 @@ bool Frustum::cullBox( BoundingBox &b ) const
 }
 
 
-bool Frustum::cullFrustum( const Frustum &frust )
+bool Frustum::cullFrustum( const Frustum &frust ) const
 {
 	for( uint32 i = 0; i < 6; ++i )
 	{
@@ -195,7 +195,7 @@ bool Frustum::cullFrustum( const Frustum &frust )
 }
 
 
-void Frustum::calcAABB( Vec3f &mins, Vec3f &maxs )
+void Frustum::calcAABB( Vec3f &mins, Vec3f &maxs ) const
 {
 	mins.x = Math::MaxFloat; mins.y = Math::MaxFloat; mins.z = Math::MaxFloat;
 	maxs.x = -Math::MaxFloat; maxs.y = -Math::MaxFloat; maxs.z = -Math::MaxFloat;
