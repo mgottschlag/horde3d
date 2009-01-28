@@ -1656,6 +1656,11 @@ void Renderer::drawModels( const string &shaderContext, const string &theClass, 
 			else
 			{
 				Modules::renderer().setShader( &defColorShader );
+				if( curLod == 0 ) glColor3f( 0.5f, 0.75f, 1 );
+				else if( curLod == 1 ) glColor3f( 0.25f, 0.75, 0.75f );
+				else if( curLod == 2 ) glColor3f( 0.25f, 0.75, 0.5f );
+				else if( curLod == 3 ) glColor3f( 0.5f, 0.5f, 0.25f );
+				else glColor3f( 0.75f, 0.5, 0.25f );
 			}
 
 			ShaderCombination *curShader = Modules::renderer().getCurShader();
