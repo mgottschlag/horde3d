@@ -138,9 +138,11 @@ bool LightNode::setParamf( int param, float value )
 	{
 	case LightNodeParams::Radius:
 		_radius = value;
+		markDirty();
 		return true;
 	case LightNodeParams::FOV:
 		_fov = value;
+		markDirty();
 		return true;
 	case LightNodeParams::Col_R:
 		_diffCol_R = value;

@@ -150,21 +150,27 @@ bool CameraNode::setParamf( int param, float value )
 	{
 	case CameraNodeParams::LeftPlane:
 		_frustLeft = value;
+		markDirty();
 		return true;
 	case CameraNodeParams::RightPlane:
 		_frustRight = value;
+		markDirty();
 		return true;
 	case CameraNodeParams::BottomPlane:
 		_frustBottom = value;
+		markDirty();
 		return true;
 	case CameraNodeParams::TopPlane:
 		_frustTop = value;
+		markDirty();
 		return true;
 	case CameraNodeParams::NearPlane:
 		_frustNear = value;
+		markDirty();
 		return true;
 	case CameraNodeParams::FarPlane:
 		_frustFar = value;
+		markDirty();
 		return true;
 	default:
 		return SceneNode::setParamf( param, value );
@@ -221,6 +227,7 @@ bool CameraNode::setParami( int param, int value )
 		return true;
 	case CameraNodeParams::Orthographic:
 		_orthographic = (value == 1);
+		markDirty();
 		return true;
 	case CameraNodeParams::OcclusionCulling:
 		if( _occSet < 0 && value != 0 )
@@ -250,6 +257,8 @@ void CameraNode::setupViewParams( float fov, float aspect, float near, float far
 	_frustTop = ymax;
 	_frustNear = near;
 	_frustFar = far;
+	
+	markDirty();
 }
 
 
