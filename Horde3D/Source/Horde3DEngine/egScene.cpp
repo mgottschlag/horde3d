@@ -354,8 +354,8 @@ void SpatialGraph::addNode( SceneNode &sceneNode )
 	}
 	else
 	{
-		sceneNode._sgHandle = (uint32)_nodes.size() + 1;
 		_nodes.push_back( &sceneNode );
+		sceneNode._sgHandle = (uint32)_nodes.size();
 	}
 }
 
@@ -394,7 +394,7 @@ void SpatialGraph::updateQueues( const Frustum &frustum1, const Frustum *frustum
 	for( size_t i = 0, s = _nodes.size(); i < s; ++i )
 	{
 		SceneNode *node = _nodes[i];
-		if( !node || !node->_active ) continue;
+		if( node == 0x0 || !node->_active ) continue;
 
 		if( renderQueue && node->_renderable )
 		{
