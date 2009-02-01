@@ -88,6 +88,18 @@ The following XML node elements with the described attributes are supported:
             </table>
         </td>
     </tr>
+	<tr>
+        <td><b>ShaderFlag</b></td>
+        <td>
+            definition of a shader flag {*}
+            <table>
+                <tr>
+                    <td><b>name</b></td>
+                    <td>name of the shader flag to be set {required}</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
     <tr>
         <td><b>TexUnit</b></td>
         <td>
@@ -194,150 +206,12 @@ The following XML node elements with the described attributes are supported:
 
 
 <h2>Code Files</h2>
-<p><i>Filename-extension: arbitrary, usually .txt</i></p>
+<p><i>Filename-extension: arbitrary, usually .glsl</i></p>
 <p>
 Code files are pure text files that can be used to define shader code. These files can be referenced by shader resources.
 </p>
 <br /><br /><br />
 
-
-<h2>Shaders</h2>
-<p><i>Filename-extension: .shader.xml</i></p>
-<p>
-Shaders are used to create a plenty of different effects. A shader can generally be executed in different stages of the
-rendering pipeline. For that reason it is possible to define shader contexts. Horde3D uses an XML format to define
-shaders in the OpenGL Shading Language (GLSL). To make it easier to locate errors returned by the GLSL compiler, Horde3D
-uses a special system for encoding line numbers. Each DefCode and InsCode is considered as a block and gets a consecutive number
-starting at 1. The number of the block where an error occured is encoded as thousand and the actual line number inside this
-block as the rest. So if you get the message that there is an error in line 2023, you know that the problem is in the second
-block in line 23.
-<br /><br />
-The following XML node elements with the described attributes are supported for a shader file:
-</p>
-<div class="syntaxbox">
-<table>
-    <tr>
-        <td><b>Shader</b></td>
-        <td>root element of the document {1}</td>
-    </tr>
-    <tr>
-        <td><b>Context</b></td>
-        <td>
-            definition of a shader context
-            <table>
-                <tr>
-                    <td><b>id</b></td>
-                    <td>name of the context {required}</td>
-                </tr>
-            </table>
-        </td>
-    </tr>
-   
-    <tr>
-        <td><b>RenderConfig</b></td>
-        <td>
-			configuration of rendering parameters; child of <b>Context</b> element {1}
-            <table>
-                <tr>
-                    <td><b>writeDepth</b></td>
-                    <td>enables writing to depth buffer (Values: false, true) (Default: true)  {optional}</td>
-                </tr>
-                <tr>
-                    <td><b>blendMode</b></td>
-                    <td>blend mode (Values: REPLACE, BLEND, ADD, ADD_BLENDED, MULT) (Default: REPLACE)  {optional}</td>
-                </tr>
-				<tr>
-                    <td><b>depthTest</b></td>
-                    <td>depth test function; use ALWAYS to disable depth test
-					    (Values: ALWAYS, EQUAL, LESS, LESS_EQUAL, GREATER, GREATER_EQUAL) (Default: LESS_EQUAL)  {optional}</td>
-                </tr>
-				<tr>
-                    <td><b>alphaTest</b></td>
-                    <td>alpha test function; use ALWAYS to disable alpha test
-					    (Values: ALWAYS, EQUAL, LESS, LESS_EQUAL, GREATER, GREATER_EQUAL) (Default: ALWAYS)  {optional}</td>
-                </tr>
-				<tr>
-                    <td><b>alphaRef</b></td>
-                    <td>reference value for alpha test (Default: 0.0)  {optional}</td>
-                </tr>
-				<tr>
-                    <td><b>alphaToCoverage</b></td>
-                    <td>enables alpha-to-coverage (Values: false, true) (Default: false)  {optional}</td>
-                </tr>
-            </table>
-        </td>
-    </tr>
-    <tr>
-        <td><b>VertexShader</b></td>
-        <td>vertex shader created by concatenating code blocks; child of <b>Context</b> element {1}</td>
-    </tr>
-    <tr>
-        <td><b>FragmentShader</b></td>
-        <td>fragment shader created by concatenating code blocks; child of <b>Context</b> element {1}</td>
-    </tr>
-    
-    <tr>
-        <td><b>DefCode</b></td>
-        <td>
-            directly defines GLSL code block in CDATA section; child of <b>VertexShader</b> or <b>FragmentShader</b> element {*}
-        </td>
-    </tr>
-    
-    <tr>
-        <td><b>InsCode</b></td>
-        <td>
-            inserts code block from a Code resource; child of <b>VertexShader</b> or <b>FragmentShader</b> element {*}
-            <table>
-                <tr>
-                    <td><b>code</b></td>
-                    <td>name of the Code resource {required}</td>
-                </tr>
-            </table>
-        </td>
-    </tr>
-</table>
-</div>
-<br />
-<h4>Sample</h4>
-<div class="memdoc">
-<pre>
-&lt;Shader&gt;
-    &lt;Context id="OVERLAY"&gt;
-        &lt;VertexShader&gt;
-            &lt;DefCode&gt;
-            &lt;![CDATA[<i>
-                void main( void )
-                {
-                    gl_TexCoord[0] = gl_MultiTexCoord0;
-                    gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;    
-                }</i>
-            ]]&gt;
-            &lt;/DefCode&gt;
-        &lt;/VertexShader&gt;
-        
-        &lt;FragmentShader&gt;
-            &lt;InsCode code="texUtils.txt" /&gt;
-            &lt;DefCode&gt;
-            &lt;![CDATA[<i>
-                uniform sampler2D tex0;
-            
-                void main( void )
-                {
-                    vec4 albedo = getColor( tex0, gl_TexCoord[0].st );
-                    gl_FragColor = albedo;
-                }</i>
-            ]]&gt;
-            &lt;/DefCode&gt;
-        &lt;/FragmentShader&gt;
-    &lt;/Context&gt;
-&lt;/Shader&gt;
-</pre>
-</div>
-<br />
-<p>
-For more information on available shader attributes see the <a href="_pipeline.html">pipeline documentation</a>.
-</p>
-<br /><br />
 
 <h2>Scene Graph Files</h2>
 <p><i>Filename-extension: .scene.xml</i></p>

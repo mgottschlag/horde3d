@@ -449,6 +449,178 @@ The following XML elements and attributes are supported.
 </div>
 <br /><br /><br />
 
+<h2>Shaders</h2>
+<p>
+Horde3D shaders are stored in text files with the extension <i>.shader</i>. A shader file consists of different
+sections: one FX section and an arbitrary number of named code sections. A section is introduced by the tag
+<b>[[<i>id</i>]]</b> where <i>id</i> is a unique identifier used as name of the section. A special identifier is
+<b>FX</b> which introduces an FX section.
+<br /><br />
+Horde3D supports übershaders using static branching (compiler defines) and can automatically compile different
+shader combinations based on a set of given shader flags. This approach helps to solve a common problem: for
+example you have one shader that does skinning and one that does parallax mapping. Now you want a shader that does
+both. Usually you would have to create an new shader file which combines the code of the two other shaders. It
+is quite obvious that you can quickly get many permutations of features and that writing different shader
+files for them can become very tedious or even unmanagable. With the help of übershaders, the shader creation workflow can
+be greatly simplified. You just need one shader file where the features are exposed with compiler defines. A feature
+is enabled by setting the corresponding flag (e.g. in a material file). Horde3D can check automatically if a
+desired combination is not yet existing and will compile it on the fly. Please note, even though übershaders are
+a powerful feature, they need to be used carefully since it is easy to generate a huge number of combinations which
+would take a long time to load.
+</p>
+
+<h3>FX section</h3>
+<p>
+The FX section defines the shader contexts and declares custom (user-defined) uniforms which are used in the
+hardware shaders. FX sections are defined in XML. The XML does not require a root element since the root is
+implicitely given by the section.
+<br /><br />
+
+The following XML node elements with the described attributes are supported for the FX section:
+</p>
+<div class="syntaxbox">
+<table>
+    <tr>
+        <td><b>Uniform</b></td>
+        <td>
+			declaration of a vector uniform {*}
+			<table>
+                <tr>
+                    <td><b>id</b></td>
+                    <td>name of the uniform as used in the GLSL code {required}</td>
+                </tr>
+				<tr>
+                    <td><b>a, b, c, d</b></td>
+                    <td>default values used when the uniform is not defined in a material {optional}</td>
+                </tr>
+            </table>
+		</td>
+    </tr>
+	
+	<tr>
+        <td><b>Context</b></td>
+        <td>
+            definition of a shader context
+            <table>
+                <tr>
+                    <td><b>id</b></td>
+                    <td>name of the context {required}</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+	
+	<tr>
+        <td><b>Shaders</b></td>
+        <td>
+			shader configuration used by the parent context; child of <b>Context</b> element {1}
+			<table>
+                <tr>
+                    <td><b>vertex</b></td>
+                    <td>name of the code section to be used as vertex shader {required}</td>
+                </tr>
+				<tr>
+                    <td><b>fragment</b></td>
+                    <td>name of the code section to be used as fragment shader {required}</td>
+                </tr>
+            </table>
+		</td>
+    </tr>
+   
+    <tr>
+        <td><b>RenderConfig</b></td>
+        <td>
+			configuration of rendering parameters; child of <b>Context</b> element {1}
+            <table>
+                <tr>
+                    <td><b>writeDepth</b></td>
+                    <td>enables writing to depth buffer (Values: false, true) (Default: true)  {optional}</td>
+                </tr>
+                <tr>
+                    <td><b>blendMode</b></td>
+                    <td>blend mode (Values: REPLACE, BLEND, ADD, ADD_BLENDED, MULT) (Default: REPLACE)  {optional}</td>
+                </tr>
+				<tr>
+                    <td><b>depthTest</b></td>
+                    <td>depth test function; use ALWAYS to disable depth test
+					    (Values: ALWAYS, EQUAL, LESS, LESS_EQUAL, GREATER, GREATER_EQUAL) (Default: LESS_EQUAL)  {optional}</td>
+                </tr>
+				<tr>
+                    <td><b>alphaTest</b></td>
+                    <td>alpha test function; use ALWAYS to disable alpha test
+					    (Values: ALWAYS, EQUAL, LESS, LESS_EQUAL, GREATER, GREATER_EQUAL) (Default: ALWAYS)  {optional}</td>
+                </tr>
+				<tr>
+                    <td><b>alphaRef</b></td>
+                    <td>reference value for alpha test (Default: 0.0)  {optional}</td>
+                </tr>
+				<tr>
+                    <td><b>alphaToCoverage</b></td>
+                    <td>enables alpha-to-coverage (Values: false, true) (Default: false)  {optional}</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</div>
+<br />
+
+<h3>Code section</h3>
+<p>
+A code section contains the GLSL code. Besides the usual GLSL keywords, Horde3D introduces an additional preprocessor
+command: <b>#include</b>. The include directive is used to insert the content of a code resource at the corresponding
+location. The name of the code file needs to be enclosed by a pair of quotation marks.
+<br /><br />
+The code section can also contain the shader flags used for the automatic combination generation. The shader flags
+have a special naming convention: <b>_F<i>&lt;digit&gt;&lt;digit&gt;</i>_<i>&lt;name&gt;</i></b>.
+The following would be a valid flag: _F06_MyFlag. The flag must have a number between 01 and 32 (note the
+leading zero). This number is exclusively used to identify the flag. The name is optional and just exists for
+convenience reasons in order to improve the code readability.
+</p>
+<br /><br />
+
+<h3>Sample</h3>
+<div class="memdoc">
+<pre>
+<b>[[FX]]</b>
+
+&lt;Uniform id="brightness" a="0.5" /&gt;
+
+&lt;Context id="OVERLAY"&gt;
+	&lt;Shaders vertex="VS_OVERLAY" fragment="FS_OVERLAY" /&gt;
+&lt;/Context&gt;  
+
+
+<b>[[VS_OVERLAY]]</b>
+<i>// ============================================================================</i>
+
+void main( void )
+{
+	gl_TexCoord[0] = gl_MultiTexCoord0;
+	gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;    
+}
+
+
+<b>[[FS_OVERLAY]]</b>
+<i>// ============================================================================</i>
+
+uniform vec4 brightness;
+uniform sampler2D tex0;
+
+void main( void )
+{
+	vec4 albedo = texture2D( tex0, gl_TexCoord[0].st );
+	
+<b>#ifdef _F07_BrightMult</b>
+	albedo *= brightness.a;
+<b>#endif</b>
+	
+	gl_FragColor = albedo;
+}
+</pre>
+</div>
+<br /><br /><br />
+
 <h2>Predefined GLSL attributes and uniforms</h2>
 <p>
 Horde defines some standard uniforms and attributes which can be used by shaders. The engine automatically detects
