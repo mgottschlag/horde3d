@@ -1,6 +1,8 @@
 <Material>
-	<Shader source="skinning_metal.shader.xml" />
+	<Shader source="model.shader" />
+	<ShaderFlag name="_F01_Skinning"/>
+	<ShaderFlag name="_F04_EnvMapping"/>
 
 	<TexUnit unit="0" map="knight.jpg" />
-	<TexUnit unit="1" map="skybox.jpg" type="CUBE" />
+	<TexUnit unit="6" map="skybox.jpg" type="CUBE" />
 </Material>

@@ -7,8 +7,17 @@
 		_F01_Skinning
 		_F02_NormalMapping
 		_F03_ParallaxMapping
+		_F04_EnvMapping
 // =================================================================================================
 -->
+
+<Uniform id="specParams" a="0.1" b="16.0">
+	<!-- Description
+		a - Specular mask
+		b - Specular exponent
+	-->
+</Uniform>
+
 
 <Context id="ATTRIBPASS">
 	<Shaders vertex="VS_GENERAL" fragment="FS_ATTRIBPASS" />
@@ -19,14 +28,14 @@
 </Context>
 
 <Context id="LIGHTING">
-	<RenderConfig writeDepth="false" blendMode="ADD" />
 	<Shaders vertex="VS_GENERAL" fragment="FS_LIGHTING" />
+	<RenderConfig writeDepth="false" blendMode="ADD" />
 </Context>
 
 <Context id="AMBIENT">
 	<Shaders vertex="VS_GENERAL" fragment="FS_AMBIENT" />
 </Context>
-		
+
 
 [[VS_GENERAL]]
 // =================================================================================================
@@ -120,6 +129,7 @@ void main( void )
 
 #include "utilityLib/fragDeferredWrite.glsl" />
 
+uniform vec4 specParams;
 uniform sampler2D tex0;
 
 #ifdef _F02_NormalMapping
@@ -175,7 +185,7 @@ void main( void )
 	setPos( newPos );
 	setNormal( normalize( normal ) );
 	setAlbedo( albedo );
-	setSpecMask( 0.1 );
+	setSpecMask( specParams.x );
 }
 
 	
@@ -221,6 +231,7 @@ void main( void )
 
 #include "utilityLib/fragLighting.glsl" />
 
+uniform vec4 specParams;
 uniform sampler2D tex0;
 
 #ifdef _F02_NormalMapping
@@ -273,7 +284,7 @@ void main( void )
 #endif
 	
 	gl_FragColor.rgb =
-		calcPhongSpotLight( newPos, normalize( normal ), albedo, 0.1, 16.0, -vsPos.z, 0.3 );
+		calcPhongSpotLight( newPos, normalize( normal ), albedo, specParams.x, specParams.y, -vsPos.z, 0.3 );
 }
 
 
@@ -291,6 +302,10 @@ uniform samplerCube tex7;
 
 #ifdef _F02_NormalMapping
 	uniform sampler2D tex1;
+#endif
+
+#ifdef _F04_EnvMapping
+	uniform samplerCube tex6;
 #endif
 
 varying vec4 pos;
@@ -331,6 +346,11 @@ void main( void )
 #else
 	vec3 normal = tsbNormal;
 #endif
-
+	
 	gl_FragColor.rgb = albedo * textureCube( tex7, normal ).rgb;
+	
+#ifdef _F04_EnvMapping
+	vec3 refl = textureCube( tex6, reflect( pos.xyz - viewer, normalize( normal ) ) ).rgb;
+	gl_FragColor.rgb = refl * 1.5;
+#endif
 }

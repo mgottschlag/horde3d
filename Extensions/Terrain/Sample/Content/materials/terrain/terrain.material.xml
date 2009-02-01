@@ -1,5 +1,5 @@
 <Material>
-	<Shader source="terrain.shader.xml"/>
+	<Shader source="terrain.shader"/>
 	
 	<TexUnit unit="0" map="terrain/heightmap.tga" allowCompression="false" />
 	<TexUnit unit="1" map="terrain/detail.jpg" />
