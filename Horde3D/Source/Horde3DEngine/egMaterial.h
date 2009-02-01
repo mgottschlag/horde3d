@@ -68,13 +68,13 @@ struct TexUnit
 };
 
 
-struct Uniform
+struct MatUniform
 {
 	std::string  name;
 	float        values[4];	
 
 
-	Uniform()
+	MatUniform()
 	{
 		values[0] = 0; values[1] = 0; values[2] = 0; values[3] = 0;
 	}
@@ -93,7 +93,7 @@ private:
 	uint32                      _combMask;
 	std::string                 _class;
 	std::vector< TexUnit >      _texUnits;
-	std::vector< Uniform >      _uniforms;
+	std::vector< MatUniform >   _uniforms;
 	std::vector< std::string >  _shaderFlags;
 	PMaterialResource           _matLink;	
 

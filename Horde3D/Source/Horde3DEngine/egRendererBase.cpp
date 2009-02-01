@@ -412,6 +412,22 @@ void RendererBase::unloadShader( uint32 shaderId )
 }
 
 
+int RendererBase::getShaderVar( uint32 shaderId, const char *var )
+{
+	return glGetUniformLocation( shaderId, var );
+}
+
+
+bool RendererBase::setShaderVar1i( uint32 shaderId, const char *var, int value )
+{
+	int loc = glGetUniformLocation( shaderId, var );
+	if( loc < 0 ) return false;
+
+	glUniform1i( loc, value );
+	return true;
+}
+
+
 RenderBuffer RendererBase::createRenderBuffer( uint32 width, uint32 height,
 											   RenderBufferFormats::List format, bool depth,
 											   uint32 numColBufs, bool bilinear, uint32 samples )

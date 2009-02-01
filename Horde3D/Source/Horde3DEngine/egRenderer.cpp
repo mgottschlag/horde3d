@@ -398,32 +398,6 @@ bool Renderer::uploadShader( const char *vertexShader, const char *fragmentShade
 	sc.attrib_texCoords0 = glGetAttribLocation( shaderId, "texCoords0" );
 	sc.attrib_texCoords1 = glGetAttribLocation( shaderId, "texCoords1" );
 
-	// Get custom uniforms
-	int uniformCount;
-	int size;
-	uint32 type;
-	char charBuf[128];
-	glGetProgramiv( shaderId, GL_ACTIVE_UNIFORMS, &uniformCount );
-	for( int i = 0; i < uniformCount; ++i )
-	{
-		glGetActiveUniform( shaderId, i, 127, 0x0, &size, &type, charBuf );
-		string name = charBuf;
-
-		if( name.find( "gl_" ) != 0 &&
-			name != "tex0" && name != "tex1" && name != "tex2" && name != "tex3" &&
-			name != "tex4" && name != "tex5" && name != "tex6" && name != "tex7" &&
-			name != "tex8" && name != "tex9" && name != "tex10" && name != "tex11" &&
-			name != "frameBufSize" && name != "worldMat" && name != "worldNormalMat" &&
-			name != "viewer" && name != "lightPos" && name != "lightDir" && name != "lightColor" &&
-			name != "lightCosCutoff" && name != "shadowSplitDists" && name != "shadowMats" &&
-			name != "shadowMapSize" && name != "shadowMapSize" && name != "shadowBias" &&
-			name != "skinMatRows[0]" && name != "parCorners" && name != "parPosArray" &&
-			name != "parSizeAndRotArray" && name != "parColorArray" )
-		{
-			sc.customUniforms[name] = glGetUniformLocation( shaderId, name.c_str() );
-		}
-	}
-
 	return true;
 }
 
@@ -443,25 +417,34 @@ void Renderer::setShader( ShaderCombination *sc )
 }
 
 
-bool Renderer::setMaterialRec( MaterialResource *materialRes, const string &shaderContext, bool firstRec )
+bool Renderer::setMaterialRec( MaterialResource *materialRes, const string &shaderContext,
+                               ShaderResource *shaderRes )
 {
 	if( materialRes == 0x0 ) return false;
+	
+	bool firstRec = (shaderRes == 0x0);
 	bool result = true;
 	
-	// Setup shader and render config (ignore shader for links)
-	if( firstRec && materialRes->_shaderRes != 0x0 )
-	{
-		ShaderContext *context = materialRes->_shaderRes->findContext( shaderContext );
+	// Set shader in first recursion step
+	if( firstRec )
+	{	
+		shaderRes = materialRes->_shaderRes;
+		if( shaderRes == 0x0 ) return false;	
+	
+		// Find context
+		ShaderContext *context = shaderRes->findContext( shaderContext );
 		if( context == 0x0 ) return false;
 		
-		ShaderCombination *sc = materialRes->_shaderRes->getCombination( *context, materialRes->_combMask );
-		if( sc != _curShader ) setShader( sc );	
+		// Set shader combination
+		ShaderCombination *sc = shaderRes->getCombination( *context, materialRes->_combMask );
+		if( sc != _curShader ) setShader( sc );
+		if( _curShader == 0x0 ) return false;
 
-		// Depth mask
+		// Configure depth mask
 		if( context->writeDepth ) glDepthMask( GL_TRUE );
 		else glDepthMask( GL_FALSE );
 
-		// Blending
+		// Configure blending
 		switch( context->blendMode )
 		{
 		case BlendModes::Replace:
@@ -485,7 +468,7 @@ bool Renderer::setMaterialRec( MaterialResource *materialRes, const string &shad
 			break;
 		}
 
-		// Depth test
+		// Configure depth test
 		switch( context->depthTest )
 		{
 		case TestModes::LessEqual:
@@ -513,7 +496,7 @@ bool Renderer::setMaterialRec( MaterialResource *materialRes, const string &shad
 			break;
 		}
 
-		// Alpha test and alpha-to-coverage
+		// Configure alpha test and alpha-to-coverage
 		if( context->alphaToCoverage && Modules::config().sampleCount > 0 )
 		{
 			glDisable( GL_ALPHA_TEST );
@@ -551,7 +534,6 @@ bool Renderer::setMaterialRec( MaterialResource *materialRes, const string &shad
 			}
 		}
 	}
-	if( _curShader == 0x0 ) return false;
 	
 	// Setup standard shader uniforms
 	// Note: Make sure that all functions which modify one of the following params increase stamp
@@ -597,7 +579,7 @@ bool Renderer::setMaterialRec( MaterialResource *materialRes, const string &shad
 		_curShader->lastUpdateStamp = _curUpdateStamp;
 	}
 	
-	// Setup material parameters
+	// Setup texture units
 	for( uint32 i = 0; i < materialRes->_texUnits.size(); ++i )
 	{
 		TexUnit &texUnit = materialRes->_texUnits[i];
@@ -619,19 +601,35 @@ bool Renderer::setMaterialRec( MaterialResource *materialRes, const string &shad
 			}
 		}
 	}
-
 	glActiveTexture( GL_TEXTURE0 );
 
-	// Setup material shader uniforms
-	for( uint32 i = 0; i < materialRes->_uniforms.size(); ++i )
+	// Set custom uniforms
+	for( size_t i = 0, s = shaderRes->_uniforms.size(); i < s; ++i )
 	{
-		Uniform &uniform = materialRes->_uniforms[i];
+		if( _curShader->customUniforms[i] < 0 ) continue;
+		
+		bool found = false;
 
-		map< string, int >::iterator itr = _curShader->customUniforms.find( uniform.name );
-		if( itr != _curShader->customUniforms.end() )
+		// Find uniform in material
+		for( size_t j = 0, s = materialRes->_uniforms.size(); j < s; ++j )
 		{
-			glUniform4f( (*itr).second, uniform.values[0], uniform.values[1],
-			             uniform.values[2], uniform.values[3] );
+			MatUniform &matUniform = materialRes->_uniforms[j];
+			
+			if( matUniform.name == shaderRes->_uniforms[i].id )
+			{
+				glUniform4f( _curShader->customUniforms[i], matUniform.values[0], matUniform.values[1],
+				             matUniform.values[2], matUniform.values[3] );
+				found = true;
+				break;
+			}
+		}
+
+		// Use default values if not found
+		if( !found )
+		{
+			ShaderUniform &uniform = shaderRes->_uniforms[i];
+			glUniform4f( _curShader->customUniforms[i], uniform.defValues[0], uniform.defValues[1],
+				         uniform.defValues[2], uniform.defValues[3] );
 		}
 	}
 
@@ -639,16 +637,16 @@ bool Renderer::setMaterialRec( MaterialResource *materialRes, const string &shad
 	{
 		// Handle link of stage
 		if( _curStageMatLink != 0x0 && _curStageMatLink != materialRes )
-			result &= setMaterialRec( _curStageMatLink, shaderContext );
+			result &= setMaterialRec( _curStageMatLink, shaderContext, shaderRes );
 
 		// Handle material of light source
 		if( _curLight != 0x0 && _curLight->_materialRes != 0x0 && _curLight->_materialRes != materialRes )
-			result &= setMaterialRec( _curLight->_materialRes, shaderContext );
+			result &= setMaterialRec( _curLight->_materialRes, shaderContext, shaderRes );
 	}
 
 	// Handle link of material resource
 	if( materialRes->_matLink != 0x0 )
-		result &= setMaterialRec( materialRes->_matLink, shaderContext );
+		result &= setMaterialRec( materialRes->_matLink, shaderContext, shaderRes );
 
 	return result;
 }
@@ -671,7 +669,7 @@ bool Renderer::setMaterial( MaterialResource *materialRes, const string &shaderC
 		
 	_curMatRes = materialRes;
 	
-	bool result = setMaterialRec( materialRes, shaderContext, true );
+	bool result = setMaterialRec( materialRes, shaderContext, 0x0 );
 
 	if( !result )
 	{

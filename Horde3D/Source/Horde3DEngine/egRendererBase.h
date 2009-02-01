@@ -115,6 +115,8 @@ public:
 	// Shader functions
 	virtual uint32 uploadShader( const char *vertexShader, const char *fragmentShader );
 	void unloadShader( uint32 shaderId );
+	int getShaderVar( uint32 shaderId, const char *var );
+	bool setShaderVar1i( uint32 shaderId, const char *var, int value );
 	std::string &getShaderLog() { return _shaderLog; }
 
 	// Render buffer functions

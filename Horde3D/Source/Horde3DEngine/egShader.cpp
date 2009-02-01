@@ -303,6 +303,7 @@ void ShaderResource::release()
 	}
 
 	_contexts.clear();
+	_uniforms.clear();
 	//_preLoadList.clear();
 }
 
@@ -369,7 +370,7 @@ bool ShaderResource::parseFXSection( const char *data, bool oldFormat )
 	}
 
 	if( oldFormat )
-		Modules::log().writeWarning( "Shader resource '%s': Deprecated old syntax, please consider converting to new format", _name.c_str() );
+		Modules::log().writeWarning( "Shader resource '%s': Deprecated old syntax, please convert to new format", _name.c_str() );
 	
 	// Parse contexts
 	int nodeItr1 = 0;
@@ -484,6 +485,27 @@ bool ShaderResource::parseFXSection( const char *data, bool oldFormat )
 		_contexts.push_back( context );
 		
 		node1 = rootNode.getChildNode( "Context", ++nodeItr1 );
+	}
+
+
+	// Parse uniforms
+	nodeItr1 = 0;
+	node1 = rootNode.getChildNode( "Uniform", nodeItr1 );
+	while( !node1.isEmpty() )
+	{
+		if( node1.getAttribute( "id" ) == 0x0 ) return raiseError( "Missing Uniform attribute 'id'" );
+		
+		ShaderUniform uniform;
+
+		uniform.id = node1.getAttribute( "id" );
+		uniform.defValues[0] = (float)atof( node1.getAttribute( "a", "0.0" ) );
+		uniform.defValues[1] = (float)atof( node1.getAttribute( "b", "0.0" ) );
+		uniform.defValues[2] = (float)atof( node1.getAttribute( "c", "0.0" ) );
+		uniform.defValues[3] = (float)atof( node1.getAttribute( "d", "0.0" ) );
+
+		_uniforms.push_back( uniform );
+		
+		node1 = rootNode.getChildNode( "Uniform", ++nodeItr1 );
 	}
 
 	return true;
@@ -635,6 +657,15 @@ void ShaderResource::compileCombination( ShaderContext &context, ShaderCombinati
 			out0.close();
 			out1.close();
 		}
+	}
+
+	
+	// Find uniforms
+	sc.customUniforms.reserve( _uniforms.size() );
+	for( uint32 i = 0; i < _uniforms.size(); ++i )
+	{
+		sc.customUniforms.push_back(
+			Modules::renderer().getShaderVar( sc.shaderObject, _uniforms[i].id.c_str() ) );
 	}
 
 	// Output shader log

@@ -252,7 +252,7 @@ bool MaterialResource::load( const char *data, int size )
 	{
 		if( node1.getAttribute( "name" ) == 0x0 ) return raiseError( "Missing Uniform attribute 'name'" );
 
-		Uniform uniform;
+		MatUniform uniform;
 		uniform.name = node1.getAttribute( "name" );
 
 		uniform.values[0] = (float)atof( node1.getAttribute( "a", "0" ) );

@@ -126,8 +126,7 @@ struct ShaderCombination
 	int                             attrib_joints, attrib_weights;
 	int                             attrib_texCoords0, attrib_texCoords1;
 
-	// Custom uniforms
-	std::map< std::string, int >    customUniforms;
+	std::vector< int >              customUniforms;
 
 
 	ShaderCombination() :
@@ -172,6 +171,14 @@ struct ShaderContext
 
 // =================================================================================================
 
+
+struct ShaderUniform
+{
+	std::string  id;
+	float        defValues[4];
+};
+
+
 class ShaderResource : public Resource
 {
 private:
@@ -180,6 +187,7 @@ private:
 	static std::string            _tmpCode0, _tmpCode1;
 	
 	std::vector< ShaderContext >  _contexts;
+	std::vector< ShaderUniform >  _uniforms;
 	std::set< uint32 >            _preLoadList;
 
 	bool raiseError( const std::string &msg, int line = -1 );

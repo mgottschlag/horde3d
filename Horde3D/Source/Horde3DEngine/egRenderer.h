@@ -142,7 +142,7 @@ protected:
 	
 	void setupViewMatrices( CameraNode *cam );
 	
-	bool setMaterialRec( MaterialResource *materialRes, const std::string &shaderContext, bool firstRec = false );
+	bool setMaterialRec( MaterialResource *materialRes, const std::string &shaderContext, ShaderResource *shaderRes );
 	
 	void setupShadowMap( bool noShadows );
 	Matrix4f calcLightMat( const Frustum &frustum );
