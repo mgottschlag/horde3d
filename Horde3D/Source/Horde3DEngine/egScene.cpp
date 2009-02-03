@@ -172,13 +172,14 @@ bool SceneNode::canAttach( SceneNode &/*parent*/ )
 
 void SceneNode::markChildrenDirty()
 {	
-	for( uint32 i = 0, s = (uint32)_children.size(); i < s; ++i )
+	for( vector< SceneNode * >::iterator itr = _children.begin(),
+	     end = _children.end(); itr != end; ++itr )
 	{
-		if( !_children[i]->_dirty )
+		if( !(*itr)->_dirty )
 		{	
-			_children[i]->_dirty = true;
-			_children[i]->_transformed = true;
-			_children[i]->markChildrenDirty();
+			(*itr)->_dirty = true;
+			(*itr)->_transformed = true;
+			(*itr)->markChildrenDirty();
 		}
 	}
 }
@@ -210,8 +211,7 @@ bool SceneNode::update()
 	
 	// Calculate absolute matrix
 	if( _parent != 0x0 )
-		//_absTrans = _parent->_absTrans * _relTrans;
-		_absTrans.fastMult( _parent->_absTrans, _relTrans );
+		Matrix4f::fastMult43( _absTrans, _parent->_absTrans, _relTrans );
 	else
 		_absTrans = _relTrans;
 	

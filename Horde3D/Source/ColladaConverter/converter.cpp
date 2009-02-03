@@ -332,13 +332,13 @@ void Converter::calcTangentSpaceBasis( vector<Vertex> &verts )
 	{
 		const Vec3f &n = verts[i].normal.normalized();
 		const Vec3f &t = verts[i].tangent;
-		verts[i].tangent = (t - n * (n * t)).normalized();
+		verts[i].tangent = (t - n * n.dot( t )).normalized();
 		verts[i].normal = n;
 				
-		if( n.crossProduct( t ) * verts[i].bitangent < 0.0f )
-			verts[i].bitangent = (n * -1).crossProduct( t );
+		if( n.cross( t ).dot( verts[i].bitangent ) < 0.0f )
+			verts[i].bitangent = (n * -1).cross( t );
 		else
-			verts[i].bitangent = n.crossProduct( t );
+			verts[i].bitangent = n.cross( t );
 	}
 }
 

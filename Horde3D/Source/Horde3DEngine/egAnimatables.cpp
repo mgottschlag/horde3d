@@ -322,12 +322,13 @@ void JointNode::onPostUpdate()
 	if( _parent->getType() != SceneNodeTypes::Joint )
 		_relModelMat = _relTrans;
 	else
-		//_relModelMat = ((JointNode *)_parent)->_relModelMat * _relTrans;
-		_relModelMat.fastMult( ((JointNode *)_parent)->_relModelMat, _relTrans );
+		Matrix4f::fastMult43( _relModelMat, ((JointNode *)_parent)->_relModelMat, _relTrans );
 
 	if( _parentModel->jointExists( _jointIndex ) )
 	{
-		Matrix4f mat = _relModelMat * _parentModel->getGeometryResource()->getInvBindMat( _jointIndex );
+		Matrix4f mat( Math::NO_INIT );
+		Matrix4f::fastMult43( mat, _relModelMat, _parentModel->getGeometryResource()->getInvBindMat( _jointIndex ) );
+
 		_parentModel->setSkinningMat( _jointIndex, mat );
 	}
 }

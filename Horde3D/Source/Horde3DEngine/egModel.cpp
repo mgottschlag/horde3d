@@ -516,9 +516,9 @@ bool ModelNode::updateGeometry()
 	{
 		VertexData &vd = *_geometryRes->getVertData();
 		
-		vd.normals[i] = vd.normals[i].normalized();
-		vd.tangents[i] = vd.tangents[i].normalized();
-		vd.bitangents[i] = vd.bitangents[i].normalized();
+		vd.normals[i].normalize();
+		vd.tangents[i].normalize();
+		vd.bitangents[i].normalize();
 	}
 
 	_morpherDirty = false;
@@ -726,10 +726,11 @@ void ModelNode::onPostUpdate()
 				}
 
 				// Build matrix from animation data
-				Matrix4f &mat = _nodeList[i].node->_relTrans;
-				mat = Matrix4f::ScaleMat( nodeScaleVec.x, nodeScaleVec.y, nodeScaleVec.z );
-				mat = Matrix4f( nodeRotQuat ) * mat;
-				mat.translate( nodeTransVec.x, nodeTransVec.y, nodeTransVec.z );
+				Matrix4f mat( Math::NO_INIT );
+				Matrix4f::fastMult43( mat, Matrix4f( nodeRotQuat ),
+				                      Matrix4f::ScaleMat( nodeScaleVec.x, nodeScaleVec.y, nodeScaleVec.z ) );
+				Matrix4f::fastMult43( _nodeList[i].node->_relTrans,
+				                      Matrix4f::TransMat( nodeTransVec.x, nodeTransVec.y, nodeTransVec.z ), mat );
 			}
 		}
 
