@@ -388,6 +388,7 @@ bool Renderer::uploadShader( const char *vertexShader, const char *fragmentShade
 	sc.uni_parPosArray = glGetUniformLocation( shaderId, "parPosArray" );
 	sc.uni_parSizeAndRotArray = glGetUniformLocation( shaderId, "parSizeAndRotArray" );
 	sc.uni_parColorArray = glGetUniformLocation( shaderId, "parColorArray" );
+	sc.uni_olayColor = glGetUniformLocation( shaderId, "olayColor" );
 
 	// Get attribute locations
 	sc.attrib_normal = glGetAttribLocation( shaderId, "normal" );
@@ -1093,14 +1094,9 @@ void Renderer::drawDebugAABB( const Vec3f &bbMin, const Vec3f &bbMax, bool saveS
 // Overlays
 // =================================================================================================
 
-void Renderer::showOverlay( const Overlay &overlay, uint32 matRes )
+void Renderer::showOverlay( const Overlay &overlay )
 {
-	Resource *res = Modules::resMan().resolveResHandle( matRes );
-	if( res != 0x0 && res->getType() == ResourceTypes::Material )
-	{
-		_overlays.push_back( overlay );
-		_overlays.back().materialRes = (MaterialResource *)res;
-	}
+	_overlays.push_back( overlay );
 }
 
 
@@ -1117,7 +1113,7 @@ void Renderer::drawOverlays( const string &shaderContext )
 	
 	glMatrixMode( GL_PROJECTION );
 	glLoadIdentity();
-	glOrtho( 0, 1, 0, 1, -1, 1 );
+	glOrtho( 0, 1, 1, 0, -1, 1 );
 	glMatrixMode( GL_MODELVIEW );
 	glLoadIdentity();
 	
@@ -1130,12 +1126,14 @@ void Renderer::drawOverlays( const string &shaderContext )
 			Overlay &overlay = _overlays[j];
 
 			if( !setMaterial( overlay.materialRes, shaderContext ) ) continue;
+			if( _curShader->uni_olayColor >= 0 )
+				glUniform4fv( _curShader->uni_olayColor, 1, &overlay.colR );
 			
 			glBegin( GL_QUADS );
-			glTexCoord2fv( &overlay.u_ll ); glVertex3f( overlay.x_ll, overlay.y_ll, 1 );
-			glTexCoord2fv( &overlay.u_lr ); glVertex3f( overlay.x_lr, overlay.y_lr, 1 );
-			glTexCoord2fv( &overlay.u_ur ); glVertex3f( overlay.x_ur, overlay.y_ur, 1 );
-			glTexCoord2fv( &overlay.u_ul ); glVertex3f( overlay.x_ul, overlay.y_ul, 1 );
+			glTexCoord2fv( &overlay.u_tl ); glVertex3f( overlay.x_tl, overlay.y_tl, 1 );
+			glTexCoord2fv( &overlay.u_bl ); glVertex3f( overlay.x_bl, overlay.y_bl, 1 );
+			glTexCoord2fv( &overlay.u_br ); glVertex3f( overlay.x_br, overlay.y_br, 1 );
+			glTexCoord2fv( &overlay.u_tr ); glVertex3f( overlay.x_tr, overlay.y_tr, 1 );
 			glEnd();
 		}
 	}

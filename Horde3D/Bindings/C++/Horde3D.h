@@ -764,29 +764,31 @@ namespace Horde3D
 		
 		This function displays an overlay with a specified material at a specified position on the screen.
         An overlay is a 2D image that can be used to render 2D GUI elements. The coordinate system
-        used has its origin (0, 0) at the lower left corner of the screen and its maximum (1, 1) at
-        the upper right corner. Texture coordinates are using the same system, where the coordinates
-        (0, 0) correspond to the lower left corner of the image.
+        used has its origin (0, 0) at the top-left corner of the screen and its maximum (1, 1) at
+        the bottom-right corner. Texture coordinates are using a system where the coordinates (0, 0)
+		correspond to the lower left corner of the image.
         Overlays can have different layers which describe the order in which they are drawn. Overlays with
         smaller layer numbers are drawn before overlays with higher layer numbers.
         Note that the overlays have to be removed manually using the function clearOverlays.
 		
 		Parameters:
-			x_ll, y_ll, u_ll, v_ll	- position and texture coordinates of the lower left corner
-			x_lr, y_lr, u_lr, v_lr	- position and texture coordinates of the lower right corner
-			x_ur, y_ur, u_ur, v_ur	- position and texture coordinates of the upper right corner
-			x_ul, y_ul, u_ul, v_ul	- position and texture coordinates of the upper left corner
-			layer					- layer index of the overlay (Values: from 0 to 7)
-			materialRes				- material resource used for rendering
+			x_tl, y_tl, u_tl, v_tl  - position and texture coordinates of the top-left corner
+			x_bl, y_bl, u_bl, v_bl  - position and texture coordinates of the bottom-left corner
+			x_br, y_br, u_br, v_br  - position and texture coordinates of the bottom-right corner
+			x_tr, y_tr, u_tr, v_tr  - position and texture coordinates of the top-right corner
+			colR, colG, colB, colA  - color of the overlay that is set for the material's shader
+			materialRes             - material resource used for rendering
+			layer                   - layer index of the overlay (Values: from 0 to 7)
 			
 		Returns:
 			nothing
 	*/
-	DLL void showOverlay( float x_ll, float y_ll, float u_ll, float v_ll,
-						  float x_lr, float y_lr, float u_lr, float v_lr,
-						  float x_ur, float y_ur, float u_ur, float v_ur,
-						  float x_ul, float y_ul, float u_ul, float v_ul,
-						  int layer, ResHandle materialRes );
+	DLL void showOverlay( float x_tl, float y_tl, float u_tl, float v_tl,
+						  float x_bl, float y_bl, float u_bl, float v_bl,
+						  float x_br, float y_br, float u_br, float v_br,
+						  float x_tr, float y_tr, float u_tr, float v_tr,
+						  float colR, float colG, float colB, float colA,
+						  ResHandle materialRes, int layer );
 
 	/* 	Function: clearOverlays
 			Removes all overlays.

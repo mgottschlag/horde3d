@@ -49,13 +49,13 @@ using namespace std;
 
 namespace Horde3DUtils
 {
-	ofstream			outf;
-	map< int, string >	resourcePaths;
+	ofstream            outf;
+	map< int, string >  resourcePaths;
 
-	#ifdef PLATFORM_WIN
-	HDC		hDC = 0;
-	HGLRC	hRC = 0;
-	#endif
+#ifdef PLATFORM_WIN
+	HDC    hDC = 0;
+	HGLRC  hRC = 0;
+#endif
 
 
 	string cleanPath( string path )
@@ -91,7 +91,7 @@ namespace Horde3DUtils
 	
 	DLLEXP bool initOpenGL( int hdc )
 	{
-		#ifdef PLATFORM_WIN
+	#ifdef PLATFORM_WIN
 		hDC = (HDC)(__int64)hdc;
 		
 		// Init OpenGL rendering context
@@ -99,24 +99,24 @@ namespace Horde3DUtils
 
 		static PIXELFORMATDESCRIPTOR pfd = 
 		{
-			sizeof( PIXELFORMATDESCRIPTOR ),			// Size of this pixel format descriptor
-			1,											// Version number
-			PFD_DRAW_TO_WINDOW |						// Format must support window
-			PFD_SUPPORT_OPENGL |						// Format must support OpenGL
-			PFD_DOUBLEBUFFER,							// Must support double buffering
-			PFD_TYPE_RGBA,								// Request a RGBA format
-			32,											// Select our color depth
-			0, 0, 0, 0, 0, 0,							// Color bits ignored
-			8,											// 8Bit alpha buffer
-			0,											// Shift bit ignored
-			0,											// No accumulation buffer
-			0, 0, 0, 0,									// Accumulation bits ignored
-			32,											// 32Bit z-buffer (depth buffer)  
-			8,											// 8Bit stencil buffer
-			0,											// No auxiliary buffer
-			PFD_MAIN_PLANE,								// Main drawing layer
-			0,											// Reserved
-			0, 0, 0										// Layer masks ignored
+			sizeof( PIXELFORMATDESCRIPTOR ),            // Size of this pixel format descriptor
+			1,                                          // Version number
+			PFD_DRAW_TO_WINDOW |                        // Format must support window
+			PFD_SUPPORT_OPENGL |                        // Format must support OpenGL
+			PFD_DOUBLEBUFFER,                           // Must support double buffering
+			PFD_TYPE_RGBA,                              // Request a RGBA format
+			32,                                         // Select our color depth
+			0, 0, 0, 0, 0, 0,                           // Color bits ignored
+			8,                                          // 8Bit alpha buffer
+			0,                                          // Shift bit ignored
+			0,                                          // No accumulation buffer
+			0, 0, 0, 0,                                 // Accumulation bits ignored
+			32,                                         // 32Bit z-buffer (depth buffer)  
+			8,                                          // 8Bit stencil buffer
+			0,                                          // No auxiliary buffer
+			PFD_MAIN_PLANE,                             // Main drawing layer
+			0,                                          // Reserved
+			0, 0, 0                                     // Layer masks ignored
 		};
 
 		if( !(pixelFormat = ChoosePixelFormat( hDC, &pfd )) ) 
@@ -142,15 +142,15 @@ namespace Horde3DUtils
 
 		return true;
 		
-		#else
+	#else
 		return false;
-		#endif
+	#endif
 	}
 
 
 	DLLEXP void releaseOpenGL()
 	{
-		#ifdef PLATFORM_WIN
+	#ifdef PLATFORM_WIN
 		if( hDC == 0 || hRC == 0 ) return;
 
 		if( !wglMakeCurrent( 0x0, 0x0 ) ) 
@@ -162,17 +162,17 @@ namespace Horde3DUtils
 			return;
 		}
 		hRC = 0;
-		#endif
+	#endif
 	}
 
 
 	DLLEXP void swapBuffers()
 	{
-		#ifdef PLATFORM_WIN
+	#ifdef PLATFORM_WIN
 		if( hDC == 0 || hRC == 0 ) return;
 
 		SwapBuffers( hDC );
-		#endif
+	#endif
 	}
 
 
@@ -222,7 +222,7 @@ namespace Horde3DUtils
 			for( unsigned int i = 0; i < dirs.size(); ++i )
 			{
 				string fileName = dirs[i] + resourcePaths[Horde3D::getResourceType( res )] + "/" +
-								  Horde3D::getResourceName( res );
+				                  Horde3D::getResourceName( res );
 				inf.clear();
 				inf.open( fileName.c_str(), ios::binary );
 				if( inf.good() ) break;
@@ -368,7 +368,8 @@ namespace Horde3DUtils
 
 
 	DLLEXP void showText( const char *text, float x, float y, float size,
-						  int layer, ResHandle fontMaterialRes )
+	                      float colR, float colG, float colB,
+	                      ResHandle fontMaterialRes, int layer )
 	{
 		if( text == 0x0 ) return;
 		
@@ -381,13 +382,13 @@ namespace Horde3DUtils
 			float u0 = 0.0625f * (ch % 16);
 			float v0 = 1.0f - 0.0625f * (ch / 16);
 
-			Horde3D::showOverlay( x + size * 0.55f * pos, y, u0, v0 - 0.0625f,
-								  x + size * 0.55f * pos + size, y, u0 + 0.0625f,v0 - 0.0625f,
-								  x + size * 0.55f * pos + size, y + size, u0 + 0.0625f, v0,
-								  x + size * 0.55f * pos, y + size, u0, v0,
-								  layer, fontMaterialRes );
+			Horde3D::showOverlay( x + size * 0.55f * pos, y, u0, v0,
+			                      x + size * 0.55f * pos, y + size, u0, v0 - 0.0625f,
+			                      x + size * 0.55f * pos + size, y + size, u0 + 0.0625f, v0 - 0.0625f,
+			                      x + size * 0.55f * pos + size, y, u0 + 0.0625f, v0,
+			                      colR, colG, colB, 1, fontMaterialRes, layer );
 			++pos;
-		} while ( *text );
+		} while( *text );
 	}
 
 
@@ -409,22 +410,22 @@ namespace Horde3DUtils
 		text.str( "" );
 		text << "FPS     " << fixed << setprecision( 2 ) << fps;
 		text << setprecision( 1 ) << " [" << minFPS << ", " << maxFPS << "]";
-		Horde3DUtils::showText( text.str().c_str(), 0, 0.95f, 0.03f, 0, fontMaterialRes );
+		Horde3DUtils::showText( text.str().c_str(), 0, 0.05f, 0.03f, 1, 1, 1, fontMaterialRes, 7 );
 
 		// Triangle count
 		text.str( "" );
 		text << "Tris    " << (int)Horde3D::getStat( EngineStats::TriCount, true );
-		Horde3DUtils::showText( text.str().c_str(), 0, 0.91f, 0.03f, 0, fontMaterialRes );
+		Horde3DUtils::showText( text.str().c_str(), 0, 0.09f, 0.03f, 1, 1, 1, fontMaterialRes, 7 );
 
 		// Number of batches
 		text.str( "" );
 		text << "Batches " << (int)Horde3D::getStat( EngineStats::BatchCount, true );
-		Horde3DUtils::showText( text.str().c_str(), 0, 0.88f, 0.03f, 0, fontMaterialRes );
+		Horde3DUtils::showText( text.str().c_str(), 0, 0.12f, 0.03f, 1, 1, 1, fontMaterialRes, 7 );
 
 		// Number of lighting passes
 		text.str( "" );
 		text << "Lights  " << (int)Horde3D::getStat( EngineStats::LightPassCount, true );
-		Horde3DUtils::showText( text.str().c_str(), 0, 0.85f, 0.03f, 0, fontMaterialRes );
+		Horde3DUtils::showText( text.str().c_str(), 0, 0.15f, 0.03f, 1, 1, 1, fontMaterialRes, 7 );
 	}
 
 
@@ -437,7 +438,7 @@ namespace Horde3DUtils
 
 	
 	DLLEXP bool createTGAImage( const unsigned char *pixels, int width, int height, int bpp,
-								char **outData, int *outSize )
+	                            char **outData, int *outSize )
 	{
 		if( pixels == 0x0 || outData == 0x0 || outSize == 0x0 ) return false;
 		
@@ -452,18 +453,18 @@ namespace Horde3DUtils
 		// Build TGA header
 		char c;
 		short s;
-		c = 0;		memcpy( data, &c, 1 ); data += 1;	// idLength
-		c = 0;		memcpy( data, &c, 1 ); data += 1;	// colmapType
-		c = 2;		memcpy( data, &c, 1 ); data += 1;	// imageType
-		s = 0;		memcpy( data, &s, 2 ); data += 2;	// colmapStart
-		s = 0;		memcpy( data, &s, 2 ); data += 2;	// colmapLength
-		c = 16;		memcpy( data, &c, 1 ); data += 1;	// colmapBits
-		s = 0;		memcpy( data, &s, 2 ); data += 2;	// x
-		s = 0;		memcpy( data, &s, 2 ); data += 2;	// y
-		s = width;	memcpy( data, &s, 2 ); data += 2;	// width
-		s = height;	memcpy( data, &s, 2 ); data += 2;	// height
-		c = bpp;	memcpy( data, &c, 1 ); data += 1;	// bpp
-		c = 0;		memcpy( data, &c, 1 ); data += 1;	// imageDesc
+		c = 0;      memcpy( data, &c, 1 ); data += 1;  // idLength
+		c = 0;      memcpy( data, &c, 1 ); data += 1;  // colmapType
+		c = 2;      memcpy( data, &c, 1 ); data += 1;  // imageType
+		s = 0;      memcpy( data, &s, 2 ); data += 2;  // colmapStart
+		s = 0;      memcpy( data, &s, 2 ); data += 2;  // colmapLength
+		c = 16;     memcpy( data, &c, 1 ); data += 1;  // colmapBits
+		s = 0;      memcpy( data, &s, 2 ); data += 2;  // x
+		s = 0;      memcpy( data, &s, 2 ); data += 2;  // y
+		s = width;  memcpy( data, &s, 2 ); data += 2;  // width
+		s = height; memcpy( data, &s, 2 ); data += 2;  // height
+		c = bpp;    memcpy( data, &c, 1 ); data += 1;  // bpp
+		c = 0;      memcpy( data, &c, 1 ); data += 1;  // imageDesc
 
 		// Copy data
 		memcpy( data, pixels, width * height * (bpp / 8) );

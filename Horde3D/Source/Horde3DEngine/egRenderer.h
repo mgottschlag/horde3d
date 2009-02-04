@@ -66,24 +66,27 @@ struct Overlay
 {
 	PMaterialResource  materialRes;
 	int                layer;
-	float              x_ll, y_ll, u_ll, v_ll;  // Lower left corner
-	float              x_lr, y_lr, u_lr, v_lr;  // Lower right corner
-	float              x_ur, y_ur, u_ur, v_ur;  // Upper right corner
-	float              x_ul, y_ul, u_ul, v_ul;  // Upper left corner
+	float              x_tl, y_tl, u_tl, v_tl;  // Top left corner
+	float              x_bl, y_bl, u_bl, v_bl;  // Bottom left corner
+	float              x_br, y_br, u_br, v_br;  // Bottom right corner
+	float              x_tr, y_tr, u_tr, v_tr;  // Top right corner
+	float              colR, colG, colB, colA;  // Color
 
 
 	Overlay() {}
 
-	Overlay( const float &x_ll, const float &y_ll, const float &u_ll, const float &v_ll,
-	         const float &x_lr, const float &y_lr, const float &u_lr, const float &v_lr,
-	         const float &x_ur, const float &y_ur, const float &u_ur, const float &v_ur,
-	         const float &x_ul, const float &y_ul, const float &u_ul, const float &v_ul,
-	         int layer ) :
-		materialRes( 0x0 ), layer( layer ),
-		x_ll( x_ll ), y_ll( y_ll ), u_ll( u_ll ), v_ll( v_ll ),
-		x_lr( x_lr ), y_lr( y_lr ), u_lr( u_lr ), v_lr( v_lr ),
-		x_ur( x_ur ), y_ur( y_ur ), u_ur( u_ur ), v_ur( v_ur ),
-		x_ul( x_ul ), y_ul( y_ul ), u_ul( u_ul ), v_ul( v_ul )
+	Overlay( const float &x_tl, const float &y_tl, const float &u_tl, const float &v_tl,
+	         const float &x_bl, const float &y_bl, const float &u_bl, const float &v_bl,
+	         const float &x_br, const float &y_br, const float &u_br, const float &v_br,
+	         const float &x_tr, const float &y_tr, const float &u_tr, const float &v_tr,
+			 const float &colR, const float &colG, const float &colB, const float &colA,
+	         MaterialResource *matRes, int layer ) :
+		x_tl( x_tl ), y_tl( y_tl ), u_tl( u_tl ), v_tl( v_tl ),
+		x_bl( x_bl ), y_bl( y_bl ), u_bl( u_bl ), v_bl( v_bl ),
+		x_br( x_br ), y_br( y_br ), u_br( u_br ), v_br( v_br ),
+		x_tr( x_tr ), y_tr( y_tr ), u_tr( u_tr ), v_tr( v_tr ),
+		colR( colR ), colG( colG ), colB( colB ), colA( colA ),
+		materialRes( matRes ), layer( layer )
 	{	
 	}
 };
@@ -189,7 +192,7 @@ public:
 	bool createShadowBuffer( uint32 width, uint32 height );
 	void destroyShadowBuffer();
 
-	void showOverlay( const Overlay &overlay, uint32 matRes );
+	void showOverlay( const Overlay &overlay );
 	void clearOverlays();
 	
 	void drawAABB( const Vec3f &bbMin, const Vec3f &bbMax );

@@ -122,6 +122,7 @@ struct ShaderCombination
 	int                             uni_skinMatRows;
 	int                             uni_parCorners;
 	int                             uni_parPosArray, uni_parSizeAndRotArray, uni_parColorArray;
+	int                             uni_olayColor;
 	int                             attrib_normal, attrib_tangent, attrib_bitangent;
 	int                             attrib_joints, attrib_weights;
 	int                             attrib_texCoords0, attrib_texCoords1;

@@ -162,13 +162,13 @@ void Application::mainLoop( float fps )
 		// Display weight
 		_text.str( "" );
 		_text << fixed << setprecision( 2 ) << "Weight: " << _weight;
-		Horde3DUtils::showText( _text.str().c_str(), 0, 0.78f, 0.03f, 0, _fontMatRes );
+		Horde3DUtils::showText( _text.str().c_str(), 0, 0.22f, 0.03f, 1, 1, 1, _fontMatRes, 5 );
 	}
 
 	// Show logo
-	Horde3D::showOverlay( 0.75f, 0, 0, 0, 1, 0, 1, 0,
-						  1, 0.2f, 1, 1, 0.75f, 0.2f, 0, 1,
-						  7, _logoMatRes );
+	Horde3D::showOverlay( 0.75f, 0.8f, 0, 1, 0.75f, 1, 0, 0,
+	                      1, 1, 1, 0, 1, 0.8f, 1, 1,
+	                      1, 1, 1, 1, _logoMatRes, 7 );
 	
 	// Render scene
 	Horde3D::render( _cam );

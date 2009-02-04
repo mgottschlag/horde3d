@@ -18,6 +18,7 @@ void main( void )
 
 [[FS_OVERLAY]]
 
+uniform vec4 olayColor;
 uniform sampler2D tex0;
 varying vec2 texCoord;
 
@@ -25,5 +26,5 @@ void main( void )
 {
 	vec4 albedo = texture2D( tex0, texCoord );
 	
-	gl_FragColor = albedo;
+	gl_FragColor = albedo * olayColor;
 }

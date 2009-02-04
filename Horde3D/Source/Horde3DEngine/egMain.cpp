@@ -218,18 +218,20 @@ namespace Horde3D
 	}
 
 
-	DLLEXP void showOverlay( float x_ll, float y_ll, float u_ll, float v_ll,
-							 float x_lr, float y_lr, float u_lr, float v_lr,
-							 float x_ur, float y_ur, float u_ur, float v_ur,
-							 float x_ul, float y_ul, float u_ul, float v_ul,
-							 int layer, ResHandle materialRes )
+	DLLEXP void showOverlay( float x_tl, float y_tl, float u_tl, float v_tl,
+	                         float x_bl, float y_bl, float u_bl, float v_bl,
+	                         float x_br, float y_br, float u_br, float v_br,
+	                         float x_tr, float y_tr, float u_tr, float v_tr,
+	                         float colR, float colG, float colB, float colA,
+	                         ResHandle materialRes, int layer )
 	{
 		Resource *res = Modules::resMan().resolveResHandle( materialRes ); 
 		if( res != 0x0 && res->getType() == ResourceTypes::Material )
 		{
 			Modules::renderer().showOverlay(
-				Overlay( x_ll, y_ll, u_ll, v_ll, x_lr, y_lr, u_lr, v_lr,
-						 x_ur, y_ur, u_ur, v_ur, x_ul, y_ul, u_ul, v_ul, layer ), materialRes );
+				Overlay( x_tl, y_tl, u_tl, v_tl, x_bl, y_bl, u_bl, v_bl,
+				         x_br, y_br, u_br, v_br, x_tr, y_tr, u_tr, v_tr,
+				         colR, colG, colB, colA, (MaterialResource *)res, layer ) );
 		}
 		else
 			Modules::log().writeDebugInfo( "Invalid Material resource handle %i in showOverlay", materialRes );
@@ -532,8 +534,8 @@ namespace Horde3D
 
 	
 	DLLEXP bool getPipelineRenderTargetData( ResHandle pipelineRes, const char *targetName,
-											 int bufIndex, int *width, int *height, int *compCount,
-											 float *dataBuffer, int bufferSize )
+	                                         int bufIndex, int *width, int *height, int *compCount,
+	                                         float *dataBuffer, int bufferSize )
 	{
 		Resource *res = Modules::resMan().resolveResHandle( pipelineRes );
 		
@@ -573,7 +575,7 @@ namespace Horde3D
 			Modules::log().writeDebugInfo( "Invalid node handle %i in getNodeParent", node );
 			return 0;
 		}
-		if ( sn->getParent() != 0x0 ) return sn->getParent()->getHandle();
+		if( sn->getParent() != 0x0 ) return sn->getParent()->getHandle();
 		else return 0;
 	}
 
@@ -665,7 +667,7 @@ namespace Horde3D
 
 	
 	DLLEXP bool getNodeTransform( NodeHandle node, float *tx, float *ty, float *tz,
-								  float *rx, float *ry, float *rz, float *sx, float *sy, float *sz )
+	                              float *rx, float *ry, float *rz, float *sx, float *sy, float *sz )
 	{
 		SceneNode *sn = Modules::sceneMan().resolveNodeHandle( node );
 		
@@ -688,7 +690,7 @@ namespace Horde3D
 	
 	
 	DLLEXP bool setNodeTransform( NodeHandle node, float tx, float ty, float tz,
-								  float rx, float ry, float rz, float sx, float sy, float sz )
+	                              float rx, float ry, float rz, float sx, float sy, float sz )
 	{
 		SceneNode *sn = Modules::sceneMan().resolveNodeHandle( node );
 		
@@ -826,7 +828,7 @@ namespace Horde3D
 
 
 	DLLEXP bool getNodeAABB( NodeHandle node, float *minX, float *minY, float *minZ,
-							 float *maxX, float *maxY, float *maxZ )
+	                         float *maxX, float *maxY, float *maxZ )
 	{
 		SceneNode *sn = Modules::sceneMan().resolveNodeHandle( node );
 		if( sn != 0x0 )
@@ -968,7 +970,7 @@ namespace Horde3D
 
 
 	DLLEXP bool setupModelAnimStage( NodeHandle modelNode, int stage, ResHandle animationRes,
-									 const char *startNode, bool additive )
+	                                 const char *startNode, bool additive )
 	{
 		SceneNode *sn = Modules::sceneMan().resolveNodeHandle( modelNode );
 		if( sn != 0x0 && sn->getType() == SceneNodeTypes::Model )
@@ -1015,7 +1017,7 @@ namespace Horde3D
 
 
 	DLLEXP NodeHandle addMeshNode( NodeHandle parent, const char *name, ResHandle materialRes,
-								   int batchStart, int batchCount, int vertRStart, int vertREnd )
+	                               int batchStart, int batchCount, int vertRStart, int vertREnd )
 	{
 		SceneNode *parentNode = Modules::sceneMan().resolveNodeHandle( parent );
 		if( parentNode == 0x0 )
@@ -1058,7 +1060,7 @@ namespace Horde3D
 
 
 	DLLEXP NodeHandle addLightNode( NodeHandle parent, const char *name, ResHandle materialRes,
-									const char *lightingContext, const char *shadowContext )
+	                                const char *lightingContext, const char *shadowContext )
 	{
 		SceneNode *parentNode = Modules::sceneMan().resolveNodeHandle( parent );
 		if( parentNode == 0x0 )
@@ -1077,7 +1079,7 @@ namespace Horde3D
 		Modules::log().writeInfo( "Adding Light node '%s'", safeStr( name ).c_str() );
 		
 		LightNodeTpl tpl( safeStr( name ), (MaterialResource *)res,
-						  safeStr( lightingContext ), safeStr( shadowContext ) );
+		                  safeStr( lightingContext ), safeStr( shadowContext ) );
 		SceneNode *sn = Modules::sceneMan().findType( SceneNodeTypes::Light )->factoryFunc( tpl );
 		return Modules::sceneMan().addNode( sn, *parentNode );
 	}
@@ -1157,7 +1159,7 @@ namespace Horde3D
 
 
 	DLLEXP NodeHandle addEmitterNode( NodeHandle parent, const char *name, ResHandle materialRes,
-									  ResHandle effectRes, int maxParticleCount, int respawnCount )
+	                                  ResHandle effectRes, int maxParticleCount, int respawnCount )
 	{
 		SceneNode *parentNode = Modules::sceneMan().resolveNodeHandle( parent );
 		if( parentNode == 0x0 )
@@ -1182,7 +1184,7 @@ namespace Horde3D
 		Modules::log().writeInfo( "Adding Emitter node '%s'", safeStr( name ).c_str() );
 
 		EmitterNodeTpl tpl( safeStr( name ), (MaterialResource *)matRes, (EffectResource *)effRes,
-							(unsigned)maxParticleCount, respawnCount );
+		                    (unsigned)maxParticleCount, respawnCount );
 		SceneNode *sn = Modules::sceneMan().findType( SceneNodeTypes::Emitter )->factoryFunc( tpl );
 		return Modules::sceneMan().addNode( sn, *parentNode );
 	}

@@ -190,7 +190,7 @@ namespace Horde3DUtils
 			false if at least one resource could not be loaded, otherwise true
 	*/
 	DLL bool createTGAImage( const unsigned char *pixels, int width, int height, int bpp,
-							 char **outData, int *outSize );
+	                         char **outData, int *outSize );
 	
 	
 	/*	Group: Scene graph */
@@ -239,18 +239,20 @@ namespace Horde3DUtils
 		ASCII characters in row-major order. The layer corresponds to the layer parameter of overlays.
 		
 		Parameters:
-			text			- text string to be displayed
-			x, y			- position of the lower left corner of the first character;
-							  for more details on coordinate system see overlay documentation
-			size 			- size (scale) factor of the font
-			layer			- layer index of the font overlays
-			fontMaterialRes	- font material resource used for rendering
+			text              - text string to be displayed
+			x, y              - position of the lower left corner of the first character;
+			                    for more details on coordinate system see overlay documentation
+			size              - size (scale) factor of the font
+			colR, colG, colB  - font color
+			fontMaterialRes   - font material resource used for rendering
+			layer             - layer index of the font overlays
 			
 		Returns:
 			nothing
 	*/
 	DLL void showText( const char *text, float x, float y, float size,
-					   int layer, ResHandle fontMaterialRes );
+	                   float colR, float colG, float colB,
+	                   ResHandle fontMaterialRes, int layer );
 
 	/* 	Function: showFrameStats
 			Shows frame statistics on the screen.
