@@ -75,8 +75,9 @@ bool Application::init()
 	// Pipelines
 	_hdrPipeRes = Horde3D::addResource( ResourceTypes::Pipeline, "hdr.pipeline.xml", 0 );
 	_forwardPipeRes = Horde3D::addResource( ResourceTypes::Pipeline, "forward.pipeline.xml", 0 );
-	// Font
+	// Font and GUI
 	_fontMatRes = Horde3D::addResource( ResourceTypes::Material, "font.material.xml", 0 );
+	_panelMatRes = Horde3D::addResource( ResourceTypes::Material, "panel.material.xml", 0 );
 	// Logo
 	_logoMatRes = Horde3D::addResource( ResourceTypes::Material, "logo.material.xml", 0 );
 	// Environment
@@ -157,12 +158,12 @@ void Application::mainLoop( float fps )
 	
 	if( _showStats )
 	{
-		Horde3DUtils::showFrameStats( _fontMatRes, _curFPS );
+		Horde3DUtils::showFrameStats( _fontMatRes, _panelMatRes, _curFPS );
 
 		// Display weight
 		_text.str( "" );
 		_text << fixed << setprecision( 2 ) << "Weight: " << _weight;
-		Horde3DUtils::showText( _text.str().c_str(), 0, 0.22f, 0.03f, 1, 1, 1, _fontMatRes, 5 );
+		Horde3DUtils::showText( _text.str().c_str(), 0.03f, 0.24f, 0.03f, 1, 1, 1, _fontMatRes, 5 );
 	}
 
 	// Show logo

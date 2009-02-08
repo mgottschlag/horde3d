@@ -73,8 +73,9 @@ bool Application::init()
 	// Add resources
 	// Pipeline
 	ResHandle pipeRes = Horde3D::addResource( ResourceTypes::Pipeline, "forward.pipeline.xml", 0 );
-	// Font
+	// Font and GUI
 	_fontMatRes = Horde3D::addResource( ResourceTypes::Material, "font.material.xml", 0 );
+	_panelMatRes = Horde3D::addResource( ResourceTypes::Material, "panel.material.xml", 0 );
 	// Logo
 	_logoMatRes = Horde3D::addResource( ResourceTypes::Material, "logo.material.xml", 0 );
 	// Terrain
@@ -128,7 +129,7 @@ void Application::mainLoop( float fps )
 	
 	if( _showStats )
 	{
-		Horde3DUtils::showFrameStats( _fontMatRes, _curFPS );
+		Horde3DUtils::showFrameStats( _fontMatRes, _panelMatRes, _curFPS );
 	}
 
 	// Show logo

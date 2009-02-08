@@ -21,15 +21,14 @@
 #include <string>
 
 
-
 struct Particle
 {
-	float			px, pz;		// Current postition
-	float			dx, dz;		// Destination position
-	float			fx, fz;		// Force on particle
-	float			ox, oz;		// Orientation vector
-	NodeHandle		node;
-	float			animTime;
+	float       px, pz;  // Current postition
+	float       dx, dz;  // Destination position
+	float       fx, fz;  // Force on particle
+	float       ox, oz;  // Orientation vector
+	NodeHandle  node;
+	float       animTime;
 
 
 	Particle()
@@ -45,8 +44,8 @@ class CrowdSim
 {
 private:
 
-	std::string				_contentDir;
-	std::vector< Particle >	_particles;
+	std::string              _contentDir;
+	std::vector< Particle >  _particles;
 
 	void chooseDestination( Particle &p );
 

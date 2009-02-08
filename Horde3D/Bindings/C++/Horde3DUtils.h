@@ -257,16 +257,17 @@ namespace Horde3DUtils
 	/* 	Function: showFrameStats
 			Shows frame statistics on the screen.
 		
-		This utility function displays statistics for the current frame in the upper left corner of
-		the screen. Since the statistic counters are reset after the call, it should be called exactly
-		once per frame to obtain correct values.
+		This utility function displays an info box with statistics for the current frame on the screen.
+		Since the statistic counters are reset after the call, the function should be called exactly once
+		per frame to obtain correct values.
 		
 		Parameters:
-			fontMaterialRes	- font material resource used for drawing text
-			curFPS			- frames per second with which application is currently running
+			fontMaterialRes	  - font material resource used for drawing text
+			panelMaterialRes  - material resource used for drawing info box
+			curFPS            - frames per second with which application is currently running
 			
 		Returns:
 			nothing
 	*/
-	DLL void showFrameStats( ResHandle fontMaterialRes, float curFPS );
+	DLL void showFrameStats( ResHandle fontMaterialRes, ResHandle panelMaterialRes, float curFPS );
 };

@@ -49,6 +49,15 @@ using namespace std;
 
 namespace Horde3DUtils
 {
+	struct InfoBox
+	{
+		ResHandle  fontMatRes;
+		float      x, y_row0;
+		float      width;
+		int        row;
+	} infoBox;
+
+	
 	ofstream            outf;
 	map< int, string >  resourcePaths;
 
@@ -374,6 +383,7 @@ namespace Horde3DUtils
 		if( text == 0x0 ) return;
 		
 		int pos = 0;
+		float width = size;
 		
 		do
 		{
@@ -382,50 +392,95 @@ namespace Horde3DUtils
 			float u0 = 0.0625f * (ch % 16);
 			float v0 = 1.0f - 0.0625f * (ch / 16);
 
-			Horde3D::showOverlay( x + size * 0.55f * pos, y, u0, v0,
-			                      x + size * 0.55f * pos, y + size, u0, v0 - 0.0625f,
-			                      x + size * 0.55f * pos + size, y + size, u0 + 0.0625f, v0 - 0.0625f,
-			                      x + size * 0.55f * pos + size, y, u0 + 0.0625f, v0,
+			Horde3D::showOverlay( x + width * 0.5f * pos, y, u0, v0,
+			                      x + width * 0.5f * pos, y + size, u0, v0 - 0.0625f,
+			                      x + width * 0.5f * pos + width, y + size, u0 + 0.0625f, v0 - 0.0625f,
+			                      x + width * 0.5f * pos + width, y, u0 + 0.0625f, v0,
 			                      colR, colG, colB, 1, fontMaterialRes, layer );
 			++pos;
 		} while( *text );
 	}
 
 
-	DLLEXP void showFrameStats( ResHandle fontMaterialRes, float curFPS )
+	void beginInfoBox( float x, float y, float width, int numRows, const char *title,
+	                   ResHandle fontMaterialRes, ResHandle boxMaterialRes )
+	{
+		float fontSize = 0.028f;
+		float barHeight = fontSize + 0.01f;
+		float bodyHeight = numRows * 0.035f + 0.005f;
+		
+		infoBox.fontMatRes = fontMaterialRes;
+		infoBox.x = x;
+		infoBox.y_row0 = y + barHeight + 0.005f;
+		infoBox.width = width;
+		infoBox.row = 0;
+		
+		// Title bar
+		Horde3D::showOverlay( x, y, 0, 1, x, y + barHeight, 0, 0,
+		                      x + width, y + barHeight, 1, 0, x + width, y, 1, 1,
+							  0.15f, 0.23f, 0.31f, 0.8f, boxMaterialRes, 6 );
+
+		// Title text
+		showText( title, x + 0.005f, y + 0.005f, fontSize, 0.7f, 0.85f, 0.95f, fontMaterialRes, 7 );
+
+		// Body
+		float yy = y + barHeight;
+		Horde3D::showOverlay( x, yy, 0, 1, x, yy + bodyHeight, 0, 0,
+		                      x + width, yy + bodyHeight, 1, 0, x + width, yy, 1, 1,
+							  0.12f, 0.12f, 0.12f, 0.5f, boxMaterialRes, 6 );
+	}
+
+
+	void addInfoBoxRow( const char *column1, const char *column2 )
+	{
+		float fontSize = 0.026f;
+		float fontWidth = fontSize * 0.5f;
+		float x = infoBox.x;
+		float y = infoBox.y_row0 + infoBox.row++ * 0.035f;
+
+		// First column
+		showText( column1, x + 0.005f, y, fontSize, 1, 1, 1, infoBox.fontMatRes, 7 );
+
+		// Second column
+		x = infoBox.x + infoBox.width - ((strlen( column2 ) - 1) * fontWidth + fontSize);
+		showText( column2, x - 0.005f, y, fontSize, 1, 1, 1, infoBox.fontMatRes, 7 );
+	}
+
+
+	DLLEXP void showFrameStats( ResHandle fontMaterialRes, ResHandle boxMaterialRes, float curFPS )
 	{
 		static stringstream text;
 		static float timer = 0;
-		static float fps = curFPS, minFPS = 10000, maxFPS = 0;
+		static float fps = curFPS;
 		
-		// FPS (current, worst, best)
+		// InfoBox
+		beginInfoBox( 0.03f, 0.03f, 0.3f, 4, "Frame Stats", fontMaterialRes, boxMaterialRes );
+		
+		// FPS
 		timer += 1.0f / curFPS;
 		if( timer > 0.3f )
 		{
-			if( curFPS < minFPS ) minFPS = curFPS;
-			if( curFPS > maxFPS ) maxFPS = curFPS;
 			fps = curFPS;
 			timer = 0;
 		}
 		text.str( "" );
-		text << "FPS     " << fixed << setprecision( 2 ) << fps;
-		text << setprecision( 1 ) << " [" << minFPS << ", " << maxFPS << "]";
-		Horde3DUtils::showText( text.str().c_str(), 0, 0.05f, 0.03f, 1, 1, 1, fontMaterialRes, 7 );
-
+		text << fixed << setprecision( 2 ) << fps;
+		addInfoBoxRow( "FPS", text.str().c_str() );
+		
 		// Triangle count
 		text.str( "" );
-		text << "Tris    " << (int)Horde3D::getStat( EngineStats::TriCount, true );
-		Horde3DUtils::showText( text.str().c_str(), 0, 0.09f, 0.03f, 1, 1, 1, fontMaterialRes, 7 );
-
+		text << (int)Horde3D::getStat( EngineStats::TriCount, true );
+		addInfoBoxRow( "Tris", text.str().c_str() );
+		
 		// Number of batches
 		text.str( "" );
-		text << "Batches " << (int)Horde3D::getStat( EngineStats::BatchCount, true );
-		Horde3DUtils::showText( text.str().c_str(), 0, 0.12f, 0.03f, 1, 1, 1, fontMaterialRes, 7 );
-
+		text << (int)Horde3D::getStat( EngineStats::BatchCount, true );
+		addInfoBoxRow( "Batches", text.str().c_str() );
+		
 		// Number of lighting passes
 		text.str( "" );
-		text << "Lights  " << (int)Horde3D::getStat( EngineStats::LightPassCount, true );
-		Horde3DUtils::showText( text.str().c_str(), 0, 0.15f, 0.03f, 1, 1, 1, fontMaterialRes, 7 );
+		text << (int)Horde3D::getStat( EngineStats::LightPassCount, true );
+		addInfoBoxRow( "Lights", text.str().c_str() );
 	}
 
 
