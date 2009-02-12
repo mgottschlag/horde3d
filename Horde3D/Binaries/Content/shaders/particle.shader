@@ -1,5 +1,7 @@
 [[FX]]
 
+<Sampler id="albedoMap" />
+
 <!--
 <Context id="SHADOWMAP">
 	<Shaders vertex="VS_SHADOWMAP" fragment="FS_SHADOWMAP" />
@@ -62,13 +64,13 @@ void main(void)
 [[FS_TRANSLUCENT]]
 // =================================================================================================
 
-uniform sampler2D tex0;
+uniform sampler2D albedoMap;
 varying vec4 color;
 varying vec2 texCoord;
 
 void main( void )
 {
-	vec4 albedo = texture2D( tex0, texCoord );
+	vec4 albedo = texture2D( albedoMap, texCoord );
 	
 	gl_FragColor = albedo * color;
 }

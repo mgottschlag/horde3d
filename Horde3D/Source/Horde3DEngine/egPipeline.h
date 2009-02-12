@@ -45,6 +45,7 @@ struct PipelineCommands
 	{
 		SwitchTarget,
 		BindBuffer,
+		UnbindBuffers,
 		ClearTarget,
 		DrawGeometry,
 		DrawOverlays,

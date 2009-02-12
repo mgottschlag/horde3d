@@ -69,59 +69,10 @@ void MaterialResource::release()
 {
 	_shaderRes = 0x0;
 	_matLink = 0x0;
-	for( uint32 i = 0; i < _texUnits.size(); ++i ) _texUnits[i].texRes = 0x0;
+	for( uint32 i = 0; i < _samplers.size(); ++i ) _samplers[i].texRes = 0x0;
 
-	_texUnits.clear();
+	_samplers.clear();
 	_uniforms.clear();
-}
-
-
-ResHandle MaterialResource::getTexUnit( int unit )
-{
-	for( size_t i = 0, size = _texUnits.size(); i < size; ++i )
-	{
-		if( _texUnits[i].unit == unit )
-			return _texUnits[i].texRes != 0x0 ? _texUnits[i].texRes->getHandle() : 0;
-	}
-	
-	return 0;
-}
-
-
-bool MaterialResource::setTexUnit( int unit, ResHandle texRes )
-{
-	Resource *res = 0x0;
-	if( texRes != 0 )
-	{
-		res = Modules::resMan().resolveResHandle( texRes );
-		if( res == 0x0 || 
-			(res->getType() != ResourceTypes::Texture2D &&
-			 res->getType() != ResourceTypes::TextureCube) )
-		{
-			return false;
-		}
-	}
-
-	// Try to find existing texture unit
-	for( size_t i = 0, size = _texUnits.size(); i < size; ++i )
-	{
-		if( _texUnits[i].unit == unit )
-		{
-			if( res != 0x0 )
-				_texUnits[i].texRes = res;
-			else
-				_texUnits.erase( _texUnits.begin() + i );
-			return true;
-		}
-	}
-
-	// Add new texture unit
-	TexUnit texUnit;
-	texUnit.unit = unit;
-	texUnit.texRes = res;
-	_texUnits.push_back( texUnit );
-
-	return true;
 }
 
 
@@ -193,18 +144,18 @@ bool MaterialResource::load( const char *data, int size )
 		_shaderRes->preLoadCombination( _combMask );
 	}
 
-	// Texture units
+	// Texture samplers
 	nodeItr1 = 0;
-	node1 = rootNode.getChildNode( "TexUnit", nodeItr1 );
+	node1 = rootNode.getChildNode( "Sampler", nodeItr1 );
 	while( !node1.isEmpty() )
 	{
-		if( node1.getAttribute( "unit" ) == 0x0 ) return raiseError( "Missing TexUnit attribute 'unit'" );
-		if( node1.getAttribute( "map" ) == 0x0 ) return raiseError( "Missing TexUnit attribute 'map'" );
-		
-		TexUnit texUnit;
-		texUnit.unit = atoi( node1.getAttribute( "unit" ) );
+		if( node1.getAttribute( "name" ) == 0x0 ) return raiseError( "Missing Sampler attribute 'name'" );
+		if( node1.getAttribute( "map" ) == 0x0 ) return raiseError( "Missing Sampler attribute 'map'" );
 
-		uint32 texMap;
+		MatSampler sampler;
+		sampler.name = node1.getAttribute( "name" );
+
+		ResHandle texMap;
 		uint32 flags = 0;
 
 		if( _stricmp( node1.getAttribute( "allowPOTConversion", "true" ), "false" ) == 0 ||
@@ -226,7 +177,7 @@ bool MaterialResource::load( const char *data, int size )
 		if( _stricmp( node1.getAttribute( "repeatMode", "true" ), "false" ) == 0 ||
 			_stricmp( node1.getAttribute( "repeatMode", "1" ), "0" ) == 0 )
 			flags |= ResourceFlags::NoTexRepeat;
-	
+
 		if( _stricmp( node1.getAttribute( "type", "2D" ), "CUBE" ) == 0 )
 		{
 			texMap = Modules::resMan().addResource( ResourceTypes::TextureCube, 
@@ -238,11 +189,11 @@ bool MaterialResource::load( const char *data, int size )
 						node1.getAttribute( "map" ), flags, false );
 		}
 
-		texUnit.texRes = Modules::resMan().resolveResHandle( texMap );
+		sampler.texRes = Modules::resMan().resolveResHandle( texMap );
 		
-		_texUnits.push_back( texUnit );
+		_samplers.push_back( sampler );
 		
-		node1 = rootNode.getChildNode( "TexUnit", ++nodeItr1 );
+		node1 = rootNode.getChildNode( "Sampler", ++nodeItr1 );
 	}
 		
 	// Vector uniforms
@@ -333,30 +284,6 @@ int MaterialResource::getParami( int param )
 		return _matLink != 0x0 ? _matLink->getHandle() : 0;		
 	case MaterialResParams::Shader:
 		return _shaderRes != 0x0 ? _shaderRes->getHandle() : 0;
-	case MaterialResParams::TexUnit_0:
-		return getTexUnit( 0 );
-	case MaterialResParams::TexUnit_1:
-		return getTexUnit( 1 );
-	case MaterialResParams::TexUnit_2:
-		return getTexUnit( 2 );
-	case MaterialResParams::TexUnit_3:
-		return getTexUnit( 3 );
-	case MaterialResParams::TexUnit_4:
-		return getTexUnit( 4 );
-	case MaterialResParams::TexUnit_5:
-		return getTexUnit( 5 );
-	case MaterialResParams::TexUnit_6:
-		return getTexUnit( 6 );
-	case MaterialResParams::TexUnit_7:
-		return getTexUnit( 7 );
-	case MaterialResParams::TexUnit_8:
-		return getTexUnit( 8 );
-	case MaterialResParams::TexUnit_9:
-		return getTexUnit( 9 );
-	case MaterialResParams::TexUnit_10:
-		return getTexUnit( 10 );
-	case MaterialResParams::TexUnit_11:
-		return getTexUnit( 11 );
 	default:
 		return Resource::getParami( param );
 	}
@@ -385,30 +312,6 @@ bool MaterialResource::setParami( int param, int value )
 			_shaderRes = (ShaderResource *)res;
 			return true;
 		}
-	case MaterialResParams::TexUnit_0:
-		return setTexUnit( 0, value );
-	case MaterialResParams::TexUnit_1:
-		return setTexUnit( 1, value );
-	case MaterialResParams::TexUnit_2:
-		return setTexUnit( 2, value );
-	case MaterialResParams::TexUnit_3:
-		return setTexUnit( 3, value );
-	case MaterialResParams::TexUnit_4:
-		return setTexUnit( 4, value );
-	case MaterialResParams::TexUnit_5:
-		return setTexUnit( 5, value );
-	case MaterialResParams::TexUnit_6:
-		return setTexUnit( 6, value );
-	case MaterialResParams::TexUnit_7:
-		return setTexUnit( 7, value );
-	case MaterialResParams::TexUnit_8:
-		return setTexUnit( 8, value );
-	case MaterialResParams::TexUnit_9:
-		return setTexUnit( 9, value );
-	case MaterialResParams::TexUnit_10:
-		return setTexUnit( 10, value );
-	case MaterialResParams::TexUnit_11:
-		return setTexUnit( 11, value );
 	default:
 		return Resource::setParami( param, value );
 	}

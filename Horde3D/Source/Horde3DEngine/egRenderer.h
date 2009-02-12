@@ -111,29 +111,38 @@ struct ParticleVert
 
 // =================================================================================================
 
+struct PipeSamplerBinding
+{
+	char          sampler[64];
+	RenderBuffer  *rb;
+	uint32        bufIndex;
+};
+
+
 class Renderer : public RendererBase
 {
 protected:
 
-	uint32                  _frameID;
-	uint32                  _smFBO, _smTex;
-	uint32                  _defShadowMap;
-	uint32                  _particleVBO;
-	MaterialResource        *_curStageMatLink;
-	CameraNode              *_curCamera;
-	LightNode               *_curLight;
-	MaterialResource        *_curMatRes;
-	ShaderCombination       *_curShader;
-	RenderTarget            *_curRenderTarget;
-	uint32                  _curUpdateStamp;
+	std::vector< PipeSamplerBinding >  _pipeSamplerBindings;
+	std::vector< char >                _occSets;  // Actually bool
+	std::vector< Overlay >             _overlays;
 	
-	float                   _splitPlanes[5];
-	Matrix4f                _lightMats[4];
+	uint32                             _frameID;
+	uint32                             _smFBO, _smTex;
+	uint32                             _defShadowMap;
+	uint32                             _particleVBO;
+	MaterialResource                   *_curStageMatLink;
+	CameraNode                         *_curCamera;
+	LightNode                          *_curLight;
+	MaterialResource                   *_curMatRes;
+	ShaderCombination                  *_curShader;
+	RenderTarget                       *_curRenderTarget;
+	uint32                             _curUpdateStamp;
+	
+	float                              _splitPlanes[5];
+	Matrix4f                           _lightMats[4];
 
-	std::vector< char >     _occSets;  // Actually bool
-	std::vector< Overlay >  _overlays;
-
-	int                     _statTriCount, _statBatchCount, _statLightPassCount;
+	int                                _statTriCount, _statBatchCount, _statLightPassCount;
 
 
 	static bool nodeFrontToBackOrder( NodeListEntry e1, NodeListEntry e2 )
@@ -153,7 +162,7 @@ protected:
 
 	void drawOverlays( const std::string &shaderContext );
 
-	void bindBuffer( RenderBuffer *rb, uint32 texUnit, uint32 bufIndex );
+	void bindBuffer( RenderBuffer *rb, const std::string &sampler, uint32 bufIndex );
 	void clear( bool depth, bool buf0, bool buf1, bool buf2, bool buf3, float r, float g, float b, float a );
 	void drawFSQuad( Resource *matRes, const std::string &shaderContext );
 	void drawGeometry( const std::string &shaderContext, const std::string &theClass,

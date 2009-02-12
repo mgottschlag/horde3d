@@ -16,15 +16,18 @@
 			<ClearTarget colBuf0="true" />
 			
 			<!-- Copy depth buffer to allow occlusion culling of lights -->
-			<BindBuffer texUnit="8" target="GBUFFER" bufIndex="32" />
+			<BindBuffer sampler="depthBuf" sourceRT="GBUFFER" bufIndex="32" />
 			<DrawQuad material="light.material.xml" context="COPY_DEPTH" />
+			<UnbindBuffers />
 			
-			<BindBuffer texUnit="8" target="GBUFFER" bufIndex="0" />
-			<BindBuffer texUnit="9" target="GBUFFER" bufIndex="1" />
-			<BindBuffer texUnit="10" target="GBUFFER" bufIndex="2" />
+			<BindBuffer sampler="buf0" sourceRT="GBUFFER" bufIndex="0" />
+			<BindBuffer sampler="buf1" sourceRT="GBUFFER" bufIndex="1" />
+			<BindBuffer sampler="buf2" sourceRT="GBUFFER" bufIndex="2" />
 			
 			<DrawQuad material="light.material.xml" context="AMBIENT" />
 			<DoDeferredLightLoop />
+			
+			<UnbindBuffers />
 		</Stage>
 		
 		<Stage id="Overlays">

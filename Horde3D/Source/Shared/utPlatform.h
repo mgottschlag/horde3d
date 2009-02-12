@@ -50,6 +50,7 @@
 #ifndef PLATFORM_WIN
 #	define _stricmp strcasecmp
 #	define _mkdir( name ) mkdir( name, 0755 )
+#	define strncpy_s( dst, dstSize, src, count ) strncpy( dst, src, min( count, dstSize ) )
 #endif
 
 // The following lines will produce a compiler error if integer types have unexpected sizes

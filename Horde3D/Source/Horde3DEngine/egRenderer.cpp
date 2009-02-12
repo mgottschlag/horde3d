@@ -342,31 +342,6 @@ bool Renderer::uploadShader( const char *vertexShader, const char *fragmentShade
 	sc.shaderObject = shaderId;
 	
 	// Set standard uniforms
-	sc.uni_texs[0] = glGetUniformLocation( shaderId, "tex0" );
-	if( sc.uni_texs[0] >= 0 ) glUniform1i( sc.uni_texs[0], 0 );
-	sc.uni_texs[1] = glGetUniformLocation( shaderId, "tex1" );
-	if( sc.uni_texs[1] >= 0 ) glUniform1i( sc.uni_texs[1], 1 );
-	sc.uni_texs[2] = glGetUniformLocation( shaderId, "tex2" );
-	if( sc.uni_texs[2] >= 0 ) glUniform1i( sc.uni_texs[2], 2 );
-	sc.uni_texs[3] = glGetUniformLocation( shaderId, "tex3" );
-	if( sc.uni_texs[3] >= 0 ) glUniform1i( sc.uni_texs[3], 3 );
-	sc.uni_texs[4] = glGetUniformLocation( shaderId, "tex4" );
-	if( sc.uni_texs[4] >= 0 ) glUniform1i( sc.uni_texs[4], 4 );
-	sc.uni_texs[5] = glGetUniformLocation( shaderId, "tex5" );
-	if( sc.uni_texs[5] >= 0 ) glUniform1i( sc.uni_texs[5], 5 );
-	sc.uni_texs[6] = glGetUniformLocation( shaderId, "tex6" );
-	if( sc.uni_texs[6] >= 0 ) glUniform1i( sc.uni_texs[6], 6 );
-	sc.uni_texs[7] = glGetUniformLocation( shaderId, "tex7" );
-	if( sc.uni_texs[7] >= 0 ) glUniform1i( sc.uni_texs[7], 7 );
-	sc.uni_texs[8] = glGetUniformLocation( shaderId, "tex8" );
-	if( sc.uni_texs[8] >= 0 ) glUniform1i( sc.uni_texs[8], 8 );
-	sc.uni_texs[9] = glGetUniformLocation( shaderId, "tex9" );
-	if( sc.uni_texs[9] >= 0 ) glUniform1i( sc.uni_texs[9], 9 );
-	sc.uni_texs[10] = glGetUniformLocation( shaderId, "tex10" );
-	if( sc.uni_texs[10] >= 0 ) glUniform1i( sc.uni_texs[10], 10 );
-	sc.uni_texs[11] = glGetUniformLocation( shaderId, "tex11" );
-	if( sc.uni_texs[11] >= 0 ) glUniform1i( sc.uni_texs[11], 11 );
-
 	int loc = glGetUniformLocation( shaderId, "shadowMap" );
 	if( loc >= 0 ) glUniform1i( loc, 12 );
 
@@ -579,26 +554,54 @@ bool Renderer::setMaterialRec( MaterialResource *materialRes, const string &shad
 
 		_curShader->lastUpdateStamp = _curUpdateStamp;
 	}
-	
-	// Setup texture units
-	for( uint32 i = 0; i < materialRes->_texUnits.size(); ++i )
+
+	// Setup texture samplers
+	for( size_t i = 0, s = shaderRes->_samplers.size(); i < s; ++i )
 	{
-		TexUnit &texUnit = materialRes->_texUnits[i];
-		
-		if( texUnit.texRes != 0x0 && texUnit.unit < 12 && _curShader->uni_texs[texUnit.unit] >= 0 )
+		if( _curShader->customSamplers[i] < 0 ) continue;
+
+		// Find sampler in material
+		for( size_t j = 0, s = materialRes->_samplers.size(); j < s; ++j )
 		{
-			glActiveTexture( GL_TEXTURE0 + texUnit.unit );
+			MatSampler &matSampler = materialRes->_samplers[j];
 			
-			if( texUnit.texRes->getType() == ResourceTypes::Texture2D )
+			if( matSampler.name == shaderRes->_samplers[i].id )
 			{
-				Texture2DResource *texRes = (Texture2DResource *)texUnit.texRes.getPtr();
-				glBindTexture( GL_TEXTURE_CUBE_MAP, 0 );
-				glBindTexture( GL_TEXTURE_2D, texRes->getTexObject() );
+				glActiveTexture( GL_TEXTURE0 + shaderRes->_samplers[i].texUnit );
+
+				if( matSampler.texRes->getType() == ResourceTypes::Texture2D )
+				{
+					Texture2DResource *texRes = (Texture2DResource *)matSampler.texRes.getPtr();
+					glBindTexture( GL_TEXTURE_CUBE_MAP, 0 );
+					glBindTexture( GL_TEXTURE_2D, texRes->getTexObject() );
+				}
+				else if( matSampler.texRes->getType() == ResourceTypes::TextureCube )
+				{
+					TextureCubeResource *texRes = (TextureCubeResource *)matSampler.texRes.getPtr();
+					glBindTexture( GL_TEXTURE_CUBE_MAP, texRes->getTexObject() );
+				}
+
+				break;
 			}
-			else if( texUnit.texRes->getType() == ResourceTypes::TextureCube )
+		}
+
+		// Find sampler in pipeline
+		for( size_t j = 0, s = _pipeSamplerBindings.size(); j < s; ++j )
+		{
+			if( strcmp( _pipeSamplerBindings[j].sampler, shaderRes->_samplers[i].id.c_str() ) == 0 )
 			{
-				TextureCubeResource *texRes = (TextureCubeResource *)texUnit.texRes.getPtr();
-				glBindTexture( GL_TEXTURE_CUBE_MAP, texRes->getTexObject() );
+				glActiveTexture( GL_TEXTURE0 + shaderRes->_samplers[i].texUnit );
+				glBindTexture( GL_TEXTURE_CUBE_MAP, 0 );
+
+				uint32 bufIndex = _pipeSamplerBindings[j].bufIndex;
+				RenderBuffer *rb = _pipeSamplerBindings[j].rb;
+				
+				if( bufIndex < 4 && rb->colBufs[bufIndex] != 0 )
+					glBindTexture( GL_TEXTURE_2D, rb->colBufs[bufIndex] );
+				else if( bufIndex == 32 && rb->depthBuf != 0 )
+					glBindTexture( GL_TEXTURE_2D, rb->depthBuf );
+
+				break;
 			}
 		}
 	}
@@ -1144,29 +1147,42 @@ void Renderer::drawOverlays( const string &shaderContext )
 // Pipeline Functions
 // =================================================================================================
 
-void Renderer::bindBuffer( RenderBuffer *rb, uint32 texUnit, uint32 bufIndex )
+void Renderer::bindBuffer( RenderBuffer *rb, const string &sampler, uint32 bufIndex )
 {
 	if( rb == 0x0 )
 	{
+		// Clear buffer bindings
+		_pipeSamplerBindings.resize( 0 );
+
+		// Make sure all render buffers are unbound
 		for( uint32 i = 0; i < 12; ++i )
 		{
 			glActiveTexture( GL_TEXTURE0 + i );
 			glBindTexture( GL_TEXTURE_2D, 0 );
 		}
+		glActiveTexture( GL_TEXTURE0 );
 	}
 	else
 	{
-		if( texUnit < 12 )
+		// Check if binding is already existing
+		for( size_t i = 0, s = _pipeSamplerBindings.size(); i < s; ++i )
 		{
-			glActiveTexture( GL_TEXTURE0 + texUnit );
-			if( bufIndex < 4 && rb->colBufs[bufIndex] != 0 )
-				glBindTexture( GL_TEXTURE_2D, rb->colBufs[bufIndex] );
-			else if( bufIndex == 32 && rb->depthBuf != 0 )
-				glBindTexture( GL_TEXTURE_2D, rb->depthBuf );
+			if( strcmp( _pipeSamplerBindings[i].sampler, sampler.c_str() ) == 0 )
+			{
+				_pipeSamplerBindings[i].rb = rb;
+				_pipeSamplerBindings[i].bufIndex = bufIndex;
+				return;
+			}
 		}
+		
+		// Add binding
+		_pipeSamplerBindings.push_back( PipeSamplerBinding() );
+		size_t len = min( sampler.length(), 63 );
+		strncpy_s( _pipeSamplerBindings.back().sampler, 63, sampler.c_str(), len );
+		_pipeSamplerBindings.back().sampler[len] = '\0';
+		_pipeSamplerBindings.back().rb = rb;
+		_pipeSamplerBindings.back().bufIndex = bufIndex;
 	}
-
-	glActiveTexture( GL_TEXTURE0 );
 }
 
 
@@ -1932,7 +1948,7 @@ bool Renderer::render( CameraNode *camNode )
 			{
 			case PipelineCommands::SwitchTarget:
 				// Unbind all textures
-				bindBuffer( 0x0, 0, 0 );
+				bindBuffer( 0x0, "", 0 );
 				if( _curRenderTarget != 0x0 && _curRenderTarget->samples > 0 )
 				{
 					// Current render target is multisampled, so resolve it now
@@ -1960,8 +1976,12 @@ bool Renderer::render( CameraNode *camNode )
 			case PipelineCommands::BindBuffer:
 				rt = (RenderTarget *)pc.refParams[0];
 			
-				bindBuffer( &rt->rendBuf, (uint32)((PCFloatParam *)pc.valParams[0])->get(),
+				bindBuffer( &rt->rendBuf, ((PCStringParam *)pc.valParams[0])->get(),
 				            (uint32)((PCFloatParam *)pc.valParams[1])->get() );
+				break;
+
+			case PipelineCommands::UnbindBuffers:
+				bindBuffer( 0x0, "", 0 );
 				break;
 
 			case PipelineCommands::ClearTarget:

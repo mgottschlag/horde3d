@@ -1,5 +1,8 @@
 [[FX]]
 
+<Sampler id="heightNormMap" />
+<Sampler id="detailMap" />
+
 <Uniform id="sunDir" a="1.0" b="-1.0" c="0.0" />
 
 <Context id="ATTRIBPASS">
@@ -49,7 +52,7 @@ void main( void )
 #include "utilityLib/fragDeferredWrite.glsl"
 
 uniform vec4 sunDir;
-uniform sampler2D tex0, tex1;
+uniform sampler2D heightNormMap, detailMap;
 varying vec4 pos;
 varying vec2 texCoords;
 
@@ -57,8 +60,8 @@ vec3 light = -normalize( sunDir.xyz );
 
 void main( void )
 {
-	vec3 detailMap = texture2D( tex1, texCoords * 300.0 ).rgb;
-	vec4 texel = texture2D( tex0, texCoords ) * 2.0 - 1.0;
+	vec3 detailMap = texture2D( detailMap, texCoords * 300.0 ).rgb;
+	vec4 texel = texture2D( heightNormMap, texCoords ) * 2.0 - 1.0;
 	float ny = sqrt( max( 1.0 - texel.b*texel.b - texel.a*texel.a, 0.0 ) );		// Use max because of numerical issues
 	vec3 normal = vec3( texel.b, ny, texel.a );
 	
@@ -109,14 +112,14 @@ void main( void )
 
 #include "utilityLib/fragLighting.glsl"
 
-uniform sampler2D tex0, tex1;
+uniform sampler2D heightNormMap, detailMap;
 varying vec4 pos, vsPos;
 varying vec2 texCoords;
 
 void main( void )
 {
-	vec3 detailMap = texture2D( tex1, texCoords * 300.0 ).rgb;
-	vec4 texel = texture2D( tex0, texCoords ) * 2.0 - 1.0;
+	vec3 detailMap = texture2D( detailMap, texCoords * 300.0 ).rgb;
+	vec4 texel = texture2D( heightNormMap, texCoords ) * 2.0 - 1.0;
 	float ny = sqrt( max( 1.0 - texel.b*texel.b - texel.a*texel.a, 0.0 ) );		// Use max because of numerical issues
 	vec3 normal = vec3( texel.b, ny, texel.a );
 	
@@ -129,15 +132,15 @@ void main( void )
 // =================================================================================================
 
 uniform vec4 sunDir;
-uniform sampler2D tex0, tex1;
+uniform sampler2D heightNormMap, detailMap;
 varying vec2 texCoords;
 
 vec3 light = -normalize( sunDir.xyz );
 
 void main( void )
 {
-	vec3 detailMap = texture2D( tex1, texCoords * 300.0 ).rgb;
-	vec4 texel = texture2D( tex0, texCoords ) * 2.0 - 1.0;
+	vec3 detailMap = texture2D( detailMap, texCoords * 300.0 ).rgb;
+	vec4 texel = texture2D( heightNormMap, texCoords ) * 2.0 - 1.0;
 	float ny = sqrt( max( 1.0 - texel.b*texel.b - texel.a*texel.a, 0.0 ) );		// Use max because of numerical issues
 	vec3 normal = vec3( texel.b, ny, texel.a );
 	

@@ -130,15 +130,19 @@ const string PipelineResource::parseStage( XMLNode &node, PipelineStage &stage )
 		}
 		else if( strcmp( node1.getName(), "BindBuffer" ) == 0 )
 		{
-			if( node1.getAttribute( "texUnit" ) == 0x0 || node1.getAttribute( "target" ) == 0x0 ||
+			if( node1.getAttribute( "sampler" ) == 0x0 || node1.getAttribute( "sourceRT" ) == 0x0 ||
 				node1.getAttribute( "bufIndex" ) == 0x0 ) return "Missing BindBuffer attribute";
-			if( findRenderTarget( node1.getAttribute( "target" ) ) == 0x0 ) return "Reference to undefined render target in BindBuffer";
+			if( findRenderTarget( node1.getAttribute( "sourceRT" ) ) == 0x0 ) return "Reference to undefined render target in BindBuffer";
 			stage.commands.push_back( PipelineCommand( PipelineCommands::BindBuffer ) );
-			stage.commands.back().refParams.push_back( findRenderTarget( node1.getAttribute( "target" ) ) );
+			stage.commands.back().refParams.push_back( findRenderTarget( node1.getAttribute( "sourceRT" ) ) );
 			vector< PCParam * > &valParams = stage.commands.back().valParams;
 			valParams.resize( 2 );
-			valParams[0] = new PCFloatParam( (float)atof( node1.getAttribute( "texUnit" ) ) );
+			valParams[0] = new PCStringParam( node1.getAttribute( "sampler" ) );
 			valParams[1] = new PCFloatParam( (float)atof( node1.getAttribute( "bufIndex" ) ) );
+		}
+		else if( strcmp( node1.getName(), "UnbindBuffers" ) == 0 )
+		{
+			stage.commands.push_back( PipelineCommand( PipelineCommands::UnbindBuffers ) );
 		}
 		else if( strcmp( node1.getName(), "ClearTarget" ) == 0 )
 		{

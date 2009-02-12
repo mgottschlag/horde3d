@@ -226,48 +226,12 @@ struct MaterialResParams
 					  valid for get-/setResourceParami
 		Shader      - Shader resource used for rendering;
 					  valid for get-/setResourceParami
-		TexUnit_0	- Texture resource for the first unit;	
-					  valid for get-/setResourceParami
-		TexUnit_1	- Texture resource for the second unit;
-					  valid for get-/setResourceParami
-		TexUnit_2	- Texture resource for the third unit;
-					  valid for get-/setResourceParami
-		TexUnit_3	- Texture resource for the fourth unit;
-					  valid for get-/setResourceParami
-		TexUnit_4	- Texture resource for the fifth unit;
-					  valid for get-/setResourceParami
-		TexUnit_5	- Texture resource for the sixth unit;
-					  valid for get-/setResourceParami
-		TexUnit_6	- Texture resource for the seventh unit;
-					  valid for get-/setResourceParami
-		TexUnit_7	- Texture resource for the eighth unit;
-					  valid for get-/setResourceParami
-		TexUnit_8	- Texture resource for the ninth unit;
-					  valid for get-/setResourceParami
-		TexUnit_9	- Texture resource for the tenth unit;
-					  valid for get-/setResourceParami
-		TexUnit_10	- Texture resource for the eleventh unit;
-					  valid for get-/setResourceParami
-		TexUnit_11	- Texture resource for the twelfth unit;
-					  valid for get-/setResourceParami
 	 */
 	enum List
 	{
 		Class = 400,
 		Link,
-		Shader,
-		TexUnit_0,
-		TexUnit_1,
-		TexUnit_2,
-		TexUnit_3,
-		TexUnit_4,
-		TexUnit_5,
-		TexUnit_6,
-		TexUnit_7,
-		TexUnit_8,
-		TexUnit_9,
-		TexUnit_10,
-		TexUnit_11
+		Shader
 	};	
 };
 

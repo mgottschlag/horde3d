@@ -40,31 +40,16 @@ struct MaterialResParams
 	{
 		Class = 400,
 		Link,
-		Shader,
-		TexUnit_0,
-		TexUnit_1,
-		TexUnit_2,
-		TexUnit_3,
-		TexUnit_4,
-		TexUnit_5,
-		TexUnit_6,
-		TexUnit_7,
-		TexUnit_8,
-		TexUnit_9,
-		TexUnit_10,
-		TexUnit_11
+		Shader
 	};	
 };
 
 // =================================================================================================
 
-struct TexUnit
+struct MatSampler
 {
-	uint32     unit;
-	PResource  texRes;
-	
-
-	TexUnit(): unit( 0 ) {}
+	std::string  name;
+	PResource    texRes;
 };
 
 
@@ -92,13 +77,11 @@ private:
 	PShaderResource             _shaderRes;
 	uint32                      _combMask;
 	std::string                 _class;
-	std::vector< TexUnit >      _texUnits;
+	std::vector< MatSampler >   _samplers;
 	std::vector< MatUniform >   _uniforms;
 	std::vector< std::string >  _shaderFlags;
 	PMaterialResource           _matLink;	
 
-	ResHandle getTexUnit( int unit );
-	bool setTexUnit( int unit, ResHandle texRes );
 	bool raiseError( const std::string &msg, int line = -1 );
 
 public:

@@ -1,5 +1,8 @@
 [[FX]]
 
+<Sampler id="buf0" />
+<Sampler id="buf1" />
+
 <Uniform id="hdrParams">
 	<!-- Description:
 		a - Exposure (higher values make scene brighter)
@@ -42,7 +45,7 @@ void main( void )
 
 #include "utilityLib/fragPostProcess.glsl"
 
-uniform sampler2D tex0;
+uniform sampler2D buf0;
 uniform vec2 frameBufSize;
 uniform vec4 hdrParams;
 varying vec2 texCoord;
@@ -53,10 +56,10 @@ void main( void )
 	vec2 coord2 = texCoord + vec2( 2, 2 ) / texSize;
 	
 	// Average using bilinear filtering
-	vec4 sum = getTex2DBilinear( tex0, texCoord, texSize );
-	sum += getTex2DBilinear( tex0, coord2, texSize );
-	sum += getTex2DBilinear( tex0, vec2( coord2.x, texCoord.y ), texSize );
-	sum += getTex2DBilinear( tex0, vec2( texCoord.x, coord2.y ), texSize );
+	vec4 sum = getTex2DBilinear( buf0, texCoord, texSize );
+	sum += getTex2DBilinear( buf0, coord2, texSize );
+	sum += getTex2DBilinear( buf0, vec2( coord2.x, texCoord.y ), texSize );
+	sum += getTex2DBilinear( buf0, vec2( texCoord.x, coord2.y ), texSize );
 	sum /= 4.0;
 	
 	// Tonemap
@@ -75,29 +78,29 @@ void main( void )
 
 #include "utilityLib/fragPostProcess.glsl"
 
-uniform sampler2D tex0;
+uniform sampler2D buf0;
 uniform vec2 frameBufSize;
 uniform vec4 blurParams;
 varying vec2 texCoord;
 
 void main( void )
 {
-	gl_FragColor = blurKawase( tex0, texCoord, frameBufSize, blurParams.x );
+	gl_FragColor = blurKawase( buf0, texCoord, frameBufSize, blurParams.x );
 }
 	
 
 [[FS_FINALPASS]]
 // =================================================================================================
 
-uniform sampler2D tex0, tex1;
+uniform sampler2D buf0, buf1;
 uniform vec2 frameBufSize;
 uniform vec4 hdrParams;
 varying vec2 texCoord;
 
 void main( void )
 {
-	vec4 col0 = texture2D( tex0, texCoord );	// HDR color
-	vec4 col1 = texture2D( tex1, texCoord );	// Bloom
+	vec4 col0 = texture2D( buf0, texCoord );	// HDR color
+	vec4 col1 = texture2D( buf1, texCoord );	// Bloom
 	
 	// Tonemap
 	vec4 col = 1.0 - exp2( -hdrParams.x * col0 );

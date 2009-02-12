@@ -11,6 +11,11 @@
 // =================================================================================================
 -->
 
+<Sampler id="albedoMap" />
+<Sampler id="normalMap" />
+<Sampler id="ambientMap" />
+<Sampler id="envMap" />
+
 <Uniform id="specParams" a="0.1" b="16.0">
 	<!-- Description
 		a - Specular mask
@@ -130,10 +135,10 @@ void main( void )
 #include "utilityLib/fragDeferredWrite.glsl" />
 
 uniform vec4 specParams;
-uniform sampler2D tex0;
+uniform sampler2D albedoMap;
 
 #ifdef _F02_NormalMapping
-	uniform sampler2D tex1;
+	uniform sampler2D normalMap;
 #endif
 
 varying vec4 pos;
@@ -160,16 +165,16 @@ void main( void )
 	vec3 eye = normalize( eyeTS );
 	for( int i = 0; i < 4; ++i )
 	{
-		vec4 nmap = texture2D( tex1, newCoords.st );
+		vec4 nmap = texture2D( normalMap, newCoords.st );
 		float height = nmap.a * plxScale + plxBias;
 		newCoords += (height - newCoords.p) * nmap.z * eye;
 	}
 #endif
 
-	vec3 albedo = texture2D( tex0, newCoords.st ).rgb;
+	vec3 albedo = texture2D( albedoMap, newCoords.st ).rgb;
 	
 #ifdef _F02_NormalMapping
-	vec3 normalMap = texture2D( tex1, newCoords.st ).rgb * 2.0 - 1.0;
+	vec3 normalMap = texture2D( normalMap, newCoords.st ).rgb * 2.0 - 1.0;
 	vec3 normal = tsbMat * normalMap;
 #else
 	vec3 normal = tsbNormal;
@@ -232,10 +237,10 @@ void main( void )
 #include "utilityLib/fragLighting.glsl" />
 
 uniform vec4 specParams;
-uniform sampler2D tex0;
+uniform sampler2D albedoMap;
 
 #ifdef _F02_NormalMapping
-	uniform sampler2D tex1;
+	uniform sampler2D normalMap;
 #endif
 
 varying vec4 pos, vsPos;
@@ -262,16 +267,16 @@ void main( void )
 	vec3 eye = normalize( eyeTS );
 	for( int i = 0; i < 4; ++i )
 	{
-		vec4 nmap = texture2D( tex1, newCoords.st );
+		vec4 nmap = texture2D( normalMap, newCoords.st );
 		float height = nmap.a * plxScale + plxBias;
 		newCoords += (height - newCoords.p) * nmap.z * eye;
 	}
 #endif
 
-	vec3 albedo = texture2D( tex0, newCoords.st ).rgb;
+	vec3 albedo = texture2D( albedoMap, newCoords.st ).rgb;
 	
 #ifdef _F02_NormalMapping
-	vec3 normalMap = texture2D( tex1, newCoords.st ).rgb * 2.0 - 1.0;
+	vec3 normalMap = texture2D( normalMap, newCoords.st ).rgb * 2.0 - 1.0;
 	vec3 normal = tsbMat * normalMap;
 #else
 	vec3 normal = tsbNormal;
@@ -297,15 +302,15 @@ void main( void )
 
 #include "utilityLib/fragLighting.glsl" />
 
-uniform sampler2D tex0;
-uniform samplerCube tex7;
+uniform sampler2D albedoMap;
+uniform samplerCube ambientMap;
 
 #ifdef _F02_NormalMapping
-	uniform sampler2D tex1;
+	uniform sampler2D normalMap;
 #endif
 
 #ifdef _F04_EnvMapping
-	uniform samplerCube tex6;
+	uniform samplerCube envMap;
 #endif
 
 varying vec4 pos;
@@ -332,25 +337,25 @@ void main( void )
 	vec3 eye = normalize( eyeTS );
 	for( int i = 0; i < 4; ++i )
 	{
-		vec4 nmap = texture2D( tex1, newCoords.st );
+		vec4 nmap = texture2D( normalMap, newCoords.st );
 		float height = nmap.a * plxScale + plxBias;
 		newCoords += (height - newCoords.p) * nmap.z * eye;
 	}
 #endif
 
-	vec3 albedo = texture2D( tex0, newCoords.st ).rgb;
+	vec3 albedo = texture2D( albedoMap, newCoords.st ).rgb;
 	
 #ifdef _F02_NormalMapping
-	vec3 normalMap = texture2D( tex1, newCoords.st ).rgb * 2.0 - 1.0;
+	vec3 normalMap = texture2D( normalMap, newCoords.st ).rgb * 2.0 - 1.0;
 	vec3 normal = tsbMat * normalMap;
 #else
 	vec3 normal = tsbNormal;
 #endif
 	
-	gl_FragColor.rgb = albedo * textureCube( tex7, normal ).rgb;
+	gl_FragColor.rgb = albedo * textureCube( ambientMap, normal ).rgb;
 	
 #ifdef _F04_EnvMapping
-	vec3 refl = textureCube( tex6, reflect( pos.xyz - viewer, normalize( normal ) ) ).rgb;
+	vec3 refl = textureCube( envMap, reflect( pos.xyz - viewer, normalize( normal ) ) ).rgb;
 	gl_FragColor.rgb = refl * 1.5;
 #endif
 }

@@ -1,5 +1,7 @@
 [[FX]]
 
+<Sampler id="albedoMap" />
+
 <Context id="OVERLAY">
 	<Shaders vertex="VS_OVERLAY" fragment="FS_OVERLAY" />
 	<RenderConfig writeDepth="false" blendMode="BLEND" />
@@ -19,12 +21,12 @@ void main( void )
 [[FS_OVERLAY]]
 
 uniform vec4 olayColor;
-uniform sampler2D tex0;
+uniform sampler2D albedoMap;
 varying vec2 texCoord;
 
 void main( void )
 {
-	vec4 albedo = texture2D( tex0, texCoord );
+	vec4 albedo = texture2D( albedoMap, texCoord );
 	
 	gl_FragColor = albedo * olayColor;
 }

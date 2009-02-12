@@ -1,5 +1,5 @@
 <Material>
 	<Shader source="overlay.shader"/>
 	
-	<TexUnit unit="0" map="font.tga" />
+	<Sampler name="albedoMap" map="font.tga" />
 </Material>

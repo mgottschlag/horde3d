@@ -1,5 +1,7 @@
 [[FX]]
 
+<Sampler id="albedoMap" />
+
 <Context id="ATTRIBPASS">
 	<Shaders vertex="VS_GENERAL" fragment="FS_ATTRIBPASS" />
 </Context>
@@ -31,12 +33,12 @@ void main(void)
 
 #include "utilityLib/fragDeferredWrite.glsl"
 
-uniform samplerCube tex0;
+uniform samplerCube albedoMap;
 varying vec3 viewVec;
 
 void main( void )
 {
-	vec3 albedo = textureCube( tex0, viewVec ).rgb;
+	vec3 albedo = textureCube( albedoMap, viewVec ).rgb;
 	
 	// Set fragment material ID to 2, meaning skybox in this case
 	setMatID( 2.0 );
@@ -47,12 +49,12 @@ void main( void )
 [[FS_AMBIENT]]
 // =================================================================================================
 
-uniform samplerCube tex0;
+uniform samplerCube albedoMap;
 varying vec3 viewVec;
 
 void main( void )
 {
-	vec3 albedo = textureCube( tex0, viewVec ).rgb;
+	vec3 albedo = textureCube( albedoMap, viewVec ).rgb;
 	
 	gl_FragColor.rgb = albedo;
 }

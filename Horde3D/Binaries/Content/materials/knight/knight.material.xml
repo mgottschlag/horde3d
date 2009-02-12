@@ -3,6 +3,6 @@
 	<ShaderFlag name="_F01_Skinning"/>
 	<ShaderFlag name="_F04_EnvMapping"/>
 
-	<TexUnit unit="0" map="knight.jpg" />
-	<TexUnit unit="6" map="skybox.jpg" type="CUBE" />
+	<Sampler name="albedoMap" map="knight.jpg" />
+	<Sampler name="envMap" map="skybox.jpg" type="CUBE" />
 </Material>

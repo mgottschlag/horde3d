@@ -1155,7 +1155,7 @@ bool Converter::writeMaterials( ColladaDocument &doc, const string &name, const 
 			
 			if( material.effect->diffuseMap != 0x0 )
 			{
-				outf << "\t<TexUnit unit=\"0\" map=\"";
+				outf << "\t<Sampler name=\"albedoMap\" map=\"";
 				outf << material.effect->diffuseMap->fileName;
 				outf << "\" />\n";
 			}

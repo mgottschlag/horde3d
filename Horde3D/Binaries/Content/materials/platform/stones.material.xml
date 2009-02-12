@@ -2,6 +2,6 @@
 	<Shader source="model.shader"/>
 	<ShaderFlag name="_F03_ParallaxMapping" />
 	
-	<TexUnit unit="0" map="layingrock.jpg" />
-	<TexUnit unit="1" map="layingrockBump.tga" allowCompression="false" />
+	<Sampler name="albedoMap" map="layingrock.jpg" />
+	<Sampler name="normalMap" map="layingrockBump.tga" allowCompression="false" />
 </Material>

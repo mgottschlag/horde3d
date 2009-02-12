@@ -1,5 +1,12 @@
 [[FX]]
 
+<Sampler id="depthBuf" />
+<Sampler id="buf0" />
+<Sampler id="buf1" />
+<Sampler id="buf2" />
+<Sampler id="ambientMap" />
+
+
 <Context id="AMBIENT">
 	<Shaders vertex="VS_QUAD" fragment="FS_AMBIENT" />
 	<RenderConfig writeDepth="false" blendMode="REPLACE" />
@@ -30,7 +37,7 @@ void main( void )
 
 #include "utilityLib/fragDeferredRead.glsl"
 
-uniform samplerCube tex7;
+uniform samplerCube ambientMap;
 varying vec2 texCoords;
 
 void main( void )
@@ -45,7 +52,7 @@ void main( void )
 	}
 	else
 	{
-		gl_FragColor.rgb = getAlbedo( texCoords ) * textureCube( tex7, getNormal( texCoords ) ).rgb;
+		gl_FragColor.rgb = getAlbedo( texCoords ) * textureCube( ambientMap, getNormal( texCoords ) ).rgb;
 	}
 }
 
@@ -73,10 +80,10 @@ void main( void )
 
 [[FS_COPY_DEPTH]]
 
-uniform sampler2D tex8;
+uniform sampler2D depthBuf;
 varying vec2 texCoord;
 
 void main( void )
 {
-	gl_FragDepth = texture2D( tex8, texCoord ).r;
+	gl_FragDepth = texture2D( depthBuf, texCoord ).r;
 }

@@ -127,6 +127,7 @@ struct ShaderCombination
 	int                             attrib_joints, attrib_weights;
 	int                             attrib_texCoords0, attrib_texCoords1;
 
+	std::vector< int >              customSamplers;
 	std::vector< int >              customUniforms;
 
 
@@ -172,6 +173,11 @@ struct ShaderContext
 
 // =================================================================================================
 
+struct ShaderSampler
+{
+	std::string  id;
+	int          texUnit;
+};
 
 struct ShaderUniform
 {
@@ -188,12 +194,13 @@ private:
 	static std::string            _tmpCode0, _tmpCode1;
 	
 	std::vector< ShaderContext >  _contexts;
+	std::vector< ShaderSampler >  _samplers;
 	std::vector< ShaderUniform >  _uniforms;
 	std::set< uint32 >            _preLoadList;
 
 	bool raiseError( const std::string &msg, int line = -1 );
 	bool parseXMLCode( XMLNode &node, std::string &code );
-	bool parseFXSection( const char *data, bool oldFormat );
+	bool parseFXSection( const char *data );
 	void compileCombination( ShaderContext &context, ShaderCombination &sc );
 
 public:
