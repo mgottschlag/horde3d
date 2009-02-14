@@ -28,7 +28,6 @@
 #	endif
 #endif
 
-
 #include "converter.h"
 #include "optimizer.h"
 #include "utPlatform.h"
@@ -36,12 +35,6 @@
 #include <sstream>
 
 using namespace std;
-
-#ifdef PLATFORM_WIN
-#	include <direct.h>
-#else
-#	include <sys/stat.h>
-#endif
 
 
 Converter::Converter( float *lodDists )
@@ -762,7 +755,7 @@ bool Converter::convertModel( ColladaDocument &doc, bool optimize )
 
 bool Converter::writeGeometry( const string &name )
 {
-	FILE *f = fopen( (name + ".geo").c_str(), "wb" );
+	FILE *f = fopen( (string() + "models/" + name + "/" + name + ".geo").c_str(), "wb" );
 
 	// Write header
 	unsigned int version = 5;
@@ -1000,7 +993,7 @@ void Converter::writeSGNode( const string &modelName, SceneNode *node, unsigned 
 			outf << "name=\"" << (i > 0 ? "#" : "") << mesh->name << "\" ";
 			if( mesh->lodLevel > 0 ) outf << "lodLevel=\"" << mesh->lodLevel << "\" ";
 			outf << "material=\"";
-			outf << modelName + "/" + mesh->triGroups[i].matName + ".material.xml\" ";
+			outf << "models/" << modelName + "/" + mesh->triGroups[i].matName + ".material.xml\" ";
 			
 			if( i == 0 )
 			{
@@ -1081,9 +1074,9 @@ void Converter::writeSGNode( const string &modelName, SceneNode *node, unsigned 
 bool Converter::writeSceneGraph( const string &name )
 {
 	ofstream outf;
-	outf.open( (name + ".scene.xml").c_str(), ios::out );
+	outf.open( (string() + "models/" + name + "/" + name + ".scene.xml").c_str(), ios::out );
 	
-	outf << "<Model name=\"" << name << "\" geometry=\"" << name << ".geo\"";
+	outf << "<Model name=\"" << name << "\" geometry=\"models/" << name << "/" << name << ".geo\"";
 	if( _maxLodLevel >= 1 ) outf << " lodDist1=\"" << _lodDist1 << "\"";
 	if( _maxLodLevel >= 2 ) outf << " lodDist2=\"" << _lodDist2 << "\"";
 	if( _maxLodLevel >= 3 ) outf << " lodDist3=\"" << _lodDist3 << "\"";
@@ -1132,11 +1125,8 @@ bool Converter::saveModel( const string &name )
 }
 
 
-bool Converter::writeMaterials( ColladaDocument &doc, const string &name, const string &defShader )
+bool Converter::writeMaterials( ColladaDocument &doc, const string &name )
 {
-	_mkdir( "materials" );
-	_mkdir( ("materials/" + name).c_str() );
-	
 	for( unsigned int i = 0; i < doc.libMaterials.materials.size(); ++i )
 	{
 		DaeMaterial &material = *doc.libMaterials.materials[i];
@@ -1144,19 +1134,23 @@ bool Converter::writeMaterials( ColladaDocument &doc, const string &name, const 
 		if( !material.used ) continue;
 		
 		ofstream outf;
-		string fileName = "materials/" + name + "/" + material.id + ".material.xml";
+		string fileName = "models/" + name + "/" + material.id + ".material.xml";
 		outf.open( fileName.c_str(), ios::out );
 
 		outf << "<Material>\n";
 		
 		if( material.effect != 0x0 )
 		{
-			outf << "\t<Shader source=\"" + defShader + "\" />\n\n";
+			outf << "\t<Shader source=\"shaders/model.shader\" />\n";
+
+			if( !_joints.empty() )
+				outf << "\t<ShaderFlag name=\"_F01_Skinning\" />\n";
+			outf << "\n";
 			
 			if( material.effect->diffuseMap != 0x0 )
 			{
 				outf << "\t<Sampler name=\"albedoMap\" map=\"";
-				outf << material.effect->diffuseMap->fileName;
+				outf << "models/" << name << "/" << material.effect->diffuseMap->fileName;
 				outf << "\" />\n";
 			}
 		}
@@ -1220,7 +1214,7 @@ void Converter::writeAnimFrames( SceneNode &node, FILE *f )
 
 bool Converter::writeAnimation( const string &name )
 {
-	FILE *f = fopen( (name + ".anim").c_str(), "wb" );
+	FILE *f = fopen( (string() + "animations/" + name + ".anim").c_str(), "wb" );
 
 	// Write header
 	unsigned int version = 3;

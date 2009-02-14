@@ -29,7 +29,11 @@
 #ifdef PLATFORM_WIN
 #   define WIN32_LEAN_AND_MEAN 1
 #	include <windows.h>
+#	include <direct.h>
+#else
+#	include <sys/stat.h>
 #endif
+
 
 using namespace std;
 
@@ -58,7 +62,6 @@ int main( int argc, char **argv )
 	
 	string inName = argv[1];
 	string outName = extractFileName( inName, false );
-	string defShader = "skinning.shader.xml";
 	bool optimize = true, animsOnly = false;
 	float lodDists[4] = { 10, 20, 40, 80 };
 
@@ -69,18 +72,6 @@ int main( int argc, char **argv )
 			if( argc > i + 1 )
 			{	
 				outName = argv[++i];
-			}
-			else
-			{
-				log( "Invalid argument" );
-				return 0;
-			}
-		}
-		else if( strcmp( argv[i], "-s" ) == 0 )
-		{
-			if( argc > i + 1 )
-			{
-				defShader = argv[++i];
 			}
 			else
 			{
@@ -136,9 +127,9 @@ int main( int argc, char **argv )
 	}
 
 	// Set output directory (needed when using drag&drop of input file on application)
-	#ifdef PLATFORM_WIN
+#ifdef PLATFORM_WIN
 	SetCurrentDirectory( extractFilePath( inName ).c_str() );
-	#endif
+#endif
 	
 	// Convert
 	log( "Converting data for model " + outName + "..." );
@@ -146,6 +137,10 @@ int main( int argc, char **argv )
 	Converter *converter = new Converter( lodDists );
 	converter->convertModel( *colladaFile, optimize );
 	log( "Done." );
+
+	_mkdir( "animations" );
+	_mkdir( "models" );
+	_mkdir( ("models/" + outName).c_str() );
 	
 	if( !animsOnly )
 	{
@@ -154,7 +149,7 @@ int main( int argc, char **argv )
 		log( "Done." );
 		
 		log( "Writing materials..." );
-		converter->writeMaterials( *colladaFile, outName, defShader );
+		converter->writeMaterials( *colladaFile, outName );
 		log( "Done." );
 	}
 

@@ -166,7 +166,7 @@ public:
 	bool convertModel( ColladaDocument &doc, bool optimize );
 	bool saveModel( const std::string &name );
 	
-	bool writeMaterials( ColladaDocument &doc, const std::string &name, const std::string &defShader );
+	bool writeMaterials( ColladaDocument &doc, const std::string &name );
 	bool hasAnimation();
 	bool writeAnimation( const std::string &name );
 };
