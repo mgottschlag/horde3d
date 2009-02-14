@@ -51,18 +51,6 @@ bool Application::init()
 		Horde3DUtils::dumpMessages();
 		return false;
 	}
-	
-	// Set paths for resources
-	Horde3DUtils::setResourcePath( ResourceTypes::SceneGraph, "models" );
-	Horde3DUtils::setResourcePath( ResourceTypes::Geometry, "models" );
-	Horde3DUtils::setResourcePath( ResourceTypes::Animation, "models" );
-	Horde3DUtils::setResourcePath( ResourceTypes::Material, "materials" );
-	Horde3DUtils::setResourcePath( ResourceTypes::Code, "shaders" );
-	Horde3DUtils::setResourcePath( ResourceTypes::Shader, "shaders" );
-	Horde3DUtils::setResourcePath( ResourceTypes::Texture2D, "textures" );
-	Horde3DUtils::setResourcePath( ResourceTypes::TextureCube, "textures" );
-	Horde3DUtils::setResourcePath( ResourceTypes::Effect, "effects" );
-	Horde3DUtils::setResourcePath( ResourceTypes::Pipeline, "pipelines" );
 
 	// Set options
 	Horde3D::setOption( EngineOptions::LoadTextures, 1 );
@@ -73,21 +61,20 @@ bool Application::init()
 
 	// Add resources
 	// Pipelines
-	_hdrPipeRes = Horde3D::addResource( ResourceTypes::Pipeline, "hdr.pipeline.xml", 0 );
-	_forwardPipeRes = Horde3D::addResource( ResourceTypes::Pipeline, "forward.pipeline.xml", 0 );
-	// Font and GUI
-	_fontMatRes = Horde3D::addResource( ResourceTypes::Material, "font.material.xml", 0 );
-	_panelMatRes = Horde3D::addResource( ResourceTypes::Material, "panel.material.xml", 0 );
-	// Logo
-	_logoMatRes = Horde3D::addResource( ResourceTypes::Material, "logo.material.xml", 0 );
+	_hdrPipeRes = Horde3D::addResource( ResourceTypes::Pipeline, "pipelines/hdr.pipeline.xml", 0 );
+	_forwardPipeRes = Horde3D::addResource( ResourceTypes::Pipeline, "pipelines/forward.pipeline.xml", 0 );
+	// Overlays
+	_fontMatRes = Horde3D::addResource( ResourceTypes::Material, "overlays/font.material.xml", 0 );
+	_panelMatRes = Horde3D::addResource( ResourceTypes::Material, "overlays/panel.material.xml", 0 );
+	_logoMatRes = Horde3D::addResource( ResourceTypes::Material, "overlays/logo.material.xml", 0 );
 	// Environment
-	ResHandle envRes = Horde3D::addResource( ResourceTypes::SceneGraph, "sphere.scene.xml", 0 );
+	ResHandle envRes = Horde3D::addResource( ResourceTypes::SceneGraph, "models/sphere/sphere.scene.xml", 0 );
 	// Knight
-	ResHandle knightRes = Horde3D::addResource( ResourceTypes::SceneGraph, "knight.scene.xml", 0 );
-	ResHandle knightAnim1Res = Horde3D::addResource( ResourceTypes::Animation, "knight_order.anim", 0 );
-	ResHandle knightAnim2Res = Horde3D::addResource( ResourceTypes::Animation, "knight_attack.anim", 0 );
+	ResHandle knightRes = Horde3D::addResource( ResourceTypes::SceneGraph, "models/knight/knight.scene.xml", 0 );
+	ResHandle knightAnim1Res = Horde3D::addResource( ResourceTypes::Animation, "animations/knight_order.anim", 0 );
+	ResHandle knightAnim2Res = Horde3D::addResource( ResourceTypes::Animation, "animations/knight_attack.anim", 0 );
 	// Particle system
-	ResHandle particleSysRes = Horde3D::addResource( ResourceTypes::SceneGraph, "particleSys1.scene.xml", 0 );
+	ResHandle particleSysRes = Horde3D::addResource( ResourceTypes::SceneGraph, "particles/particleSys1/particleSys1.scene.xml", 0 );
 	
 	// Load resources
 	Horde3DUtils::loadResourcesFromDisk( _contentDir.c_str() );
@@ -122,7 +109,7 @@ bool Application::init()
 	Horde3D::setNodeParamf( light, LightNodeParams::Col_B, 0.7f );
 
 	// Customize post processing effects
-	NodeHandle matRes = Horde3D::findResource( ResourceTypes::Material, "postHDR.material.xml" );
+	NodeHandle matRes = Horde3D::findResource( ResourceTypes::Material, "pipelines/postHDR.material.xml" );
 	// hdrParams: exposure, brightpass threshold, brightpass offset (see shader for description)
 	Horde3D::setMaterialUniform( matRes, "hdrParams", 2.5f, 0.5f, 0.08f, 0 );
 	

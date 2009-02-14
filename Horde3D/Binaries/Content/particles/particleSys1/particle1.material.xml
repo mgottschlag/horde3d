@@ -1,5 +1,5 @@
 <Material class="Translucent.Particle">
-	<Shader source="particle.shader"/>
+	<Shader source="shaders/particle.shader"/>
 	
-	<Sampler name="albedoMap" map="particle1.tga" />
+	<Sampler name="albedoMap" map="textures/particles/particle1.tga" />
 </Material>

@@ -1,5 +1,5 @@
 <Material>
-	<Shader source="postHDR.shader"/>
+	<Shader source="shaders/postHDR.shader"/>
 	
 	<Uniform name="hdrParams" a="2.0" b="0.6" c="0.06" />
 	<Uniform name="blurParams" a="0.0" />

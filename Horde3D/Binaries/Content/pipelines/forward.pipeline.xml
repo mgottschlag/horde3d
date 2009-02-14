@@ -1,7 +1,7 @@
 <!-- Forward Shading Pipeline -->
 <Pipeline>
 	<CommandQueue>
-		<Stage id="Geometry" link="globalSettings.material.xml">
+		<Stage id="Geometry" link="pipelines/globalSettings.material.xml">
 			<ClearTarget depthBuf="true" colBuf0="true" />
 			
 			<DrawGeometry context="AMBIENT" class="~Translucent" />

@@ -1,4 +1,4 @@
-<Model name="man" geometry="man.geo" lodDist1="10" lodDist2="20" lodDist3="40">
+<Model name="man" geometry="models/man/man.geo" lodDist1="10" lodDist2="20" lodDist3="40">
 	<Joint name="Hips" tx="0.003413" ty="0.899222" tz="0.0192515" rx="5.12489" ry="0" rz="0" sx="0.009444" sy="0.009444" sz="0.009444" jointIndex="1">
 		<Joint name="RightUpLeg" tx="-10" ty="-2.10541" tz="-0.189289" rx="-1.45421" ry="-89.8994" rz="-95.7041" jointIndex="2">
 			<Joint name="RightLeg" tx="44.2048" ty="-1e-006" tz="-1.5e-005" rx="-0.117227" ry="4.76155" rz="-6.74527" jointIndex="3">
@@ -39,8 +39,8 @@
 		</Joint>
 	</Joint>
 
-	<Mesh name="body" lodLevel="1" material="man/civilian1.material.xml" batchStart="0" batchCount="2976" vertRStart="0" vertREnd="860" />
-	<Mesh name="body" material="man/civilian1.material.xml" batchStart="2976" batchCount="5994" vertRStart="861" vertREnd="2430" />
-	<Mesh name="body" lodLevel="2" material="man/civilian1.material.xml" batchStart="8970" batchCount="1461" vertRStart="2431" vertREnd="2911" />
-	<Mesh name="body" lodLevel="3" material="man/civilian1.material.xml" batchStart="10431" batchCount="729" vertRStart="2912" vertREnd="3184" />
+	<Mesh name="body" lodLevel="1" material="models/man/civilian1.material.xml" batchStart="0" batchCount="2976" vertRStart="0" vertREnd="860" />
+	<Mesh name="body" material="models/man/civilian1.material.xml" batchStart="2976" batchCount="5994" vertRStart="861" vertREnd="2430" />
+	<Mesh name="body" lodLevel="2" material="models/man/civilian1.material.xml" batchStart="8970" batchCount="1461" vertRStart="2431" vertREnd="2911" />
+	<Mesh name="body" lodLevel="3" material="models/man/civilian1.material.xml" batchStart="10431" batchCount="729" vertRStart="2912" vertREnd="3184" />
 </Model>

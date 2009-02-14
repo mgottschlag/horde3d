@@ -50,18 +50,6 @@ bool Application::init()
 		Horde3DUtils::dumpMessages();
 		return false;
 	}
-	
-	// Set paths for resources
-	Horde3DUtils::setResourcePath( ResourceTypes::SceneGraph, "models" );
-	Horde3DUtils::setResourcePath( ResourceTypes::Geometry, "models" );
-	Horde3DUtils::setResourcePath( ResourceTypes::Animation, "models" );
-	Horde3DUtils::setResourcePath( ResourceTypes::Material, "materials" );
-	Horde3DUtils::setResourcePath( ResourceTypes::Code, "shaders" );
-	Horde3DUtils::setResourcePath( ResourceTypes::Shader, "shaders" );
-	Horde3DUtils::setResourcePath( ResourceTypes::Texture2D, "textures" );
-	Horde3DUtils::setResourcePath( ResourceTypes::TextureCube, "textures" );
-	Horde3DUtils::setResourcePath( ResourceTypes::Effect, "effects" );
-	Horde3DUtils::setResourcePath( ResourceTypes::Pipeline, "pipelines" );
 
 	// Set options
 	Horde3D::setOption( EngineOptions::LoadTextures, 1 );
@@ -72,14 +60,13 @@ bool Application::init()
 
 	// Add resources
 	// Pipeline
-	ResHandle pipeRes = Horde3D::addResource( ResourceTypes::Pipeline, "forward.pipeline.xml", 0 );
-	// Font and GUI
-	_fontMatRes = Horde3D::addResource( ResourceTypes::Material, "font.material.xml", 0 );
-	_panelMatRes = Horde3D::addResource( ResourceTypes::Material, "panel.material.xml", 0 );
-	// Logo
-	_logoMatRes = Horde3D::addResource( ResourceTypes::Material, "logo.material.xml", 0 );
+	ResHandle pipeRes = Horde3D::addResource( ResourceTypes::Pipeline, "pipelines/forward.pipeline.xml", 0 );
+	// Overlays
+	_fontMatRes = Horde3D::addResource( ResourceTypes::Material, "overlays/font.material.xml", 0 );
+	_panelMatRes = Horde3D::addResource( ResourceTypes::Material, "overlays/panel.material.xml", 0 );
+	_logoMatRes = Horde3D::addResource( ResourceTypes::Material, "overlays/logo.material.xml", 0 );
 	// Terrain
-	ResHandle terrainRes = Horde3D::addResource( ResourceTypes::SceneGraph, "terrain.scene.xml", 0 );
+	ResHandle terrainRes = Horde3D::addResource( ResourceTypes::SceneGraph, "terrains/terrain1/terrain1.scene.xml", 0 );
 	
 	
 	// Load resources
@@ -104,7 +91,7 @@ bool Application::init()
 	Horde3D::setNodeParamf( light, LightNodeParams::Col_B, 0.7f );*/
 
 	// Set sun direction for ambient pass
-	NodeHandle matRes = Horde3D::findResource( ResourceTypes::Material, "terrain/terrain.material.xml" );
+	NodeHandle matRes = Horde3D::findResource( ResourceTypes::Material, "terrains/terrain1/terrain1.material.xml" );
 	Horde3D::setMaterialUniform( matRes, "sunDir", 1, -1, 0, 0 );
 
 	return true;

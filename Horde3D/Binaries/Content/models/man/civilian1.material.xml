@@ -1,6 +1,6 @@
 <Material>
-	<Shader source="model.shader" />
+	<Shader source="shaders/model.shader" />
 	<ShaderFlag name="_F01_Skinning" />
 
-	<Sampler name="albedoMap" map="civil01.jpg" />
+	<Sampler name="albedoMap" map="models/man/civil01.jpg" />
 </Material>

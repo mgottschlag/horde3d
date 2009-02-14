@@ -17,7 +17,7 @@
 [[VS_SHADOWMAP]]
 // =================================================================================================
 
-#include "utilityLib/vertParticle.glsl"
+#include "shaders/utilityLib/vertParticle.glsl"
 
 uniform vec4 lightPos;
 varying float dist;
@@ -47,7 +47,7 @@ void main( void )
 [[VS_TRANSLUCENT]]
 // =================================================================================================
 
-#include "utilityLib/vertParticle.glsl"
+#include "shaders/utilityLib/vertParticle.glsl"
 
 varying vec4 color;
 varying vec2 texCoord;

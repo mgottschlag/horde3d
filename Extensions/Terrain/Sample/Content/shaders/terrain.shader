@@ -26,7 +26,7 @@
 [[VS_GENERAL]]
 // =================================================================================================
 
-#include "utilityLib/vertCommon.glsl"
+#include "shaders/utilityLib/vertCommon.glsl"
 
 uniform vec4 terBlockParams;
 attribute float terHeight;
@@ -49,7 +49,7 @@ void main( void )
 [[FS_ATTRIBPASS]]
 // =================================================================================================
 
-#include "utilityLib/fragDeferredWrite.glsl"
+#include "shaders/utilityLib/fragDeferredWrite.glsl"
 
 uniform vec4 sunDir;
 uniform sampler2D heightNormMap, detailMap;
@@ -76,7 +76,7 @@ void main( void )
 [[VS_SHADOWMAP]]
 // =================================================================================================
 
-#include "utilityLib/vertCommon.glsl"
+#include "shaders/utilityLib/vertCommon.glsl"
 
 uniform vec4 lightPos;
 uniform vec4 terBlockParams;
@@ -110,7 +110,7 @@ void main( void )
 [[FS_LIGHTING]]
 // =================================================================================================
 
-#include "utilityLib/fragLighting.glsl"
+#include "shaders/utilityLib/fragLighting.glsl"
 
 uniform sampler2D heightNormMap, detailMap;
 varying vec4 pos, vsPos;

@@ -37,8 +37,8 @@ void CrowdSim::init()
 	srand( (unsigned int)time( NULL ) );
 	
 	// Load character with walk animation
-	ResHandle characterRes = Horde3D::addResource( ResourceTypes::SceneGraph, "man.scene.xml", 0 );
-	ResHandle characterWalkRes = Horde3D::addResource( ResourceTypes::Animation, "man.anim", 0 );
+	ResHandle characterRes = Horde3D::addResource( ResourceTypes::SceneGraph, "models/man/man.scene.xml", 0 );
+	ResHandle characterWalkRes = Horde3D::addResource( ResourceTypes::Animation, "animations/man.anim", 0 );
 	Horde3DUtils::loadResourcesFromDisk( _contentDir.c_str() );
 	
 	// Add characters

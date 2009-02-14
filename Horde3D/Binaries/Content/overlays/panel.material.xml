@@ -1,5 +1,5 @@
 <Material>
-	<Shader source="overlay.shader"/>
+	<Shader source="shaders/overlay.shader"/>
 	
-	<Sampler name="albedoMap" map="white.tga" />
+	<Sampler name="albedoMap" map="textures/common/white.tga" />
 </Material>

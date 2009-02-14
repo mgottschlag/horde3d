@@ -7,7 +7,7 @@
 	</Setup>
 	
 	<CommandQueue>
-		<Stage id="Ambient" link="globalSettings.material.xml">
+		<Stage id="Ambient" link="pipelines/globalSettings.material.xml">
 			<SwitchTarget target="HDRBUF" />
 			<ClearTarget depthBuf="true" colBuf0="true" />
 			
@@ -26,27 +26,27 @@
 		<Stage id="BrightPass">
 			<SwitchTarget target="BLURBUF1" />
 			<BindBuffer sampler="buf0" sourceRT="HDRBUF" bufIndex="0" />
-			<DrawQuad material="postHDR.material.xml" context="BRIGHTPASS" />
+			<DrawQuad material="pipelines/postHDR.material.xml" context="BRIGHTPASS" />
 			<UnbindBuffers />
 		</Stage>
 		
 		<Stage id="Bloom">
 			<SwitchTarget target="BLURBUF2" />
 			<BindBuffer sampler="buf0" sourceRT="BLURBUF1" bufIndex="0" />
-			<SetUniform material="postHDR.material.xml" uniform="blurParams" a="0.0" />
-			<DrawQuad material="postHDR.material.xml" context="BLUR" />
+			<SetUniform material="pipelines/postHDR.material.xml" uniform="blurParams" a="0.0" />
+			<DrawQuad material="pipelines/postHDR.material.xml" context="BLUR" />
 			<SwitchTarget target="BLURBUF1" />
 			<BindBuffer sampler="buf0" sourceRT="BLURBUF2" bufIndex="0" />
-			<SetUniform material="postHDR.material.xml" uniform="blurParams" a="1.0" />
-			<DrawQuad material="postHDR.material.xml" context="BLUR" />
+			<SetUniform material="pipelines/postHDR.material.xml" uniform="blurParams" a="1.0" />
+			<DrawQuad material="pipelines/postHDR.material.xml" context="BLUR" />
 			<SwitchTarget target="BLURBUF2" />
 			<BindBuffer sampler="buf0" sourceRT="BLURBUF1" bufIndex="0" />
-			<SetUniform material="postHDR.material.xml" uniform="blurParams" a="2.0" />
-			<DrawQuad material="postHDR.material.xml" context="BLUR" />
+			<SetUniform material="pipelines/postHDR.material.xml" uniform="blurParams" a="2.0" />
+			<DrawQuad material="pipelines/postHDR.material.xml" context="BLUR" />
 			<SwitchTarget target="BLURBUF1" />
 			<BindBuffer sampler="buf0" sourceRT="BLURBUF2" bufIndex="0" />
-			<SetUniform material="postHDR.material.xml" uniform="blurParams" a="3.0" />
-			<DrawQuad material="postHDR.material.xml" context="BLUR" />
+			<SetUniform material="pipelines/postHDR.material.xml" uniform="blurParams" a="3.0" />
+			<DrawQuad material="pipelines/postHDR.material.xml" context="BLUR" />
 			<UnbindBuffers />
 		</Stage>
 		
@@ -54,7 +54,7 @@
 			<SwitchTarget target="" />
 			<BindBuffer sampler="buf0" sourceRT="HDRBUF" bufIndex="0" />
 			<BindBuffer sampler="buf1" sourceRT="BLURBUF1" bufIndex="0" />
-			<DrawQuad material="postHDR.material.xml" context="FINALPASS" />
+			<DrawQuad material="pipelines/postHDR.material.xml" context="FINALPASS" />
 			<UnbindBuffers />
 		</Stage>
 		

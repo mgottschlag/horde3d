@@ -1,5 +1,5 @@
 <Material>
-	<Shader source="skybox.shader"/>
+	<Shader source="shaders/skybox.shader"/>
 	
-	<Sampler name="albedoMap" map="skybox.jpg" type="CUBE" />
+	<Sampler name="albedoMap" map="models/skybox/skybox.jpg" type="CUBE" />
 </Material>

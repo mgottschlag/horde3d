@@ -1,4 +1,4 @@
-<Model name="knight" geometry="knight.geo">
+<Model name="knight" geometry="models/knight/knight.geo">
 	<Joint name="Bip01" tx="-0.000833" ty="35" tz="-0.93383" rx="-0" ry="40" rz="0" jointIndex="1">
 		<Joint name="Bip01_Footsteps" tx="3e-006" ty="-34.3606" tz="0" rx="-0" ry="-40" rz="0" jointIndex="2" />
 		<Joint name="Bip01_Pelvis" rx="-0" ry="-89.9999" rz="92.8207" jointIndex="3">
@@ -7,7 +7,7 @@
 					<Joint name="Bip01_Spine2" tx="4.13445" ty="0.000777" tz="0.007217" rx="-6.10017" ry="6.98518" rz="-4.2919" jointIndex="6">
 						<Joint name="Bip01_Neck" tx="9.18408" ty="0" tz="0.003139" rx="-0" ry="22.0606" rz="5.72958e-005" jointIndex="7">
 							<Joint name="Bip01_Head" tx="4.25392" ty="0" tz="0" rx="6.26079" ry="-25.9025" rz="0.434895" jointIndex="8">
-								<Mesh name="helmet" material="knight/knight.material.xml" tx="-63.121" ty="-0.000834" tz="0.286122" rx="-0" ry="0" rz="-89.9999" batchStart="26844" batchCount="1776" vertRStart="6038" vertREnd="6434" />
+								<Mesh name="helmet" material="models/knight/knight.material.xml" tx="-63.121" ty="-0.000834" tz="0.286122" rx="-0" ry="0" rz="-89.9999" batchStart="26844" batchCount="1776" vertRStart="6038" vertREnd="6434" />
 							</Joint>
 							<Joint name="Bip01_R_Clavicle" tx="0" ty="-1.19506" tz="-0.00339" rx="-1.84341" ry="157.894" rz="-73.4091" jointIndex="9">
 								<Joint name="Bip01_R_UpperArm" tx="6.37149" ty="-1e-006" tz="0" rx="41.0862" ry="53.2935" rz="57.4189" jointIndex="10">
@@ -38,7 +38,7 @@
 													<Joint name="Bip01_R_Finger42" tx="0.677208" ty="3e-006" tz="0" rx="-0" ry="88.7213" rz="0" jointIndex="27" />
 												</Joint>
 											</Joint>
-											<Mesh name="default" material="knight/knight.material.xml" tx="16.5466" ty="3.4593" tz="-44.0244" batchStart="28620" batchCount="1464" vertRStart="6435" vertREnd="6827" />
+											<Mesh name="default" material="models/knight/knight.material.xml" tx="16.5466" ty="3.4593" tz="-44.0244" batchStart="28620" batchCount="1464" vertRStart="6435" vertREnd="6827" />
 										</Joint>
 									</Joint>
 									<Joint name="Bip01_R_ForeTwist" tx="11.5125" ty="0" tz="-1e-006" rx="11.0613" ry="-62.0666" rz="0" jointIndex="28" />
@@ -101,8 +101,8 @@
 		</Joint>
 	</Joint>
 
-	<Mesh name="osh_body" material="knight/knight.material.xml" batchStart="0" batchCount="14952" vertRStart="0" vertREnd="3570" />
-	<Mesh name="osh_pauldrons" material="knight/knight.material.xml" batchStart="14952" batchCount="1746" vertRStart="3571" vertREnd="4026" />
-	<Mesh name="osh_scabroyal" material="knight/knight.material.xml" batchStart="16698" batchCount="1344" vertRStart="4027" vertREnd="4445" />
-	<Mesh name="head" material="knight/knight.material.xml" batchStart="18042" batchCount="8802" vertRStart="4446" vertREnd="6037" />
+	<Mesh name="osh_body" material="models/knight/knight.material.xml" batchStart="0" batchCount="14952" vertRStart="0" vertREnd="3570" />
+	<Mesh name="osh_pauldrons" material="models/knight/knight.material.xml" batchStart="14952" batchCount="1746" vertRStart="3571" vertREnd="4026" />
+	<Mesh name="osh_scabroyal" material="models/knight/knight.material.xml" batchStart="16698" batchCount="1344" vertRStart="4027" vertREnd="4445" />
+	<Mesh name="head" material="models/knight/knight.material.xml" batchStart="18042" batchCount="8802" vertRStart="4446" vertREnd="6037" />
 </Model>

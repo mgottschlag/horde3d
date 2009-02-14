@@ -50,18 +50,6 @@ bool Application::init()
 		Horde3DUtils::dumpMessages();
 		return false;
 	}
-	
-	// Set paths for resources
-	Horde3DUtils::setResourcePath( ResourceTypes::SceneGraph, "models" );
-	Horde3DUtils::setResourcePath( ResourceTypes::Geometry, "models" );
-	Horde3DUtils::setResourcePath( ResourceTypes::Animation, "models" );
-	Horde3DUtils::setResourcePath( ResourceTypes::Material, "materials" );
-	Horde3DUtils::setResourcePath( ResourceTypes::Code, "shaders" );
-	Horde3DUtils::setResourcePath( ResourceTypes::Shader, "shaders" );
-	Horde3DUtils::setResourcePath( ResourceTypes::Texture2D, "textures" );
-	Horde3DUtils::setResourcePath( ResourceTypes::TextureCube, "textures" );
-	Horde3DUtils::setResourcePath( ResourceTypes::Effect, "effects" );
-	Horde3DUtils::setResourcePath( ResourceTypes::Pipeline, "pipelines" );
 
 	// Set options
 	Horde3D::setOption( EngineOptions::LoadTextures, 1 );
@@ -72,19 +60,18 @@ bool Application::init()
 
 	// Add resources
 	// Pipelines
-	_forwardPipeRes = Horde3D::addResource( ResourceTypes::Pipeline, "forward.pipeline.xml", 0 );
-	_deferredPipeRes = Horde3D::addResource( ResourceTypes::Pipeline, "deferred.pipeline.xml", 0 );
-	// Font and GUI
-	_fontMatRes = Horde3D::addResource( ResourceTypes::Material, "font.material.xml", 0 );
-	_panelMatRes = Horde3D::addResource( ResourceTypes::Material, "panel.material.xml", 0 );
-	// Logo
-	_logoMatRes = Horde3D::addResource( ResourceTypes::Material, "logo.material.xml", 0 );
+	_forwardPipeRes = Horde3D::addResource( ResourceTypes::Pipeline, "pipelines/forward.pipeline.xml", 0 );
+	_deferredPipeRes = Horde3D::addResource( ResourceTypes::Pipeline, "pipelines/deferred.pipeline.xml", 0 );
+	// Overlays
+	_fontMatRes = Horde3D::addResource( ResourceTypes::Material, "overlays/font.material.xml", 0 );
+	_panelMatRes = Horde3D::addResource( ResourceTypes::Material, "overlays/panel.material.xml", 0 );
+	_logoMatRes = Horde3D::addResource( ResourceTypes::Material, "overlays/logo.material.xml", 0 );
 	// Shader for deferred shading
-	ResHandle lightMatRes = Horde3D::addResource( ResourceTypes::Material, "light.material.xml", 0 );
+	ResHandle lightMatRes = Horde3D::addResource( ResourceTypes::Material, "materials/light.material.xml", 0 );
 	// Environment
-	ResHandle envRes = Horde3D::addResource( ResourceTypes::SceneGraph, "platform.scene.xml", 0 );
+	ResHandle envRes = Horde3D::addResource( ResourceTypes::SceneGraph, "models/platform/platform.scene.xml", 0 );
 	// Skybox
-	ResHandle skyBoxRes = Horde3D::addResource( ResourceTypes::SceneGraph, "skybox.scene.xml", 0 );
+	ResHandle skyBoxRes = Horde3D::addResource( ResourceTypes::SceneGraph, "models/skybox/skybox.scene.xml", 0 );
 	
 	// Load resources
 	Horde3DUtils::loadResourcesFromDisk( _contentDir.c_str() );

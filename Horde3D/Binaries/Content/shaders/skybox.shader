@@ -14,7 +14,7 @@
 [[VS_GENERAL]]
 // =================================================================================================
 
-#include "utilityLib/vertCommon.glsl"
+#include "shaders/utilityLib/vertCommon.glsl"
 
 uniform vec3 viewer;
 varying vec3 viewVec;
@@ -31,7 +31,7 @@ void main(void)
 [[FS_ATTRIBPASS]]
 // =================================================================================================
 
-#include "utilityLib/fragDeferredWrite.glsl"
+#include "shaders/utilityLib/fragDeferredWrite.glsl"
 
 uniform samplerCube albedoMap;
 varying vec3 viewVec;
