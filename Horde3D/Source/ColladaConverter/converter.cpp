@@ -33,6 +33,7 @@
 #include "utPlatform.h"
 #include <fstream>
 #include <sstream>
+#include <iomanip>
 
 using namespace std;
 
@@ -712,17 +713,33 @@ void Converter::processMeshes( ColladaDocument &doc, bool optimize )
 	}
 
 	// Optimization and clean up
+	float effBefore = 0, effAfter = 0;
+	unsigned int numCalls = 0;
 	for( unsigned int i = 0; i < _meshes.size(); ++i )
 	{
 		for( unsigned int j = 0; j < _meshes[i]->triGroups.size(); ++j )
 		{
 			// Optimize order of indices for best vertex cache usage
 			if( optimize )
+			{
+				++numCalls;
+				effBefore += MeshOptimizer::calcCacheEfficiency( _meshes[i]->triGroups[j], _indices );
 				MeshOptimizer::optimizeIndexOrder( _meshes[i]->triGroups[j], _vertices, _indices );
+				effAfter += MeshOptimizer::calcCacheEfficiency( _meshes[i]->triGroups[j], _indices );
+			}
 			
 			delete[] _meshes[i]->triGroups[j].posIndexToVertices;
 			_meshes[i]->triGroups[j].posIndexToVertices = 0x0;
 		}
+	}
+
+	if( numCalls > 0 )
+	{
+		stringstream ss;
+		ss << fixed << setprecision( 3 );
+		ss << "Optimized geometry for vertex cache: from ATVR " << effBefore / numCalls;
+		ss << " to ATVR " << effAfter / numCalls;
+		log( ss.str() );
 	}
 }
 

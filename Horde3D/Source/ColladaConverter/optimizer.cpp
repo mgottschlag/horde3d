@@ -16,7 +16,7 @@ void OptVertex::updateScore( int cacheIndex )
 	// The constants used here are coming from the paper
 	if( cacheIndex < 0 ) score = 0;				// Not in cache
 	else if( cacheIndex < 3 ) score = 0.75f;	// Among three most recent vertices
-	else score = pow( 1.0f - ((cacheIndex - 3) / MeshOptimizer::OptCacheSize), 1.5f );
+	else score = pow( 1.0f - ((cacheIndex - 3) / MeshOptimizer::maxCacheSize), 1.5f );
 
 	score += 2.0f * pow( (float)faces.size(), -0.5f );
 }
@@ -148,7 +148,7 @@ void MeshOptimizer::optimizeIndexOrder( TriGroup &triGroup, vector< Vertex > &ve
 		}
 
 		// Trim cache
-		for( int i = (int)cache.size(); i > OptCacheSize; --i )
+		for( int i = (int)cache.size(); i > maxCacheSize; --i )
 		{
 			cache.pop_back();
 		}
@@ -181,10 +181,15 @@ void MeshOptimizer::optimizeIndexOrder( TriGroup &triGroup, vector< Vertex > &ve
 	{
 		vertices[itr1->second] = oldVertices[itr1->first - triGroup.vertRStart];
 	}
+}
 
 
-	/*// Measure cache efficiency
-	int misses = 0;
+float MeshOptimizer::calcCacheEfficiency( TriGroup &triGroup, vector< unsigned int > &indices,
+                                          const unsigned int cacheSize )
+{	
+	// Measure efficiency of index array regarding post-transform vertex cache
+
+	unsigned int misses = 0;
 	list< unsigned int > testCache;
 	for( unsigned int i = 0; i < triGroup.count; ++i )
 	{
@@ -192,9 +197,13 @@ void MeshOptimizer::optimizeIndexOrder( TriGroup &triGroup, vector< Vertex > &ve
 		if( find( testCache.begin(), testCache.end(), index ) == testCache.end() )
 		{
 			testCache.push_back( index );
-			if( testCache.size() > 16 ) testCache.erase( testCache.begin() );
+			if( testCache.size() > cacheSize ) testCache.erase( testCache.begin() );
 			++misses;
 		}
 	}
-	float efficiency = 1.0f - (float)misses / triGroup.count;*/
+	
+	// Average transform to vertex ratio (ATVR)
+	// 1.0 is theoretical optimum, meaning that each vertex is just transformed exactly one time
+	float atvr = (float)(triGroup.count + misses) / triGroup.count;
+	return atvr;
 }
