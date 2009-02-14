@@ -169,14 +169,6 @@ bool MaterialResource::load( const char *data, int size )
 		if( _stricmp( node1.getAttribute( "mipmaps", "true" ), "false" ) == 0 ||
 			_stricmp( node1.getAttribute( "mipmaps", "1" ), "0" ) == 0 )
 			flags |= ResourceFlags::NoTexMipmaps;
-		
-		if( _stricmp( node1.getAttribute( "bilinear", "true" ), "false" ) == 0 ||
-			_stricmp( node1.getAttribute( "bilinear", "1" ), "0" ) == 0 )
-			flags |= ResourceFlags::NoTexFiltering;
-
-		if( _stricmp( node1.getAttribute( "repeatMode", "true" ), "false" ) == 0 ||
-			_stricmp( node1.getAttribute( "repeatMode", "1" ), "0" ) == 0 )
-			flags |= ResourceFlags::NoTexRepeat;
 
 		if( _stricmp( node1.getAttribute( "type", "2D" ), "CUBE" ) == 0 )
 		{

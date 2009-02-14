@@ -105,10 +105,10 @@ public:
 	// Texture map functions
 	bool supportsNPOTTextures();
 	uint32 uploadTexture2D( void *pixels, int width, int height, int comps, bool hdr, bool allowCompression,
-	                        bool mipmaps, bool filtering, bool repeatMode, uint32 texId = 0 );
-	void updateTexture2D( unsigned char *pixels, int width, int height, int comps, bool filtering, uint32 texId );
+	                        bool mipmaps, uint32 texId = 0 );
+	void updateTexture2D( unsigned char *pixels, int width, int height, int comps, uint32 texId );
 	uint32 uploadTextureCube( void *pixels, int width, int height, int comps, bool hdr, uint32 cubeFace,
-	                          bool allowCompression, bool mipmaps, bool filtering, uint32 texId = 0 );
+	                          bool allowCompression, bool mipmaps, uint32 texId = 0 );
 	void unloadTexture( uint32 texId, bool cubeMap );
 	float *downloadTexture2DData( uint32 texId, int *width, int *height );
 
@@ -121,7 +121,7 @@ public:
 
 	// Render buffer functions
 	RenderBuffer createRenderBuffer( uint32 width, uint32 height, RenderBufferFormats::List format,
-	                                 bool depth, uint32 numColBufs, bool bilinear, uint32 samples );
+	                                 bool depth, uint32 numColBufs, uint32 samples );
 	void destroyRenderBuffer( RenderBuffer &rb );
 	void setRenderBuffer( RenderBuffer *rb );
 	bool getBufferData( RenderBuffer *rb, int bufIndex, int *width, int *height,

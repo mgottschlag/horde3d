@@ -150,7 +150,6 @@ struct RenderTarget
 	uint32                     samples;  // Multisampled if > 0
 	float                      scale;  // Scale factor for FB width and height
 	bool                       hasDepthBuf;
-	bool                       bilinear;
 	RenderBuffer               rendBuf;
 	RenderBuffer               rendBufMultisample;
 
@@ -174,7 +173,7 @@ private:
 	const std::string parseStage( XMLNode &node, PipelineStage &stage );
 
 	void addRenderTarget( const std::string &id, bool depthBuffer, uint32 numBuffers,
-	                      RenderBufferFormats::List format, bool bilinear, uint32 samples,
+	                      RenderBufferFormats::List format, uint32 samples,
 	                      uint32 width, uint32 height, float scale );
 	RenderTarget *findRenderTarget( const std::string &id );
 	bool createRenderTargets();

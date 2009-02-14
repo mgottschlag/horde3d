@@ -103,6 +103,25 @@ struct TestModes
 	};
 };
 
+struct TexFilterModes
+{
+	enum List
+	{
+		None,
+		Bilinear,
+		Trilinear
+	};
+};
+
+struct TexAddressModes
+{
+	enum List
+	{
+		Wrap,
+		Clamp
+	};
+};
+
 
 struct ShaderCombination
 {
@@ -175,8 +194,17 @@ struct ShaderContext
 
 struct ShaderSampler
 {
-	std::string  id;
-	int          texUnit;
+	std::string            id;
+	int                    texUnit;
+	TexAddressModes::List  addressMode;
+	TexFilterModes::List   filterMode;
+	int                    maxAnisotropy;
+
+
+	ShaderSampler() :
+		addressMode( TexAddressModes::Wrap ), filterMode( TexFilterModes::Trilinear ), maxAnisotropy( 8 )
+	{
+	}
 };
 
 struct ShaderUniform

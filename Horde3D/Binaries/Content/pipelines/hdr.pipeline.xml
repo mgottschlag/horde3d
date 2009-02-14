@@ -2,8 +2,8 @@
 <Pipeline>
 	<Setup>
 		<RenderTarget id="HDRBUF" depthBuf="true" numColBufs="1" format="RGBA16F" scale="1.0" maxSamples="16" />
-		<RenderTarget id="BLURBUF1" depthBuf="false" numColBufs="1" format="RGBA8" bilinear="true" scale="0.25" />
-		<RenderTarget id="BLURBUF2" depthBuf="false" numColBufs="1" format="RGBA8" bilinear="true" scale="0.25" />
+		<RenderTarget id="BLURBUF1" depthBuf="false" numColBufs="1" format="RGBA8" scale="0.25" />
+		<RenderTarget id="BLURBUF2" depthBuf="false" numColBufs="1" format="RGBA8" scale="0.25" />
 	</Setup>
 	
 	<CommandQueue>

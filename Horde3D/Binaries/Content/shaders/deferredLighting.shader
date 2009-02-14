@@ -1,9 +1,21 @@
 [[FX]]
 
-<Sampler id="depthBuf" />
-<Sampler id="buf0" />
-<Sampler id="buf1" />
-<Sampler id="buf2" />
+<Sampler id="depthBuf">
+	<StageConfig addressMode="CLAMP" />
+</Sampler>
+
+<Sampler id="buf0">
+	<StageConfig addressMode="CLAMP" />
+</Sampler>
+
+<Sampler id="buf1">
+	<StageConfig addressMode="CLAMP" />
+</Sampler>
+
+<Sampler id="buf2">
+	<StageConfig addressMode="CLAMP" />
+</Sampler>
+
 <Sampler id="ambientMap" />
 
 

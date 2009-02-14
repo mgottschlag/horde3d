@@ -148,7 +148,7 @@ void Texture2DResource::initializationFunc()
 
 	// Upload default texture
 	defTexObject = Modules::renderer().uploadTexture2D(
-		defaultTexture, 4, 4, 24, false, false, true, true, true );
+		defaultTexture, 4, 4, 24, false, false, true, true );
 }
 
 
@@ -175,8 +175,7 @@ Texture2DResource::Texture2DResource( const string &name, int flags,
 	if( !renderable )
 	{
 		_texObject = Modules::renderer().uploadTexture2D( 0x0, _width, _height, _comps, _hdr,
-			!(_flags & ResourceFlags::NoTexCompression), !(_flags & ResourceFlags::NoTexMipmaps),
-			!(_flags & ResourceFlags::NoTexFiltering), !(_flags & ResourceFlags::NoTexRepeat) );
+			!(_flags & ResourceFlags::NoTexCompression), !(_flags & ResourceFlags::NoTexMipmaps) );
 		
 		if( _texObject == 0 ) initDefault();
 	}
@@ -184,7 +183,7 @@ Texture2DResource::Texture2DResource( const string &name, int flags,
 	{
 		_rendBuf = new RenderBuffer();
 		*_rendBuf = Modules::renderer().createRenderBuffer(
-			width, height, RenderBufferFormats::RGBA8, false, 1, !(_flags & ResourceFlags::NoTexFiltering), 0 ); 
+			width, height, RenderBufferFormats::RGBA8, false, 1, 0 ); 
 		_texObject = _rendBuf->colBufs[0];
 	}
 }
@@ -255,8 +254,7 @@ bool Texture2DResource::load( const char *data, int size )
 	
 	// Upload texture
 	_texObject = Modules::renderer().uploadTexture2D( pixels, _width, _height, _comps, _hdr,
-		!(_flags & ResourceFlags::NoTexCompression), !(_flags & ResourceFlags::NoTexMipmaps),
-		!(_flags & ResourceFlags::NoTexFiltering), !(_flags & ResourceFlags::NoTexRepeat) );
+		!(_flags & ResourceFlags::NoTexCompression), !(_flags & ResourceFlags::NoTexMipmaps) );
 	if( _texObject == 0 )
 		return raiseError( "Failed to upload texture map" );
 
@@ -275,8 +273,7 @@ bool Texture2DResource::updateData( int param, const void *data, int size )
 		if( _texObject == 0 ) return false;
 		if( size != _width * _height * _comps ) return false;
 
-		Modules::renderer().updateTexture2D( (unsigned char *)data, _width, _height, _comps,
-			!(_flags & ResourceFlags::NoTexFiltering), _texObject );
+		Modules::renderer().updateTexture2D( (unsigned char *)data, _width, _height, _comps, _texObject );
 
 		return true;
 	}
@@ -331,7 +328,7 @@ void TextureCubeResource::initializationFunc()
 	for( uint32 j = 1; j < 6; j++ ) 
 	{
 		Modules::renderer().uploadTextureCube(
-			defaultTexture, 4, 4, 24, false, j, false, true, true, defTexObject );
+			defaultTexture, 4, 4, 24, false, j, false, true, defTexObject );
 	}
 }
 
@@ -472,14 +469,13 @@ bool TextureCubeResource::load( const char *data, int size )
 		if( i == 0 )
 		{
 			_texObject = Modules::renderer().uploadTextureCube( cubeFace, faceWidth, faceHeight, _comps,
-				_hdr, i, !(_flags & ResourceFlags::NoTexCompression), !(_flags & ResourceFlags::NoTexMipmaps),
-				!(_flags & ResourceFlags::NoTexFiltering) );
+				_hdr, i, !(_flags & ResourceFlags::NoTexCompression), !(_flags & ResourceFlags::NoTexMipmaps) );
 		}
 		else
 		{
 			Modules::renderer().uploadTextureCube( cubeFace, faceWidth, faceHeight, _comps, _hdr, i,
 				!(_flags & ResourceFlags::NoTexCompression), !(_flags & ResourceFlags::NoTexMipmaps),
-				!(_flags & ResourceFlags::NoTexFiltering), _texObject );
+				_texObject );
 		}
 	}
 	

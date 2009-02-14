@@ -189,12 +189,6 @@ bool Renderer::init()
 	                      1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
 	glGenTextures( 1, &_defShadowMap );
 	glBindTexture( GL_TEXTURE_2D, _defShadowMap );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL );
 	glTexImage2D( GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, 8, 8, 0,
 	              GL_DEPTH_COMPONENT, GL_FLOAT, shadowTex );
 
@@ -559,24 +553,32 @@ bool Renderer::setMaterialRec( MaterialResource *materialRes, const string &shad
 	for( size_t i = 0, s = shaderRes->_samplers.size(); i < s; ++i )
 	{
 		if( _curShader->customSamplers[i] < 0 ) continue;
+		
+		glActiveTexture( GL_TEXTURE0 + shaderRes->_samplers[i].texUnit );
+		
+		ShaderSampler &sampler = shaderRes->_samplers[i];
+		int target = 0;
+		bool mips = false;
 
 		// Find sampler in material
 		for( size_t j = 0, s = materialRes->_samplers.size(); j < s; ++j )
 		{
 			MatSampler &matSampler = materialRes->_samplers[j];
 			
-			if( matSampler.name == shaderRes->_samplers[i].id )
+			if( matSampler.name == sampler.id )
 			{
-				glActiveTexture( GL_TEXTURE0 + shaderRes->_samplers[i].texUnit );
-
 				if( matSampler.texRes->getType() == ResourceTypes::Texture2D )
 				{
+					target = GL_TEXTURE_2D;
+					if( !(matSampler.texRes->getFlags() & ResourceFlags::NoTexMipmaps) ) mips = true;
 					Texture2DResource *texRes = (Texture2DResource *)matSampler.texRes.getPtr();
 					glBindTexture( GL_TEXTURE_CUBE_MAP, 0 );
 					glBindTexture( GL_TEXTURE_2D, texRes->getTexObject() );
 				}
 				else if( matSampler.texRes->getType() == ResourceTypes::TextureCube )
 				{
+					target = GL_TEXTURE_CUBE_MAP;
+					if( !(matSampler.texRes->getFlags() & ResourceFlags::NoTexMipmaps) ) mips = true;
 					TextureCubeResource *texRes = (TextureCubeResource *)matSampler.texRes.getPtr();
 					glBindTexture( GL_TEXTURE_CUBE_MAP, texRes->getTexObject() );
 				}
@@ -588,21 +590,83 @@ bool Renderer::setMaterialRec( MaterialResource *materialRes, const string &shad
 		// Find sampler in pipeline
 		for( size_t j = 0, s = _pipeSamplerBindings.size(); j < s; ++j )
 		{
-			if( strcmp( _pipeSamplerBindings[j].sampler, shaderRes->_samplers[i].id.c_str() ) == 0 )
+			if( strcmp( _pipeSamplerBindings[j].sampler, sampler.id.c_str() ) == 0 )
 			{
-				glActiveTexture( GL_TEXTURE0 + shaderRes->_samplers[i].texUnit );
+				target = GL_TEXTURE_2D;
+				mips = false;
 				glBindTexture( GL_TEXTURE_CUBE_MAP, 0 );
 
 				uint32 bufIndex = _pipeSamplerBindings[j].bufIndex;
 				RenderBuffer *rb = _pipeSamplerBindings[j].rb;
 				
 				if( bufIndex < 4 && rb->colBufs[bufIndex] != 0 )
+				{
 					glBindTexture( GL_TEXTURE_2D, rb->colBufs[bufIndex] );
+				}
 				else if( bufIndex == 32 && rb->depthBuf != 0 )
+				{
 					glBindTexture( GL_TEXTURE_2D, rb->depthBuf );
+					glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE );
+					glTexParameteri( GL_TEXTURE_2D, GL_DEPTH_TEXTURE_MODE, GL_LUMINANCE );
+				}
 
 				break;
 			}
+		}
+
+		// Address mode
+		switch( sampler.addressMode )
+		{
+		case TexAddressModes::Wrap:
+			glTexParameteri( target, GL_TEXTURE_WRAP_S, GL_REPEAT );
+			glTexParameteri( target, GL_TEXTURE_WRAP_T, GL_REPEAT );
+			glTexParameteri( target, GL_TEXTURE_WRAP_R, GL_REPEAT );
+			break;
+		case TexAddressModes::Clamp:
+			glTexParameteri( target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+			glTexParameteri( target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+			glTexParameteri( target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE );
+			break;
+		}
+
+		// Filtering
+		switch( sampler.filterMode )
+		{
+		case TexFilterModes::Trilinear:
+			if( Modules::config().trilinearFiltering )
+			{
+				glTexParameteri( target, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+				if( mips )
+					glTexParameteri( target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+				else
+					glTexParameteri( target, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+				break;
+			} // else go to case TexFilterModes::Bilinear
+		case TexFilterModes::Bilinear:
+			glTexParameteri( target, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+			if( mips )
+				glTexParameteri( target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST );
+			else
+				glTexParameteri( target, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+			break;
+		case TexFilterModes::None:
+			glTexParameteri( target, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+			if( mips )
+				glTexParameteri( target, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST );
+			else
+				glTexParameteri( target, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+			break;
+		}
+
+		// Anisotropy
+		if( mips )
+		{
+			glTexParameteri( target, GL_TEXTURE_MAX_ANISOTROPY_EXT,
+				min( sampler.maxAnisotropy, Modules::config().maxAnisotropy ) );
+		}
+		else
+		{
+			glTexParameteri( target, GL_TEXTURE_MAX_ANISOTROPY_EXT, 0 );
 		}
 	}
 	glActiveTexture( GL_TEXTURE0 );
@@ -704,13 +768,6 @@ bool Renderer::createShadowBuffer( uint32 width, uint32 height )
 	glGenTextures( 1, &_smTex );
 	glBindTexture( GL_TEXTURE_2D, _smTex );
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER );
-	float borderColor[] = {1.0f, 1.0f, 1.0f, 1.0f};
-	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL );
 	glTexImage2D( GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0x0 );
 	glFramebufferTexture2DEXT( GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, _smTex, 0 );
 
@@ -744,8 +801,19 @@ void Renderer::setupShadowMap( bool noShadows )
 {
 	// Bind shadow map
 	glActiveTexture( GL_TEXTURE12 );
+
 	if( !noShadows && _curLight->_shadowMapCount > 0 )glBindTexture( GL_TEXTURE_2D, _smTex );
 	else glBindTexture( GL_TEXTURE_2D, _defShadowMap );
+
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 0 );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER );
+	float borderColor[] = {1.0f, 1.0f, 1.0f, 1.0f};
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL );
 	
 	glActiveTexture( GL_TEXTURE0 );
 }

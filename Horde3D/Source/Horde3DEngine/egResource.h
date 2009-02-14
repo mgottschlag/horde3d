@@ -60,9 +60,7 @@ struct ResourceFlags
 		NoQuery = 1,
 		NoTexPOTConversion = 2,
 		NoTexCompression = 4,
-		NoTexMipmaps = 8,
-		NoTexFiltering = 16,
-		NoTexRepeat = 32
+		NoTexMipmaps = 8
 	};
 };
 
@@ -105,6 +103,7 @@ public:
 	virtual bool updateData( int param, const void *data, int size );
 
 	int &getType() { return _type; }
+	int getFlags() { return _flags; }
 	const std::string &getName() { return _name; }
 	ResHandle getHandle() { return _handle; }
 	bool isLoaded() { return _loaded; }

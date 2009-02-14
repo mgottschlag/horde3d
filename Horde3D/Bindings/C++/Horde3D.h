@@ -75,10 +75,8 @@ struct EngineOptions
 		MaxLogLevel			- Defines the maximum log level; only messages which are smaller or equal to this value
 							  (hence more important) are published in the message queue. (Default: 4)
 		MaxNumMessages      - Defines the maximum number of messages that can be stored in the message queue (Default: 512)
-		TrilinearFiltering	- Enables or disables trilinear filtering for textures; only affects textures
-							  that are loaded after setting the option. (Values: 0, 1; Default: 1)
-		AnisotropyFactor	- Sets the quality for anisotropic filtering; only affects textures that
-							  are loaded after setting the option. (Values: 1, 2, 4, 8; Default: 1)
+		TrilinearFiltering	- Enables or disables trilinear filtering for textures. (Values: 0, 1; Default: 1)
+		MaxAnisotropy		- Sets the maximum quality for anisotropic filtering. (Values: 1, 2, 4, 8; Default: 1)
 		TexCompression		- Enables or disables texture compression; only affects textures that are
 							  loaded after setting the option. (Values: 0, 1; Default: 0)
 		LoadTextures		- Enables or disables loading of texture images; option can be used to
@@ -98,7 +96,7 @@ struct EngineOptions
 		MaxLogLevel = 1,
 		MaxNumMessages,
 		TrilinearFiltering,
-		AnisotropyFactor,
+		MaxAnisotropy,
 		TexCompression,
 		LoadTextures,
 		FastAnimation,
@@ -169,17 +167,13 @@ struct ResourceFlags
 		NoTexPOTConversion	- Disables texture conversion to power-of-two dimensions on hardware without NPOT-support.
 		NoTexCompression	- Disables texture compression for Texture2D or TextureCube resource.
 		NoTexMipmaps		- Disables generation of mipmaps for textures.
-		NoTexFiltering		- Disables bilinear filtering for textures.
-		NoTexRepeat			- Disables tiling (repeat mode) for textures and enables clamping instead.
 	*/
 	enum Flags
 	{
 		NoQuery = 1,
 		NoTexPOTConversion = 2,
 		NoTexCompression = 4,
-		NoTexMipmaps = 8,
-		NoTexFiltering = 16,
-		NoTexRepeat = 32
+		NoTexMipmaps = 8
 	};
 };
 

@@ -1,7 +1,12 @@
 [[FX]]
 
-<Sampler id="buf0" />
-<Sampler id="buf1" />
+<Sampler id="buf0">
+	<StageConfig addressMode="CLAMP" />
+</Sampler>
+
+<Sampler id="buf1">
+	<StageConfig addressMode="CLAMP" />
+</Sampler>
 
 <Uniform id="hdrParams">
 	<!-- Description:

@@ -56,7 +56,7 @@ bool Application::init()
 	Horde3D::setOption( EngineOptions::LoadTextures, 1 );
 	Horde3D::setOption( EngineOptions::TexCompression, 0 );
 	Horde3D::setOption( EngineOptions::FastAnimation, 0 );
-	Horde3D::setOption( EngineOptions::AnisotropyFactor, 8 );
+	Horde3D::setOption( EngineOptions::MaxAnisotropy, 8 );
 	Horde3D::setOption( EngineOptions::ShadowMapSize, 2048 );
 
 	// Add resources

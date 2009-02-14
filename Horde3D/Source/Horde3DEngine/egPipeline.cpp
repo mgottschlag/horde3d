@@ -258,7 +258,7 @@ const string PipelineResource::parseStage( XMLNode &node, PipelineStage &stage )
 
 
 void PipelineResource::addRenderTarget( const string &id, bool depthBuf, uint32 numColBufs,
-										RenderBufferFormats::List format, bool bilinear, uint32 samples,
+										RenderBufferFormats::List format, uint32 samples,
 										uint32 width, uint32 height, float scale )
 {
 	if( numColBufs > RenderBuffer::MaxColorAttachmentCount ) return;
@@ -269,7 +269,6 @@ void PipelineResource::addRenderTarget( const string &id, bool depthBuf, uint32 
 	rt.hasDepthBuf = depthBuf;
 	rt.numColBufs = numColBufs;
 	rt.format = format;
-	rt.bilinear = bilinear;
 	rt.samples = samples;
 	rt.width = width;
 	rt.height = height;
@@ -306,14 +305,14 @@ bool PipelineResource::createRenderTargets()
 		if( height == 0 ) height = (int)(Modules::renderer().getVPHeight() * rt.scale);
 		
 		rt.rendBuf = Modules::renderer().createRenderBuffer(
-			width, height, rt.format, rt.hasDepthBuf, rt.numColBufs, rt.bilinear, 0 );
+			width, height, rt.format, rt.hasDepthBuf, rt.numColBufs, 0 );
 		if( rt.rendBuf.fbo == 0 ) return false;
 
 		if( rt.samples > 0 )
 		{
 			// Also create a multisampled renderbuffer
 			rt.rendBufMultisample = Modules::renderer().createRenderBuffer(
-				width, height, rt.format, rt.hasDepthBuf, rt.numColBufs, rt.bilinear, rt.samples );
+				width, height, rt.format, rt.hasDepthBuf, rt.numColBufs, rt.samples );
 			if( rt.rendBufMultisample.fbo == 0 ) return false;
 		}
 	}
@@ -378,18 +377,13 @@ bool PipelineResource::load( const char *data, int size )
 				else return raiseError( "Unknown RenderTarget format" );
 			}
 
-			bool bilinear = false;
-			if( _stricmp( node2.getAttribute( "bilinear", "false" ), "true" ) == 0 ||
-				_stricmp( node2.getAttribute( "bilinear", "0" ), "1" ) == 0 )
-				bilinear = true;
-
 			int maxSamples = atoi( node2.getAttribute( "maxSamples", "0" ) );
 
 			uint32 width = atoi( node2.getAttribute( "width", "0" ) );
 			uint32 height = atoi( node2.getAttribute( "height", "0" ) );
 			float scale = (float)atof( node2.getAttribute( "scale", "1" ) );
 
-			addRenderTarget( id, depth, numBuffers, format, bilinear,
+			addRenderTarget( id, depth, numBuffers, format,
 				min( maxSamples, Modules::config().sampleCount ), width, height, scale );
 
 			node2 = node1.getChildNode( "RenderTarget", ++nodeItr2 );

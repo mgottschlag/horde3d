@@ -166,28 +166,12 @@ bool RendererBase::supportsNPOTTextures()
 
 
 uint32 RendererBase::uploadTexture2D( void *pixels, int width, int height, int comps, bool hdr,
-									  bool allowCompression, bool mipmaps, bool filtering,
-									  bool repeatMode, uint32 texId )
+									  bool allowCompression, bool mipmaps, uint32 texId )
 {
 	if( texId == 0 ) glGenTextures( 1, &texId );
 	glBindTexture( GL_TEXTURE_2D, texId );
 	
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filtering ? GL_LINEAR : GL_NEAREST );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, repeatMode ? GL_REPEAT : GL_CLAMP_TO_EDGE );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, repeatMode ? GL_REPEAT : GL_CLAMP_TO_EDGE );
-	if( mipmaps )
-	{
-		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, Modules::config().anisotropyFactor );
-		glTexParameteri( GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE );
-		if( Modules::config().trilinearFiltering )
-			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-		else
-			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST );
-	}
-	else
-	{
-		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filtering ? GL_LINEAR : GL_NEAREST );
-	}
+	if( mipmaps ) glTexParameteri( GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE );
 	
 	int format = (comps == 4) ? GL_RGBA : GL_RGB;
 	int type = hdr ? GL_FLOAT : GL_UNSIGNED_BYTE;
@@ -210,12 +194,9 @@ uint32 RendererBase::uploadTexture2D( void *pixels, int width, int height, int c
 }
 
 
-void RendererBase::updateTexture2D( unsigned char *pixels, int width, int height, int comps,
-								    bool filtering, uint32 texId )
+void RendererBase::updateTexture2D( unsigned char *pixels, int width, int height, int comps, uint32 texId )
 {
 	glBindTexture( GL_TEXTURE_2D, texId );
-
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filtering ? GL_LINEAR : GL_NEAREST );
 	glTexParameteri( GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_FALSE );
 	
 	int format = (comps == 4) ? GL_BGRA : GL_BGR;
@@ -225,29 +206,12 @@ void RendererBase::updateTexture2D( unsigned char *pixels, int width, int height
 
 uint32 RendererBase::uploadTextureCube( void *pixels, int width, int height, int comps, bool hdr,
 										uint32 cubeFace, bool allowCompression, bool mipmaps,
-										bool filtering, uint32 texId )
+										uint32 texId )
 {
 	if( texId == 0 ) glGenTextures( 1, &texId );
 	glBindTexture( GL_TEXTURE_CUBE_MAP, texId );
 	
-	glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, filtering ? GL_LINEAR : GL_NEAREST );
-	glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
-	glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
-	glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE );
-	
-	if( mipmaps )
-	{
-		glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_ANISOTROPY_EXT, Modules::config().anisotropyFactor );
-		glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_GENERATE_MIPMAP, GL_TRUE );
-		if( Modules::config().trilinearFiltering )
-			glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-		else
-			glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST );
-	}
-	else
-	{
-		glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, filtering ? GL_LINEAR : GL_NEAREST );
-	}
+	if( mipmaps ) glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_GENERATE_MIPMAP, GL_TRUE );
 	
 	int format = (comps == 4) ? GL_RGBA : GL_RGB;
 	int type = hdr ? GL_FLOAT : GL_UNSIGNED_BYTE;
@@ -430,7 +394,7 @@ bool RendererBase::setShaderVar1i( uint32 shaderId, const char *var, int value )
 
 RenderBuffer RendererBase::createRenderBuffer( uint32 width, uint32 height,
 											   RenderBufferFormats::List format, bool depth,
-											   uint32 numColBufs, bool bilinear, uint32 samples )
+											   uint32 numColBufs, uint32 samples )
 {
 	if( (format == RenderBufferFormats::RGBA16F || format == RenderBufferFormats::RGBA32F) &&
 		!glExt::ARB_texture_float )
@@ -494,10 +458,8 @@ RenderBuffer RendererBase::createRenderBuffer( uint32 width, uint32 height,
 				// Create a color texture
 				glGenTextures( 1, &rb.colBufs[j] );
 				glBindTexture( GL_TEXTURE_2D, rb.colBufs[j] );
-				glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, bilinear ? GL_LINEAR : GL_NEAREST );
-				glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, bilinear ? GL_LINEAR : GL_NEAREST );
-				glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
-				glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+				glTexParameteri( GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_FALSE );
+				glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
 				glTexImage2D( GL_TEXTURE_2D, 0, glFormat, rb.width, rb.height, 0, GL_RGBA, GL_FLOAT, 0x0 );
 
 				// Attach the texture
@@ -530,10 +492,8 @@ RenderBuffer RendererBase::createRenderBuffer( uint32 width, uint32 height,
 			// Create a depth texture
 			glGenTextures( 1, &rb.depthBuf );
 			glBindTexture( GL_TEXTURE_2D, rb.depthBuf );
-			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
-			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+			glTexParameteri( GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_FALSE );
+			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
 			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE );
 			glTexParameteri( GL_TEXTURE_2D, GL_DEPTH_TEXTURE_MODE, GL_LUMINANCE );
 			glTexImage2D( GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, rb.width, rb.height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0x0 );

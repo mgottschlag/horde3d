@@ -477,6 +477,28 @@ bool ShaderResource::parseFXSection( const char *data )
 		if( sampler.texUnit > 11 ) return raiseError( "texUnit exceeds limit" );
 		if( sampler.texUnit >= 0 ) unitFree[sampler.texUnit] = false;
 
+		// Sampler states
+		XMLNode node2 = node1.getChildNode( "StageConfig" );
+		if( !node2.isEmpty() )
+		{
+			// Address mode
+			if( _stricmp( node2.getAttribute( "addressMode", "WRAP" ), "CLAMP" ) == 0 )
+				sampler.addressMode = TexAddressModes::Clamp;
+			else
+				sampler.addressMode = TexAddressModes::Wrap;
+			
+			// Filtering
+			if( _stricmp( node2.getAttribute( "filtering", "TRILINEAR" ), "NONE" ) == 0 )
+				sampler.filterMode = TexFilterModes::None;
+			else if( _stricmp( node2.getAttribute( "filtering", "TRILINEAR" ), "BILINEAR" ) == 0 )
+				sampler.filterMode = TexFilterModes::Bilinear;
+			else
+				sampler.filterMode = TexFilterModes::Trilinear;
+
+			// Max anisotropy
+			sampler.maxAnisotropy = atoi( node2.getAttribute( "maxAnisotropy", "8" ) );
+		}
+
 		_samplers.push_back( sampler );
 
 		node1 = rootNode.getChildNode( "Sampler", ++nodeItr1 );

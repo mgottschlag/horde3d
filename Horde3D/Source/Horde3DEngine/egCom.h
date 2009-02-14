@@ -46,7 +46,7 @@ struct EngineOptions
 		MaxLogLevel = 1,
 		MaxNumMessages,
 		TrilinearFiltering,
-		AnisotropyFactor,
+		MaxAnisotropy,
 		TexCompression,
 		LoadTextures,
 		FastAnimation,
@@ -65,7 +65,7 @@ class EngineConfig
 public:
 	
 	int   maxLogLevel;
-	int   anisotropyFactor;
+	int   maxAnisotropy;
 	int   shadowMapSize;
 	int   sampleCount;
 	bool  texCompression;

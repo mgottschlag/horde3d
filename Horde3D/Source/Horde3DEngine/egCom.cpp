@@ -37,7 +37,7 @@ EngineConfig::EngineConfig()
 {
 	maxLogLevel = 4;
 	trilinearFiltering = true;
-	anisotropyFactor = 1;
+	maxAnisotropy = 1;
 	texCompression = false;
 	loadTextures = true;
 	fastAnimation = true;
@@ -60,8 +60,8 @@ float EngineConfig::getOption( EngineOptions::List param )
 		return (float)Modules::log().getMaxNumMessages();
 	case EngineOptions::TrilinearFiltering:
 		return trilinearFiltering ? 1.0f : 0.0f;
-	case EngineOptions::AnisotropyFactor:
-		return (float)anisotropyFactor;
+	case EngineOptions::MaxAnisotropy:
+		return (float)maxAnisotropy;
 	case EngineOptions::TexCompression:
 		return texCompression ? 1.0f : 0.0f;
 	case EngineOptions::LoadTextures:
@@ -99,8 +99,8 @@ bool EngineConfig::setOption( EngineOptions::List param, float value )
 	case EngineOptions::TrilinearFiltering:
 		trilinearFiltering = (value != 0);
 		return true;
-	case EngineOptions::AnisotropyFactor:
-		anisotropyFactor = (int)value;
+	case EngineOptions::MaxAnisotropy:
+		maxAnisotropy = (int)value;
 		return true;
 	case EngineOptions::TexCompression:
 		texCompression = (value != 0);
