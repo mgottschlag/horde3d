@@ -54,7 +54,7 @@ bool Application::init()
 	// Set options
 	Horde3D::setOption( EngineOptions::LoadTextures, 1 );
 	Horde3D::setOption( EngineOptions::TexCompression, 0 );
-	Horde3D::setOption( EngineOptions::MaxAnisotropy, 8 );
+	Horde3D::setOption( EngineOptions::MaxAnisotropy, 4 );
 	Horde3D::setOption( EngineOptions::ShadowMapSize, 2048 );
 	Horde3D::setOption( EngineOptions::FastAnimation, 1 );
 
@@ -125,6 +125,11 @@ void Application::mainLoop( float fps )
 	if( _showStats )
 	{
 		Horde3DUtils::showFrameStats( _fontMatRes, _panelMatRes, _curFPS );
+
+		if( Horde3D::getNodeParami( _cam, CameraNodeParams::PipelineRes ) == _forwardPipeRes )
+			Horde3DUtils::showText( "Pipeline: forward", 0.03f, 0.24f, 0.026f, 1, 1, 1, _fontMatRes, 5 );
+		else
+			Horde3DUtils::showText( "Pipeline: deferred", 0.03f, 0.24f, 0.026f, 1, 1, 1, _fontMatRes, 5 );
 	}
 
 	// Show logo

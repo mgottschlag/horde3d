@@ -12,9 +12,16 @@
 -->
 
 <Sampler id="albedoMap" />
+
 <Sampler id="normalMap" />
-<Sampler id="ambientMap" />
-<Sampler id="envMap" />
+
+<Sampler id="ambientMap">
+	<StageConfig addressMode="CLAMP" filtering="BILINEAR" maxAnisotropy="1" />
+</Sampler>
+
+<Sampler id="envMap">
+	<StageConfig addressMode="CLAMP" filtering="BILINEAR" maxAnisotropy="1" />
+</Sampler>
 
 <Uniform id="specParams" a="0.1" b="16.0">
 	<!-- Description

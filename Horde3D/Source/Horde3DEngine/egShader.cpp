@@ -73,6 +73,7 @@ void CodeResource::release()
 	{
 		_includes[i].first = 0x0;
 	}
+	_includes.clear();
 }
 
 

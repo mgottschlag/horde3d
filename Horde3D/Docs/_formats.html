@@ -43,14 +43,18 @@ cube map.
 <h2>Materials</h2>
 <p><i>Filename-extension: .material.xml</i></p>
 <p>
-Materials are used to bind data to shaders. They can reference a shader and setup texture units
-with images. Furthermore materials can define shader uniforms which are four-dimensional
-float vectors with arbitrary user defined data. Materials can e.g. be used to define the appearance of
-a surface. Every material can have a class which is useful for accessing geometry with specific properties,
-e.g. translucency. Since the material system is hierarchical, names can contain subclasses which are
-separated from the parent class using a dot character. A further feature of the material system is that
-a single material can link to another material to use its texture units and uniforms. This is useful
-to define global data (e.g. ambient lighting settings) at a single location.
+Materials are used to bind data to shaders. They can reference a shader and setup texture samplers
+with images. They can also define shader uniforms which are four-dimensional float vectors with arbitrary
+user defined data. Materials are also responsible for setting shader flags which are used to select a shader
+combination from an übershader.
+<br />
+A material can for example be used to define the appearance of a surface. Every material can have a class string which
+is useful for accessing geometry with specific properties, e.g. translucency. Since the material class system is
+hierarchical, names can contain subclasses which are separated from the parent class using a dot character.
+A further feature of the material system is that a single material can link to another material to use its
+texture samplers and uniforms. This is useful to define global data (e.g. ambient lighting settings) at a single
+location.
+<br />
 In Horde3D materials are specified with an XML syntax.
 <br />
 <br />
@@ -101,13 +105,13 @@ The following XML node elements with the described attributes are supported:
         </td>
     </tr>
     <tr>
-        <td><b>TexUnit</b></td>
+        <td><b>Sampler</b></td>
         <td>
-            configuration for a texture unit {*}
+            configuration of a texture sampler {*}
             <table>
                 <tr>
-                    <td><b>unit</b></td>
-                    <td>index of the texture unit (Values: 0-11) {required}</td>
+                    <td><b>name</b></td>
+                    <td>name of the sampler as used in the hardware shader code {required}</td>
                 </tr>
                 <tr>
                     <td><b>map</b></td>
@@ -138,20 +142,6 @@ The following XML node elements with the described attributes are supported:
                     <td><b>mipmaps</b></td>
                     <td>
                     true if texture shall use mipmaps, otherwise false; (Default: true) {optional}<br />
-                    <b>Note: </b> This flag is only respected if the texture isn't already loaded with an opposed flag setting
-                    </td>
-                </tr>
-                <tr>
-                    <td><b>bilinear</b></td>
-                    <td>
-                    true if texture shall use bilinear filtering, otherwise false; (Default: true) {optional}<br />
-                    <b>Note: </b> This flag is only respected if the texture isn't already loaded with an opposed flag setting
-                    </td>
-                </tr>
-                <tr>
-                    <td><b>repeatMode</b></td>
-                    <td>
-                    true if texture shall be repeated for texture coordinates larger than one, otherwise false (clamping); (Default: true) {optional}<br />
                     <b>Note: </b> This flag is only respected if the texture isn't already loaded with an opposed flag setting
                     </td>
                 </tr>
@@ -197,11 +187,29 @@ The following XML node elements with the described attributes are supported:
 <pre>
 &lt;Material class="Translucent.MyClass"&gt;
     &lt;Shader source="myshader.shader.xml" /&gt;
-    &lt;TexUnit unit="0" map="mytex.jpg" /&gt;
+    &lt;Sampler unit="albedoMap" map="mytex.jpg" /&gt;
     &lt;Uniform name="myColor" a="1.0" b="1.0" c="0.5" /&gt;
 &lt;/Material&gt;
 </pre>
 </div>
+<br /><br /><br />
+
+
+<h2>Pipeline Files</h2>
+<p><i>Filename-extension: .pipeline.xml</i></p>
+<p>
+Pipeline files are used to configure the rendering pipeline. A detailed description can bed found in the
+<a href="_pipeline.html" >pipeline documentation</a>.
+</p>
+<br /><br /><br />
+
+
+<h2>Shader Files</h2>
+<p><i>Filename-extension: .shader</i></p>
+<p>
+Shader files define render states and hardware shader code. A detailed description can bed found in the
+<a href="_pipeline.html" >pipeline documentation</a>.
+</p>
 <br /><br /><br />
 
 

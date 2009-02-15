@@ -1,6 +1,8 @@
 [[FX]]
 
-<Sampler id="albedoMap" />
+<Sampler id="albedoMap">
+	<StageConfig filtering="BILINEAR" maxAnisotropy="1" />
+</Sampler>
 
 <!--
 <Context id="SHADOWMAP">

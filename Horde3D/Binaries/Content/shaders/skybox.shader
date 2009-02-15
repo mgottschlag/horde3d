@@ -1,6 +1,8 @@
 [[FX]]
 
-<Sampler id="albedoMap" />
+<Sampler id="albedoMap">
+	<StageConfig addressMode="CLAMP" />
+</Sampler>
 
 <Context id="ATTRIBPASS">
 	<Shaders vertex="VS_GENERAL" fragment="FS_ATTRIBPASS" />

@@ -56,7 +56,7 @@ bool Application::init()
 	Horde3D::setOption( EngineOptions::LoadTextures, 1 );
 	Horde3D::setOption( EngineOptions::TexCompression, 0 );
 	Horde3D::setOption( EngineOptions::FastAnimation, 0 );
-	Horde3D::setOption( EngineOptions::MaxAnisotropy, 8 );
+	Horde3D::setOption( EngineOptions::MaxAnisotropy, 4 );
 	Horde3D::setOption( EngineOptions::ShadowMapSize, 2048 );
 
 	// Add resources
@@ -150,7 +150,7 @@ void Application::mainLoop( float fps )
 		// Display weight
 		_text.str( "" );
 		_text << fixed << setprecision( 2 ) << "Weight: " << _weight;
-		Horde3DUtils::showText( _text.str().c_str(), 0.03f, 0.24f, 0.03f, 1, 1, 1, _fontMatRes, 5 );
+		Horde3DUtils::showText( _text.str().c_str(), 0.03f, 0.24f, 0.026f, 1, 1, 1, _fontMatRes, 5 );
 	}
 
 	// Show logo

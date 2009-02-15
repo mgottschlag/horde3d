@@ -276,7 +276,7 @@ namespace Horde3D
 	}
 
 
-	DLLEXP ResHandle iterateResources( int type, ResHandle start )
+	DLLEXP ResHandle getNextResource( int type, ResHandle start )
 	{
 		Resource *res = Modules::resMan().getNextResource( type, start );
 		

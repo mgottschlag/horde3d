@@ -164,10 +164,6 @@ The following XML elements and attributes are supported.
                     <td>pixel format of render target {optional}; possible values: <i>RGBA8, RGBA16F, RGBA32F</i>; default: <i>RGBA8</i></td>
                 </tr>
                 <tr>
-                    <td><b>bilinear</b></td>
-                    <td>flag specifying whether bilinear filtering is enabled for color buffers {optional}; possible values: <i>true, false</i>; default: <i>false</i></td>
-                </tr>
-                <tr>
                     <td><b>width</b></td>
                     <td>width of render target in pixels where 0 means width of the main framebuffer {optional}; default: <i>0</i></td>
                 </tr>
@@ -215,7 +211,8 @@ The following XML elements and attributes are supported.
     <tr>
         <td><b>SwitchTarget</b></td>
         <td>
-            command for setting the currently active render target to which data is rendered; child of <b>Stage</b> element {*}
+            command for setting the currently active render target to which data is rendered; the command implicitely
+			calls the <i>UnbindBuffers</i> command before the desired render target is activated; child of <b>Stage</b> element {*}
             <table>
                 <tr>
                     <td><b>target</b></td>
@@ -231,11 +228,11 @@ The following XML elements and attributes are supported.
             command for binding a color or depth buffer of a render target as texture map; child of <b>Stage</b> element {*}
             <table>
                 <tr>
-                    <td><b>texUnit</b></td>
-                    <td>texture unit to which buffer is assigned {required}; possible values: <i>0-11</i<i></td>
+                    <td><b>sampler</b></td>
+                    <td>name of texture sampler to which the buffer is bound {required}</td>
                 </tr>
                 <tr>
-                    <td><b>target</b></td>
+                    <td><b>sourceRT</b></td>
                     <td>name of render target {required}</td>
                 </tr>
                 <tr>
@@ -243,6 +240,13 @@ The following XML elements and attributes are supported.
                     <td>index of color buffer or 32 as special value for binding the depth buffer {required}</td>
                 </tr>
             </table>
+        </td>
+    </tr>
+	<tr>
+        <td><b>UnbindBuffers</b></td>
+        <td>
+            command for unbinding all buffers that were bound to texture samplers before;
+			child of <b>Stage</b> element {*}
         </td>
     </tr>
     <tr>
@@ -471,8 +475,11 @@ would take a long time to load.
 
 <h3>FX section</h3>
 <p>
-The FX section defines the shader contexts and declares custom (user-defined) uniforms which are used in the
-hardware shaders. FX sections are defined in XML. The XML does not require a root element since the root is
+The FX section defines the shader contexts. It also declares and configures texture samplers and custom (user-defined)
+uniforms used in the hardware shaders. Please note that it is strictly required to declare all custom samplers and
+uniforms in order to use them with the Horde3D material system.
+<br />
+FX sections are defined in XML. The XML does not require a root element since the root is
 implicitely given by the section.
 <br /><br />
 
@@ -481,6 +488,23 @@ The following XML node elements with the described attributes are supported for 
 <div class="syntaxbox">
 <table>
     <tr>
+        <td><b>Sampler</b></td>
+        <td>
+			declaration of a texture sampler {*}
+			<table>
+                <tr>
+                    <td><b>id</b></td>
+                    <td>name of the sampler as used in the GLSL code {required}</td>
+                </tr>
+				<tr>
+                    <td><b>texUnit</b></td>
+                    <td>texture unit assigned to the sampler; can be -1 for automatic assignment (Values: -1 or 0-11) (Default: -1) {optional}</td>
+                </tr>
+            </table>
+		</td>
+    </tr>
+	
+	<tr>
         <td><b>Uniform</b></td>
         <td>
 			declaration of a vector uniform {*}
@@ -491,7 +515,7 @@ The following XML node elements with the described attributes are supported for 
                 </tr>
 				<tr>
                     <td><b>a, b, c, d</b></td>
-                    <td>default values used when the uniform is not defined in a material {optional}</td>
+                    <td>default values used when the uniform is not defined in a material (Default: 0) {optional}</td>
                 </tr>
             </table>
 		</td>
@@ -528,6 +552,27 @@ The following XML node elements with the described attributes are supported for 
     </tr>
    
     <tr>
+        <td><b>StageConfig</b></td>
+        <td>
+			configuration of texture unit (stage) parameters; child of <b>Sampler</b> element {1}
+            <table>
+                <tr>
+                    <td><b>addressMode</b></td>
+                    <td>address mode used when texture coordinates are outside [0.0, 1.0] range (Values: CLAMP, WRAP) (Default: WRAP)  {optional}</td>
+                </tr>
+				<tr>
+                    <td><b>filtering</b></td>
+                    <td>texture filtering mode (Values: NONE, BILINEAR, TRILINEAR) (Default: TRILINEAR)  {optional}</td>
+                </tr>
+				<tr>
+                    <td><b>maxAnisotropy</b></td>
+                    <td>maximum quality level of anisotropic filtering used for the texture (Default: 8)  {optional}</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+	
+	<tr>
         <td><b>RenderConfig</b></td>
         <td>
 			configuration of rendering parameters; child of <b>Context</b> element {1}
@@ -584,6 +629,10 @@ convenience reasons in order to improve the code readability.
 <pre>
 <b>[[FX]]</b>
 
+&lt;Sampler id="albedoMap"&gt;
+	&lt;StageConfig filtering="BILINEAR" /&gt;
+&lt;Sampler/&gt;
+
 &lt;Uniform id="brightness" a="0.5" /&gt;
 
 &lt;Context id="OVERLAY"&gt;
@@ -605,11 +654,11 @@ void main( void )
 <i>// ============================================================================</i>
 
 uniform vec4 brightness;
-uniform sampler2D tex0;
+uniform sampler2D albedoMap;
 
 void main( void )
 {
-	vec4 albedo = texture2D( tex0, gl_TexCoord[0].st );
+	vec4 albedo = texture2D( albedoMap, gl_TexCoord[0].st );
 	
 <b>#ifdef _F07_BrightMult</b>
 	albedo *= brightness.a;
@@ -690,100 +739,17 @@ rendering emitters.
 <br /><br/>
 
 
-<h3>Particle specific vector/matrix uniforms</h3>
-<div class="syntaxbox">
-<table>
-    <tr>
-        <td><b>uniform vec3 parCorners[4]</b></td>
-        <td>four corner positions of particle billboard</td>
-    </tr>
-    <tr>
-        <td><b>uniform vec3 parPosArray[64]</b></td>
-        <td>position array of particle batch</td>
-    </tr>
-    <tr>
-        <td><b>uniform vec2 parSizeAndRotArray[64]</b></td>
-        <td>combined size and rotation array of particle batch</td>
-    </tr>
-    <tr>
-        <td><b>uniform vec4 parColorArray[64]</b></td>
-        <td>color array of particle batch</td>
-    </tr>
-</table>
-</div>
-<br /><br/>
-
-
-<h3>Overlay specific vector/matrix uniforms</h3>
-<div class="syntaxbox">
-<table>
-    <tr>
-        <td><b>uniform vec4 olayColor</b></td>
-        <td>color of overlay</td>
-    </tr>
-</table>
-</div>
-<br /><br/>
-
-
-<h3>Sampler uniforms</h3>
+<h3>General sampler uniforms</h3>
 <div class="syntaxbox">
 <table>
     <tr>
         <td><b>uniform sampler2D shadowMap</b></td>
         <td>shadow map texture</td>
     </tr>
-    <tr>
-        <td><b>uniform sampler[2D/Cube] tex0</b></td>
-        <td>texture unit 0</td>
-    </tr>
-    <tr>
-        <td><b>uniform sampler[2D/Cube] tex1</b></td>
-        <td>texture unit 1</td>
-    </tr>
-    <tr>
-        <td><b>uniform sampler[2D/Cube] tex2</b></td>
-        <td>texture unit 2</td>
-    </tr>
-    <tr>
-        <td><b>uniform sampler[2D/Cube] tex3</b></td>
-        <td>texture unit 3</td>
-    </tr>
-    <tr>
-        <td><b>uniform sampler[2D/Cube] tex4</b></td>
-        <td>texture unit 4</td>
-    </tr>
-    <tr>
-        <td><b>uniform sampler[2D/Cube] tex5</b></td>
-        <td>texture unit 5</td>
-    </tr> 
-    <tr>
-        <td><b>uniform sampler[2D/Cube] tex6</b></td>
-        <td>texture unit 6</td>
-    </tr> 
-    <tr>
-        <td><b>uniform sampler[2D/Cube] tex7</b></td>
-        <td>texture unit 7</td>
-    </tr>
-    <tr>
-        <td><b>uniform sampler[2D/Cube] tex8</b></td>
-        <td>texture unit 8</td>
-    </tr>
-    <tr>
-        <td><b>uniform sampler[2D/Cube] tex9</b></td>
-        <td>texture unit 9</td>
-    </tr>
-    <tr>
-        <td><b>uniform sampler[2D/Cube] tex10</b></td>
-        <td>texture unit 10</td>
-    </tr>
-    <tr>
-        <td><b>uniform sampler[2D/Cube] tex11</b></td>
-        <td>texture unit 11</td>
-    </tr>
 </table>
 </div>
 <br/><br/>
+
 
 <h3>General vertex attributes</h3>
 <div class="syntaxbox">
@@ -819,6 +785,43 @@ rendering emitters.
 </table>
 </div>
 <br/><br/>
+
+
+<h3>Overlay specific vector/matrix uniforms</h3>
+<div class="syntaxbox">
+<table>
+    <tr>
+        <td><b>uniform vec4 olayColor</b></td>
+        <td>color of overlay</td>
+    </tr>
+</table>
+</div>
+<br /><br/>
+
+
+<h3>Particle specific vector/matrix uniforms</h3>
+<div class="syntaxbox">
+<table>
+    <tr>
+        <td><b>uniform vec3 parCorners[4]</b></td>
+        <td>four corner positions of particle billboard</td>
+    </tr>
+    <tr>
+        <td><b>uniform vec3 parPosArray[64]</b></td>
+        <td>position array of particle batch</td>
+    </tr>
+    <tr>
+        <td><b>uniform vec2 parSizeAndRotArray[64]</b></td>
+        <td>combined size and rotation array of particle batch</td>
+    </tr>
+    <tr>
+        <td><b>uniform vec4 parColorArray[64]</b></td>
+        <td>color array of particle batch</td>
+    </tr>
+</table>
+</div>
+<br /><br/>
+
 
 <h3>Particle specific vertex attributes</h3>
 <div class="syntaxbox">

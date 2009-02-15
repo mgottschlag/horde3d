@@ -16,7 +16,9 @@
 	<StageConfig addressMode="CLAMP" />
 </Sampler>
 
-<Sampler id="ambientMap" />
+<Sampler id="ambientMap">
+	<StageConfig addressMode="CLAMP" filtering="BILINEAR" maxAnisotropy="1" />
+</Sampler>
 
 
 <Context id="AMBIENT">
