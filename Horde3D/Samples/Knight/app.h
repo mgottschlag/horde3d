@@ -5,7 +5,7 @@
 //
 // Sample Application
 // --------------------------------------
-// Copyright (C) 2006-2008 Nicolas Schulz
+// Copyright (C) 2006-2009 Nicolas Schulz
 //
 //
 // This sample source file is not covered by the LGPL as the rest of the SDK

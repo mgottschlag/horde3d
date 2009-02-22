@@ -2,7 +2,7 @@
 //
 // Horde3D Terrain Extension
 // --------------------------------------------------------
-// Copyright (C) 2006-2008 Nicolas Schulz and Volker Wiendl
+// Copyright (C) 2006-2009 Nicolas Schulz and Volker Wiendl
 //
 //
 // This library is free software; you can redistribute it and/or

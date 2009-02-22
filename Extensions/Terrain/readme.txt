@@ -1,7 +1,7 @@
 Horde3D Terrain Extension
 --------------------------
 
-Copyright (C) 2006-2008 Nicolas Schulz and Volker Wiendl
+Copyright (C) 2006-2009 Nicolas Schulz and Volker Wiendl
 
 The Terrain Extension extends Horde3D with the capability to render large landscapes. A special
 level of detail algorithm adapts the resolution of the terrain mesh so that near regions get

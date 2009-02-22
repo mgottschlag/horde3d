@@ -9,7 +9,7 @@ Horde3D
 		Version 1.0.0 Beta2
 		
 
-Copyright (C) 2006-2008 Nicolas Schulz and the Horde3D Team
+Copyright (C) 2006-2009 Nicolas Schulz and the Horde3D Team
 
 http://www.horde3d.org
 
