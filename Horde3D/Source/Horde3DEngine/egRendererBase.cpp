@@ -159,37 +159,105 @@ uint32 RendererBase::cloneIndexBuffer( uint32 idxBufId )
 }
 
 
-bool RendererBase::supportsNPOTTextures()
+uint32 RendererBase::calcTexSize( TextureFormats::List format, int width, int height )
 {
-	return glExt::ARB_texture_non_power_of_two;
+	switch( format )
+	{
+	case TextureFormats::RGB8:
+		return width * height * 3;
+	case TextureFormats::BGR8:
+		return width * height * 3;
+	case TextureFormats::RGBX8:
+	case TextureFormats::BGRX8:
+	case TextureFormats::RGBA8:
+	case TextureFormats::BGRA8:
+		return width * height * 4;
+	case TextureFormats::DXT1:
+		return max( width / 4, 1 ) * max( height / 4, 1 ) * 8;
+	case TextureFormats::DXT3:
+		return max( width / 4, 1 ) * max( height / 4, 1 ) * 16;
+	case TextureFormats::DXT5:
+		return max( width / 4, 1 ) * max( height / 4, 1 ) * 16;
+	case TextureFormats::RGBA16F:
+		return width * height * 8;
+	case TextureFormats::RGBA32F:
+		return width * height * 16;
+	default:
+		return 0;
+	}
 }
 
 
-uint32 RendererBase::uploadTexture2D( void *pixels, int width, int height, int comps, bool hdr,
-									  bool allowCompression, bool mipmaps, uint32 texId )
+uint32 RendererBase::uploadTexture( TextureTypes::List type, void *pixels, int width, int height,
+	TextureFormats::List format, int slice, int mipLevel, bool genMips, bool compress, uint32 texId )
 {
+	int target = type == TextureTypes::TexCube ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D;
+	
 	if( texId == 0 ) glGenTextures( 1, &texId );
-	glBindTexture( GL_TEXTURE_2D, texId );
+	glBindTexture( target, texId );
 	
-	if( mipmaps ) glTexParameteri( GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE );
-	
-	int format = (comps == 4) ? GL_RGBA : GL_RGB;
-	int type = hdr ? GL_FLOAT : GL_UNSIGNED_BYTE;
-	int internalFormat;
-	if( Modules::config().texCompression && allowCompression )
-	{	
-		internalFormat = comps == 4 ? GL_COMPRESSED_RGBA_S3TC_DXT5_EXT : GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
-	}
+	if( genMips ) glTexParameteri( target, GL_GENERATE_MIPMAP, GL_TRUE );
+	if( genMips || mipLevel > 0 )
+		glTexParameteri( target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
 	else
-	{
-		if( hdr )
-			internalFormat = comps == 4 ? GL_RGBA16F_ARB : GL_RGB16F_ARB;
-		else
-			internalFormat = comps == 4 ? GL_RGBA8 : GL_RGB8;
-	}
+		glTexParameteri( target, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
 
-	glTexImage2D( GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, type, pixels );
+	int internalFormat = 0, inputFormat = 0, inputType = GL_UNSIGNED_BYTE;
+	if( target == GL_TEXTURE_CUBE_MAP ) target = GL_TEXTURE_CUBE_MAP_POSITIVE_X + slice;
+
+	switch( format )
+	{
+	case TextureFormats::RGB8:
+		internalFormat = GL_RGB8;
+		inputFormat = GL_RGB;
+		break;
+	case TextureFormats::BGR8:
+		internalFormat = GL_RGB8;
+		inputFormat = GL_BGR;
+		break;
+	case TextureFormats::RGBX8:
+		internalFormat = GL_RGB8;
+		inputFormat = GL_RGBA;
+		break;
+	case TextureFormats::BGRX8:
+		internalFormat = GL_RGB8;
+		inputFormat = GL_BGRA;
+		break;
+	case TextureFormats::RGBA8:
+		internalFormat = GL_RGBA8;
+		inputFormat = GL_RGBA;
+		break;
+	case TextureFormats::BGRA8:
+		internalFormat = GL_RGBA8;
+		inputFormat = GL_BGRA;
+		break;
+	case TextureFormats::DXT1:
+		internalFormat = GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
+		break;
+	case TextureFormats::DXT3:
+		internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+		break;
+	case TextureFormats::DXT5:
+		internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+		break;
+	case TextureFormats::RGBA16F:
+		internalFormat = GL_RGBA16F_ARB;
+		inputFormat = GL_BGRA;
+		inputType = GL_FLOAT;
+		break;
+	case TextureFormats::RGBA32F:
+		internalFormat = GL_RGBA32F_ARB;
+		inputFormat = GL_BGRA;
+		inputType = GL_FLOAT;
+		break;
+	};
 	
+	if( format != TextureFormats::DXT1 && format != TextureFormats::DXT3 && format != TextureFormats::DXT5 )
+		glTexImage2D( target, mipLevel, internalFormat, width, height, 0, inputFormat, inputType, pixels );
+	else
+		glCompressedTexImage2D( target, mipLevel, internalFormat, width, height, 0,
+		                        calcTexSize( format, width, height ), pixels );
+
 	return texId;
 }
 
@@ -204,46 +272,15 @@ void RendererBase::updateTexture2D( unsigned char *pixels, int width, int height
 }
 
 
-uint32 RendererBase::uploadTextureCube( void *pixels, int width, int height, int comps, bool hdr,
-										uint32 cubeFace, bool allowCompression, bool mipmaps,
-										uint32 texId )
+void RendererBase::unloadTexture( uint32 texId, TextureTypes::List type )
 {
-	if( texId == 0 ) glGenTextures( 1, &texId );
-	glBindTexture( GL_TEXTURE_CUBE_MAP, texId );
-	
-	if( mipmaps ) glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_GENERATE_MIPMAP, GL_TRUE );
-	
-	int format = (comps == 4) ? GL_RGBA : GL_RGB;
-	int type = hdr ? GL_FLOAT : GL_UNSIGNED_BYTE;
-	int internalFormat;
-	if( Modules::config().texCompression && allowCompression )
-	{
-		internalFormat = comps == 4 ? GL_COMPRESSED_RGBA_S3TC_DXT5_EXT : GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
-	}
-	else
-	{	
-		if( hdr )
-			internalFormat = comps == 4 ? GL_RGBA16F_ARB : GL_RGB16F_ARB;
-		else
-			internalFormat = comps == 4 ? GL_RGBA8 : GL_RGB8;
-	}
-
-	glTexImage2D( GL_TEXTURE_CUBE_MAP_POSITIVE_X + cubeFace, 0, internalFormat, width, height,
-				  0, format, type, pixels );
-	
-	return texId;
-}
-
-
-void RendererBase::unloadTexture( uint32 texId, bool cubeMap )
-{
-	if( !cubeMap )
+	if( type == TextureTypes::Tex2D )
 	{	
 		glBindTexture( GL_TEXTURE_2D, texId );
 		glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB8, 0, 0, 0, GL_RGB, GL_UNSIGNED_BYTE, 0x0 );
 		glBindTexture( GL_TEXTURE_2D, 0 );
 	}
-	else 
+	else if( type == TextureTypes::TexCube )
 	{	
 		glBindTexture( GL_TEXTURE_CUBE_MAP, texId );
 		glTexImage2D( GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_RGB8, 0, 0, 0, GL_RGB, GL_UNSIGNED_BYTE, 0x0 );

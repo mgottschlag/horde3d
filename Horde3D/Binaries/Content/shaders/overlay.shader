@@ -9,11 +9,11 @@
 
 [[VS_OVERLAY]]
 
-varying vec2 texCoord;
+varying vec2 texCoords;
 
 void main( void )
 {
-	texCoord = gl_MultiTexCoord0.st; 
+	texCoords = vec2( gl_MultiTexCoord0.s, -gl_MultiTexCoord0.t ); 
 	gl_Position = gl_ProjectionMatrix * gl_Vertex;
 }
 
@@ -22,11 +22,11 @@ void main( void )
 
 uniform vec4 olayColor;
 uniform sampler2D albedoMap;
-varying vec2 texCoord;
+varying vec2 texCoords;
 
 void main( void )
 {
-	vec4 albedo = texture2D( albedoMap, texCoord );
+	vec4 albedo = texture2D( albedoMap, texCoords );
 	
 	gl_FragColor = albedo * olayColor;
 }

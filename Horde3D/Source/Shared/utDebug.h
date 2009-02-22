@@ -43,10 +43,3 @@
 #define new MYDEBUG_NEW
 
 #endif
-
-
-#if defined( _DEBUG )
-#	define ASSERT( exp ) assert( exp )
-#else
-#	define ASSERT( exp )
-#endif

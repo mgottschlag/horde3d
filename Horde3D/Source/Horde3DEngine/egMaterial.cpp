@@ -157,10 +157,6 @@ bool MaterialResource::load( const char *data, int size )
 
 		ResHandle texMap;
 		uint32 flags = 0;
-
-		if( _stricmp( node1.getAttribute( "allowPOTConversion", "true" ), "false" ) == 0 ||
-			_stricmp( node1.getAttribute( "allowPOTConversion", "1" ), "0" ) == 0 )
-			flags |= ResourceFlags::NoTexPOTConversion;
 		
 		if( _stricmp( node1.getAttribute( "allowCompression", "true" ), "false" ) == 0 ||
 			_stricmp( node1.getAttribute( "allowCompression", "1" ), "0" ) == 0 )
@@ -170,18 +166,10 @@ bool MaterialResource::load( const char *data, int size )
 			_stricmp( node1.getAttribute( "mipmaps", "1" ), "0" ) == 0 )
 			flags |= ResourceFlags::NoTexMipmaps;
 
-		if( _stricmp( node1.getAttribute( "type", "2D" ), "CUBE" ) == 0 )
-		{
-			texMap = Modules::resMan().addResource( ResourceTypes::TextureCube, 
-						node1.getAttribute( "map" ), flags, false );
-		}
-		else
-		{
-			texMap = Modules::resMan().addResource( ResourceTypes::Texture2D,
-						node1.getAttribute( "map" ), flags, false );
-		}
+		texMap = Modules::resMan().addResource(
+			ResourceTypes::Texture, node1.getAttribute( "map" ), flags, false );
 
-		sampler.texRes = Modules::resMan().resolveResHandle( texMap );
+		sampler.texRes = (TextureResource *)Modules::resMan().resolveResHandle( texMap );
 		
 		_samplers.push_back( sampler );
 		

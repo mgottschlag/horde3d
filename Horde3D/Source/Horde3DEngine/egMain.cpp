@@ -98,10 +98,8 @@ namespace Horde3D
 			CodeResource::factoryFunc );
 		Modules::resMan().registerType( ResourceTypes::Shader, "Shader", 0x0, 0x0,
 			ShaderResource::factoryFunc );
-		Modules::resMan().registerType( ResourceTypes::Texture2D, "Texture2D", Texture2DResource::initializationFunc,
-			Texture2DResource::releaseFunc, Texture2DResource::factoryFunc );
-		Modules::resMan().registerType( ResourceTypes::TextureCube, "TextureCube", TextureCubeResource::initializationFunc,
-			TextureCubeResource::releaseFunc, TextureCubeResource::factoryFunc );
+		Modules::resMan().registerType( ResourceTypes::Texture, "Texture", TextureResource::initializationFunc,
+			TextureResource::releaseFunc, TextureResource::factoryFunc );
 		Modules::resMan().registerType( ResourceTypes::Effect, "Effect", 0x0, 0x0,
 			EffectResource::factoryFunc );
 		Modules::resMan().registerType( ResourceTypes::Pipeline, "Pipeline", 0x0, 0x0,
@@ -485,8 +483,8 @@ namespace Horde3D
 
 	DLLEXP ResHandle createTexture2D( const char *name, int flags, int width, int height, bool renderable )
 	{
-		Texture2DResource *texRes =
-			new Texture2DResource( safeStr( name ), flags, width, height, renderable );
+		TextureResource *texRes =
+			new TextureResource( safeStr( name ), flags, width, height, renderable );
 
 		ResHandle res = Modules::resMan().addNonExistingResource( *texRes, true );
 		if( res == 0 )

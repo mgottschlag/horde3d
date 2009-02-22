@@ -67,6 +67,33 @@ struct RenderBuffer
 	}
 };
 
+struct TextureFormats
+{
+	enum List
+	{
+		RGB8,
+		BGR8,
+		RGBX8,
+		BGRX8,
+		RGBA8,
+		BGRA8,
+		DXT1,
+		DXT3,
+		DXT5,
+		RGBA16F,
+		RGBA32F
+	};
+};
+
+struct TextureTypes
+{
+	enum List
+	{
+		Tex2D,
+		TexCube
+	};
+};
+
 // =================================================================================================
 
 class RendererBase
@@ -103,13 +130,11 @@ public:
 	uint32 cloneIndexBuffer( uint32 idxBufId );
 
 	// Texture map functions
-	bool supportsNPOTTextures();
-	uint32 uploadTexture2D( void *pixels, int width, int height, int comps, bool hdr, bool allowCompression,
-	                        bool mipmaps, uint32 texId = 0 );
+	uint32 calcTexSize( TextureFormats::List format, int width, int height );
+	uint32 uploadTexture( TextureTypes::List type, void *pixels, int width, int height, TextureFormats::List format,
+	                      int slice, int mipLevel, bool genMips, bool compress, uint32 texId = 0 );
 	void updateTexture2D( unsigned char *pixels, int width, int height, int comps, uint32 texId );
-	uint32 uploadTextureCube( void *pixels, int width, int height, int comps, bool hdr, uint32 cubeFace,
-	                          bool allowCompression, bool mipmaps, uint32 texId = 0 );
-	void unloadTexture( uint32 texId, bool cubeMap );
+	void unloadTexture( uint32 texId, TextureTypes::List type );
 	float *downloadTexture2DData( uint32 texId, int *width, int *height );
 
 	// Shader functions

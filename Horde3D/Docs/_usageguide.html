@@ -136,19 +136,14 @@ A code resource is a plain text file that can contain arbitrary code. Code resou
 resources and are usually employed to define shader program fragments in a reusable fashion.
 <br /><br />
 
-<b>Texture2D</b>
+<b>Texture</b>
 <br /><br />
-A two-dimensional texture map simply represents an image. Textures are used by shaders to define the appearance of a
-surface but they can also encode non-photographic data like normals or a lookup table. Horde3D provides several options
-to configure texture properties like the filtering mode or compression settings.
-<br /><br />
-
-<b>TextureCube</b>
-<br /><br />
-Cube maps are a special form of texture maps. They are comprised of a series of six images that correspond to the
+A texture resource can contain a two-dimensional texture map or a cube map. A 2D texture map simply represents an image.
+2D textures are used by shaders to define the appearance of a surface but they can also encode non-photographic data like
+normals or a lookup table.
+Cube maps are a special form of texture maps which are comprised of a series of six images that correspond to the
 sides of a cube. Cube maps represent the environment around a point. Therefore, it is possible to use a three-dimensional
-vector to look up the texel that lies in the corresponding direction. Cube maps in Horde3D are stored in usual image
-files by unfolding the cube as a vertical cross.
+vector to look up the texel that lies in the corresponding direction.
 <br /><br />
 
 <b>Effect</b>

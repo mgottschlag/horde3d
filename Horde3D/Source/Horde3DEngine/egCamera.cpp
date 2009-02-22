@@ -71,8 +71,8 @@ SceneNodeTpl *CameraNode::parsingFunc( map< string, string > &attribs )
 	itr = attribs.find( "outputTex" );
 	if( itr != attribs.end() )
 	{	
-		cameraTpl->outputTex = (Texture2DResource *)Modules::resMan().findResource(
-			ResourceTypes::Texture2D, itr->second );
+		cameraTpl->outputTex = (TextureResource *)Modules::resMan().findResource(
+			ResourceTypes::Texture, itr->second );
 	}
 	itr = attribs.find( "outputBufferIndex" );
 	if( itr != attribs.end() ) cameraTpl->outputBufferIndex = atoi( itr->second.c_str() );
@@ -215,12 +215,13 @@ bool CameraNode::setParami( int param, int value )
 		return true;
 	case CameraNodeParams::OutputTex:
 		res = Modules::resMan().resolveResHandle( value );
-		if( res != 0x0 && res->getType() != ResourceTypes::Texture2D )
+		if( res != 0x0 && (res->getType() != ResourceTypes::Texture ||
+			((TextureResource *)res)->getTexType() != TextureTypes::Tex2D) )
 		{	
-			Modules::log().writeDebugInfo( "Invalid Texture2D resource for Camera node %i", _handle );
+			Modules::log().writeDebugInfo( "Invalid Texture resource for Camera node %i", _handle );
 			return false;
 		}
-		_outputTex = (Texture2DResource *)res;
+		_outputTex = (TextureResource *)res;
 		return true;
 	case CameraNodeParams::OutputBufferIndex:
 		_outputBufferIndex = value;

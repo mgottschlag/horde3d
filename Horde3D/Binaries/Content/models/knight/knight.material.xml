@@ -4,5 +4,5 @@
 	<ShaderFlag name="_F04_EnvMapping"/>
 
 	<Sampler name="albedoMap" map="models/knight/knight.jpg" />
-	<Sampler name="envMap" map="models/skybox/skybox.jpg" type="CUBE" />
+	<Sampler name="envMap" map="models/skybox/skybox.dds" />
 </Material>

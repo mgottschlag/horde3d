@@ -12,33 +12,28 @@
 
 <h2>Texture Maps</h2>
 <p>
-Horde3D supports two dimensional texture maps and cube maps with up to four 8-bit color components, thus including
-an Alpha channel. It is recommended that texture maps have power of two dimensions (1, 2, 4, 8, 16, ..., 512, 1024, 2048) but this
-is no strict requirement. Newer graphics cards support textures with arbitrary sizes. If a graphics card doesn't have
-support for these so called NPOT textures Horde3D will convert the texture to a compatible size, although this can
-result in some visible stretching artifacts. Horde3D has also support for the Radiance RGBE format which makes it
-possible to use 16 bit floating point textures.
-<br />
-The engine can load the following image formats. Since Horde uses a pretty lightweight image loading library there
+Horde3D supports two-dimensional textures and cube maps. 2D textures can be loaded from the Direct3D DDS format
+or from any other image format listed below. Cube maps need to be stored in the DDS format. In contrast to
+other image formats, DDS files can store mipmaps and DXT compressed data. Therefore, the texture-related resource
+flags for mipmap generation and compression are ignored for DDS textures.<br />
+In order to guarantee optimal loading performance for DDS textures, Horde3D uses the D3D texture coordinate system
+convention where the origin is at the top left corner of the image. This is different from the OpenGL coordinate
+system which defines the image origin as the lower left corner. For that reason, texture coordinates for 2D texture
+maps need to be flipped manually in the shaders.
+<br /><br />
+The engine can load the following image formats. Since Horde3D uses a pretty lightweight image loading library, there
 are some limitations concerning exotic formats like 1 bpp textures.
 </p>
 <ul>
-    <li>JPEG (non-progressive)</li>
+    <li>DDS (pixel formats: RGB8, RGBA8, RGBA16F, DXT1, DXT3, DXT5 and a few other)</li>
+	<li>JPEG (non-progressive)</li>
     <li>PNG</li>
     <li>TGA</li>
 	<li>BMP (non-RLE)</li>
     <li>PSD (RGB format only)</li>
     <li>HDR</li>
 </ul>
-<p>
-Cube maps are stored with a special texture layout, a so called vertical cross, as can be seen in the
-following figure. The label <b>PZ</b> stands for <i>positive z coordinate</i> and is the front face of the
-cube map.
 <br />
-<br />
-<img src="images/cubemap.png" alt="cubemap" />
-</p>
-<br /><br /><br />
 
 <h2>Materials</h2>
 <p><i>Filename-extension: .material.xml</i></p>
@@ -116,20 +111,6 @@ The following XML node elements with the described attributes are supported:
                 <tr>
                     <td><b>map</b></td>
                     <td>name of the texture resource for the specified unit {required}</td>
-                </tr>
-				<tr>
-                    <td><b>type</b></td>
-                    <td>
-                    type of the texture map (Default: 2D) {optional}<br />
-                    Values: <b>2D</b> for standard texture maps and <b>CUBE</b> for cube maps
-                    </td>
-                </tr>
-                <tr>
-                    <td><b>allowPOTConversion</b></td>
-                    <td>
-                    true if texture may be converted to power-of-two dimensions on hardware without NPOT-support, otherwise false; (Default: true) {optional}<br />
-                    <b>Note: </b> This flag is only respected if the texture isn't already loaded with an opposed flag setting
-                    </td>
                 </tr>
                 <tr>
                     <td><b>allowCompression</b></td>

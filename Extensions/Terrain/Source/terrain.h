@@ -40,13 +40,13 @@ namespace Horde3DTerrain
 	
 	struct TerrainNodeTpl : public SceneNodeTpl
 	{
-		PTexture2DResource	hmapRes;
-		PMaterialResource	matRes;
-		float				meshQuality;
-		float				skirtHeight;
-		int					blockSize;
+		PTextureResource   hmapRes;
+		PMaterialResource  matRes;
+		float              meshQuality;
+		float              skirtHeight;
+		int                blockSize;
 
-		TerrainNodeTpl( const std::string &name, Texture2DResource *hmapRes, MaterialResource *matRes ) :
+		TerrainNodeTpl( const std::string &name, TextureResource *hmapRes, MaterialResource *matRes ) :
 			SceneNodeTpl( SNT_TerrainNode, name ), hmapRes( hmapRes ), matRes( matRes ),
 			meshQuality( 50.0f ), skirtHeight( 0.1f ), blockSize( 17 )
 		{
@@ -79,24 +79,24 @@ namespace Horde3DTerrain
 	{
 	protected:
 		
-		PMaterialResource	_materialRes;
-		uint32				_blockSize;
-		float				_skirtHeight;
-		float				_lodThreshold;
+		PMaterialResource  _materialRes;
+		uint32             _blockSize;
+		float              _skirtHeight;
+		float              _lodThreshold;
 		
-		uint32				_hmapSize;
-		unsigned short		*_heightData;
-		uint32				_maxLevel;
-		float				*_heightArray;
-		uint32				_vertexBuffer, _indexBuffer;
-		BoundingBox			_localBBox;
+		uint32             _hmapSize;
+		unsigned short     *_heightData;
+		uint32             _maxLevel;
+		float              *_heightArray;
+		uint32             _vertexBuffer, _indexBuffer;
+		BoundingBox        _localBBox;
 
-		std::vector< BlockInfo >	_blockTree;
+		std::vector< BlockInfo >  _blockTree;
 
 
 		TerrainNode( const TerrainNodeTpl &terrainTpl );
 		
-		bool updateHeightData( Texture2DResource &hmap );
+		bool updateHeightData( TextureResource &hmap );
 		void calcMaxLevel();
 		
 		uint32 getVertexCount();
@@ -109,14 +109,14 @@ namespace Horde3DTerrain
 		void createBlockTree();
 
 		static void drawTerrainBlock( TerrainNode *terrain, float minU, float minV, float maxU, float maxV,
-									  int level, float scale, const Vec3f &localCamPos, const Frustum *frust1,
-									  const Frustum *frust2, int uni_terBlockParams );
+		                              int level, float scale, const Vec3f &localCamPos, const Frustum *frust1,
+		                              const Frustum *frust2, int uni_terBlockParams );
 
 		uint32 calculateGeometryBlockCount( float lodThreshold, float minU, float minV,
-											float maxU, float maxV, int level, float scale);
+		                                    float maxU, float maxV, int level, float scale);
 		void createGeometryVertices( float lodThreshold, float minU, float minV,
-									 float maxU, float maxV, int level, float scale, 
-									 float *&vertData, unsigned int *&indexData, uint32 &index );
+		                             float maxU, float maxV, int level, float scale, 
+		                             float *&vertData, unsigned int *&indexData, uint32 &index );
 
 	public:
 

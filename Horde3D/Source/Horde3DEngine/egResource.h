@@ -46,8 +46,7 @@ struct ResourceTypes
 		Material,
 		Code,
 		Shader,
-		Texture2D,
-		TextureCube,
+		Texture,
 		Effect,
 		Pipeline
 	};
@@ -58,9 +57,8 @@ struct ResourceFlags
 	enum Flags
 	{
 		NoQuery = 1,
-		NoTexPOTConversion = 2,
-		NoTexCompression = 4,
-		NoTexMipmaps = 8
+		NoTexCompression = 2,
+		NoTexMipmaps = 4
 	};
 };
 

@@ -28,6 +28,7 @@
 #include "egPrerequisites.h"
 #include "egResource.h"
 #include "egShader.h"
+#include "egTextures.h"
 
 
 // =================================================================================================
@@ -48,8 +49,8 @@ struct MaterialResParams
 
 struct MatSampler
 {
-	std::string  name;
-	PResource    texRes;
+	std::string       name;
+	PTextureResource  texRes;
 };
 
 
@@ -80,7 +81,7 @@ private:
 	std::vector< MatSampler >   _samplers;
 	std::vector< MatUniform >   _uniforms;
 	std::vector< std::string >  _shaderFlags;
-	PMaterialResource           _matLink;	
+	PMaterialResource           _matLink;
 
 	bool raiseError( const std::string &msg, int line = -1 );
 

@@ -68,14 +68,15 @@ namespace Horde3DTerrain
 		if( parentNode == 0x0 ) return 0;
 		
 		Resource *hmapRes = Modules::resMan().resolveResHandle( heightMapRes );
-		if( hmapRes == 0x0 || hmapRes->getType() != ResourceTypes::Texture2D ) return 0;
+		if( hmapRes == 0x0 || hmapRes->getType() != ResourceTypes::Texture ||
+			((TextureResource *)hmapRes)->getTexType() != TextureTypes::Tex2D ) return 0;
 		
 		Resource *matRes =  Modules::resMan().resolveResHandle( materialRes );
 		if( matRes == 0x0 || matRes->getType() != ResourceTypes::Material ) return 0;
 		
 		Modules::log().writeInfo( "Adding Terrain node '%s'", safeStr( name ).c_str() );
 		
-		TerrainNodeTpl tpl( safeStr( name ), (Texture2DResource *)hmapRes, (MaterialResource *)matRes );
+		TerrainNodeTpl tpl( safeStr( name ), (TextureResource *)hmapRes, (MaterialResource *)matRes );
 		SceneNode *sn = Modules::sceneMan().findType( SNT_TerrainNode )->factoryFunc( tpl );
 		return Modules::sceneMan().addNode( sn, *parentNode );
 	}

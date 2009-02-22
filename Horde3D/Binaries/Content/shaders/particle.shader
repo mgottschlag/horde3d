@@ -52,13 +52,13 @@ void main( void )
 #include "shaders/utilityLib/vertParticle.glsl"
 
 varying vec4 color;
-varying vec2 texCoord;
+varying vec2 texCoords;
 attribute vec2 texCoords0;
 
 void main(void)
 {
 	color = getParticleColor();
-	texCoord = texCoords0;
+	texCoords = vec2( texCoords0.s, -texCoords0.t );
 	gl_Position = gl_ProjectionMatrix * calcParticleViewPos();
 }
 
@@ -68,11 +68,11 @@ void main(void)
 
 uniform sampler2D albedoMap;
 varying vec4 color;
-varying vec2 texCoord;
+varying vec2 texCoords;
 
 void main( void )
 {
-	vec4 albedo = texture2D( albedoMap, texCoord );
+	vec4 albedo = texture2D( albedoMap, texCoords );
 	
 	gl_FragColor = albedo * color;
 }

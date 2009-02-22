@@ -73,7 +73,7 @@
 
 /*
 	Constants: Predefined constants
-	SNT_TerrainNode	- Type identifier of Terrain scene node
+	SNT_TerrainNode  - Type identifier of Terrain scene node
 */
 const int SNT_TerrainNode = 100;
 
@@ -83,11 +83,11 @@ struct TerrainNodeParams
 	/*	Enum: TerrainNodeParams
 			The available Terrain node parameters.
 		
-		HeightMapRes	- Height map texture; must be square and a power of two [type: ResHandle, write-only]
-		MaterialRes		- Material resource used for rendering the terrain [type: ResHandle]
-		MeshQuality		- Constant controlling the overall resolution of the terrain mesh (default: 50.0) [type: float]
-		SkirtHeight		- Height of the skirts used to hide cracks (default: 0.1) [type: float]
-		BlockSize		- Size of a terrain block that is drawn in a single render call; must be 2^n+1 (default: 17) [type: int]
+		HeightMapRes  - Height map texture; must be square and a power of two [type: ResHandle, write-only]
+		MaterialRes   - Material resource used for rendering the terrain [type: ResHandle]
+		MeshQuality   - Constant controlling the overall resolution of the terrain mesh (default: 50.0) [type: float]
+		SkirtHeight   - Height of the skirts used to hide cracks (default: 0.1) [type: float]
+		BlockSize     - Size of a terrain block that is drawn in a single render call; must be 2^n+1 (default: 17) [type: int]
 	*/
 	enum List
 	{
@@ -108,10 +108,10 @@ namespace Horde3DTerrain
 		This function creates a new Terrain node and attaches it to the specified parent node.
 		
 		Parameters:
-			parent		 - handle to parent node to which the new node will be attached
-			name		 - name of the node
-			heightMapRes - handle to a Texture2D resource that contains the terrain height information (must be square and POT) 
-			materialRes  - handle to the Material resource used for rendering the terrain
+			parent        - handle to parent node to which the new node will be attached
+			name          - name of the node
+			heightMapRes  - handle to a 2D Texture resource that contains the terrain height information (must be square and POT) 
+			materialRes   - handle to the Material resource used for rendering the terrain
 
 		Returns:
 			 handle to the created node or 0 in case of failure
@@ -128,9 +128,9 @@ namespace Horde3DTerrain
 		geometrical complexity is higher and optimize the vertex count for flat regions.
 		
 		Parameters:
-			node		- handle to terrain node that will be accessed
-			resName		- name of the Geometry resource that shall be created
-			meshQuality - constant controlling the overall mesh resolution
+			node         - handle to terrain node that will be accessed
+			resName      - name of the Geometry resource that shall be created
+			meshQuality  - constant controlling the overall mesh resolution
 			
 		Returns:
 			 handle to the created Geometry resource or 0 in case of failure

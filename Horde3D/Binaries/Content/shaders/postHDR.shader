@@ -36,11 +36,11 @@
 [[VS_FSQUAD]]
 // =================================================================================================
 
-varying vec2 texCoord;
+varying vec2 texCoords;
 				
 void main( void )
 {
-	texCoord = gl_MultiTexCoord0.st; 
+	texCoords = gl_MultiTexCoord0.st; 
 	gl_Position = gl_ProjectionMatrix * gl_Vertex;
 }
 
@@ -53,18 +53,18 @@ void main( void )
 uniform sampler2D buf0;
 uniform vec2 frameBufSize;
 uniform vec4 hdrParams;
-varying vec2 texCoord;
+varying vec2 texCoords;
 
 void main( void )
 {
 	vec2 texSize = frameBufSize * 4.0;
-	vec2 coord2 = texCoord + vec2( 2, 2 ) / texSize;
+	vec2 coord2 = texCoords + vec2( 2, 2 ) / texSize;
 	
 	// Average using bilinear filtering
-	vec4 sum = getTex2DBilinear( buf0, texCoord, texSize );
+	vec4 sum = getTex2DBilinear( buf0, texCoords, texSize );
 	sum += getTex2DBilinear( buf0, coord2, texSize );
-	sum += getTex2DBilinear( buf0, vec2( coord2.x, texCoord.y ), texSize );
-	sum += getTex2DBilinear( buf0, vec2( texCoord.x, coord2.y ), texSize );
+	sum += getTex2DBilinear( buf0, vec2( coord2.x, texCoords.y ), texSize );
+	sum += getTex2DBilinear( buf0, vec2( texCoords.x, coord2.y ), texSize );
 	sum /= 4.0;
 	
 	// Tonemap
@@ -86,11 +86,11 @@ void main( void )
 uniform sampler2D buf0;
 uniform vec2 frameBufSize;
 uniform vec4 blurParams;
-varying vec2 texCoord;
+varying vec2 texCoords;
 
 void main( void )
 {
-	gl_FragColor = blurKawase( buf0, texCoord, frameBufSize, blurParams.x );
+	gl_FragColor = blurKawase( buf0, texCoords, frameBufSize, blurParams.x );
 }
 	
 
@@ -100,12 +100,12 @@ void main( void )
 uniform sampler2D buf0, buf1;
 uniform vec2 frameBufSize;
 uniform vec4 hdrParams;
-varying vec2 texCoord;
+varying vec2 texCoords;
 
 void main( void )
 {
-	vec4 col0 = texture2D( buf0, texCoord );	// HDR color
-	vec4 col1 = texture2D( buf1, texCoord );	// Bloom
+	vec4 col0 = texture2D( buf0, texCoords );	// HDR color
+	vec4 col1 = texture2D( buf1, texCoords );	// Bloom
 	
 	// Tonemap
 	vec4 col = 1.0 - exp2( -hdrParams.x * col0 );

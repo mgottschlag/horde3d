@@ -95,9 +95,9 @@ void main( void )
 [[FS_COPY_DEPTH]]
 
 uniform sampler2D depthBuf;
-varying vec2 texCoord;
+varying vec2 texCoords;
 
 void main( void )
 {
-	gl_FragDepth = texture2D( depthBuf, texCoord ).r;
+	gl_FragDepth = texture2D( depthBuf, texCoords ).r;
 }

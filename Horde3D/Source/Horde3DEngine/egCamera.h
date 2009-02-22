@@ -58,7 +58,7 @@ struct CameraNodeParams
 struct CameraNodeTpl : public SceneNodeTpl
 {
 	PPipelineResource   pipeRes;
-	PTexture2DResource  outputTex;
+	PTextureResource    outputTex;
 	float               leftPlane, rightPlane;
 	float               bottomPlane, topPlane;
 	float               nearPlane, farPlane;
@@ -84,7 +84,7 @@ class CameraNode : public SceneNode
 private:
 
 	PPipelineResource   _pipelineRes;
-	PTexture2DResource  _outputTex;
+	PTextureResource    _outputTex;
 	Matrix4f            _viewMat, _projMat;
 	Frustum             _frustum;
 	Vec3f               _absPos;

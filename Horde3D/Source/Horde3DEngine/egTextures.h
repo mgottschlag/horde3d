@@ -27,30 +27,13 @@
 
 #include "egPrerequisites.h"
 #include "egResource.h"
+#include "egRendererBase.h"
 
 struct RenderBuffer;
 
 
 // =================================================================================================
-// Image Loader
-// =================================================================================================
-
-class ImageLoader
-{
-private:
-
-	static uint32 nextSmallerPowerOfTwo( uint32 n );
-
-public:
-
-	static uint32 loadImage( const char *data, uint32 size, bool makePOT,
-	                         void *&pixels, int &width, int &height, int &comps, bool &hdr );
-	static std::string getErrorString();
-};
-
-
-// =================================================================================================
-// 2D Texture Resource
+// Texture Resource
 // =================================================================================================
 
 struct TextureResParams
@@ -58,39 +41,42 @@ struct TextureResParams
 	enum List
 	{
 		PixelData = 700,
+		TexType,
+		TexFormat,
 		Width,
-		Height,
-		Comps,
-		HDR
+		Height
 	};
 };
 
 // =================================================================================================
 
-class Texture2DResource : public Resource
+class TextureResource : public Resource
 {
 protected:
 	
-	uint32        _texObject;
-	int           _width, _height, _comps;
-	RenderBuffer  *_rendBuf;	// Used when texture is renderable
-	bool          _hdr;
+	RenderBuffer          *_rendBuf;	// Used when texture is renderable
+	TextureTypes::List    _texType;
+	TextureFormats::List  _texFormat;
+	int                   _width, _height;
+	uint32                _texObject;
+	bool                  _hasMipMaps;
 
 	bool raiseError( const std::string &msg );
 
 public:
 	
-	static uint32 defTexObject;
+	static uint32 defTex2DObject;
+	static uint32 defTexCubeObject;
 
 	static void initializationFunc();
 	static void releaseFunc();
 	static Resource *factoryFunc( const std::string &name, int flags )
-		{ return new Texture2DResource( name, flags ); }
+		{ return new TextureResource( name, flags ); }
 	
-	Texture2DResource( const std::string &name, int flags );
-	Texture2DResource( const std::string &name, int flags,
-	                   uint32 width, uint32 height, bool renderable );
-	~Texture2DResource();
+	TextureResource( const std::string &name, int flags );
+	TextureResource( const std::string &name, int flags,
+	                 uint32 width, uint32 height, bool renderable );
+	~TextureResource();
 	
 	void initDefault();
 	void release();
@@ -100,56 +86,17 @@ public:
 
 	int getParami( int param );
 
+	RenderBuffer *getRenderBuffer()  { return _rendBuf; }
+	TextureTypes::List getTexType() { return _texType; }
+	TextureFormats::List getTexFormat() { return _texFormat; }
 	uint32 getWidth() const { return _width; }
 	uint32 getHeight() const { return _height; } 
-	uint32 getComps() const { return _comps; }
-	bool isHDR() const { return _hdr; }
 	uint32 getTexObject() { return _texObject; }
-	RenderBuffer *getRenderBuffer()  { return _rendBuf; }
+	bool hasMipMaps() { return _hasMipMaps; }
 
 	friend class ResourceManager;
 };
 
-typedef SmartResPtr< Texture2DResource > PTexture2DResource;
-
-
-// =================================================================================================
-// Cubemap Texture Resource
-// =================================================================================================
-
-class TextureCubeResource : public Resource
-{
-protected:
-	
-	uint32  _texObject;
-	int     _width, _height, _comps;
-	bool    _hdr;
-
-	bool raiseError( const std::string &msg );
-
-public:
-	
-	static uint32 defTexObject;
-
-	static void initializationFunc();
-	static void releaseFunc();
-	static Resource *factoryFunc( const std::string &name, int flags )
-		{ return new TextureCubeResource( name, flags ); }
-	
-	TextureCubeResource( const std::string &name, int flags );
-	~TextureCubeResource();
-	
-	void initDefault();
-	void release();
-	bool load( const char *data, int size );
-
-	int getParami( int param );
-
-	uint32 getTexObject() { return _texObject; }
-
-	friend class ResourceManager;
-};
-
-typedef SmartResPtr< TextureCubeResource > PTextureCubeResource;
+typedef SmartResPtr< TextureResource > PTextureResource;
 
 #endif // _egTextures_H_

@@ -32,7 +32,7 @@ Application::Application( const string &contentDir )
 {
 	for( unsigned int i = 0; i < 320; ++i ) _keys[i] = false;
 
-	_x = 512; _y = 120; _z = 512; _rx = 0; _ry = -45; _velocity = 10.0f;
+	_x = 512; _y = 120; _z = 512; _rx = 0; _ry = 225; _velocity = 10.0f;
 	_curFPS = 30;
 
 	_freeze = false; _showStats = false; _debugViewMode = false; _wireframeMode = false;

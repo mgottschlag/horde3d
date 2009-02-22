@@ -137,8 +137,7 @@ struct ResourceTypes
 		Material	- Material script
 		Code		- Text block containing shader source code
 		Shader		- Shader program
-		Texture2D	- Two-dimensional texture map
-		TextureCube	- Cube map texture
+		Texture		- Texture map
 		Effect		- Particle configuration
 		Pipeline	- Rendering pipeline
 	*/
@@ -151,8 +150,7 @@ struct ResourceTypes
 		Material,
 		Code,
 		Shader,
-		Texture2D,
-		TextureCube,
+		Texture,
 		Effect,
 		Pipeline
 	};
@@ -164,16 +162,14 @@ struct ResourceFlags
 			The available flags used when adding a resource.
 			
 		NoQuery				- Excludes resource from being listed by queryUnloadedResource function.
-		NoTexPOTConversion	- Disables texture conversion to power-of-two dimensions on hardware without NPOT-support.
-		NoTexCompression	- Disables texture compression for Texture2D or TextureCube resource.
-		NoTexMipmaps		- Disables generation of mipmaps for textures.
+		NoTexCompression	- Disables texture compression for Texture resource.
+		NoTexMipmaps		- Disables generation of mipmaps for Texture resources.
 	*/
 	enum Flags
 	{
 		NoQuery = 1,
-		NoTexPOTConversion = 2,
-		NoTexCompression = 4,
-		NoTexMipmaps = 8
+		NoTexCompression = 2,
+		NoTexMipmaps = 4
 	};
 };
 
@@ -232,22 +228,21 @@ struct MaterialResParams
 struct TextureResParams
 {
 	/*	Enum: TextureResParams
-			The available Texture2D and TextureCube resource parameters.
+			The available Texture resource parameters.
 
-		PixelData	- Image pixel data (pointer to unsigned char); valid for updateResourceData for Texture2D
+		PixelData	- Image pixel data (pointer to unsigned char); valid for updateResourceData for 2D Textures
+		TexType		- Texture type (2D or Cube); valid for getResourceParami
+		TexFormat	- Pixel format; valid for getResourceParami
 		Width		- Image width in pixels; valid for getResourceParami
 		Height		- Image height in pixels; valid for getResourceParami
-		Comps		- Number of channels in image (e.g. an RGBA image has 4 channels); valid for getResourceParami
-		HDR			- Flag indicating whether the texture is a HDR image (returns 1) or a usual 8 bit per channel image (returns 0);
-		              valid for getResourceParami
 	 */
 	enum List
 	{
 		PixelData = 700,
+		TexType,
+		TexFormat,
 		Width,
-		Height,
-		Comps,
-		HDR
+		Height
 	};
 };
 
@@ -473,7 +468,7 @@ struct CameraNodeParams
 			The available Camera node parameters.
 		
 		PipelineRes			- Pipeline resource used for rendering [type: ResHandle]
-		OutputTex			- Texture2D resource used as output buffer (can be 0 to use main framebuffer) (default: 0) [type: ResHandle]
+		OutputTex			- 2D Texture resource used as output buffer (can be 0 to use main framebuffer) (default: 0) [type: ResHandle]
 		OutputBufferIndex	- Index of the output buffer for stereo rendering (values: 0 for left eye, 1 for right eye) (default: 0) [type: int]
 		LeftPlane			- Coordinate of left plane relative to near plane center (default: -0.055228457) [type: float]
 		RightPlane			- Coordinate of right plane relative to near plane center (default: 0.055228457) [type: float]
@@ -1051,8 +1046,8 @@ namespace Horde3D
         have exactly the same data layout as the data that was loaded.
         
         Notes on available ResourceData parameters:
-		- Texture2DResData::PixelData
-			Sets the image data of a Texture2D resource. The data pointer must point to a memory block that contains
+		- TextureResParams::PixelData
+			Sets the image data of a 2D Texture resource. The data pointer must point to a memory block that contains
 			the pixels of the image. Each pixel needs to have 32 bit color data in BGRA format and the dimensions
 			of the image (width, height) must be exactly the same as the dimensions of the image that was
 			originally loaded for the resource. The first element in the data array corresponds to the lower left
@@ -1102,10 +1097,10 @@ namespace Horde3D
 
 	/* Group: Specific resource management functions */
 	/* 	Function: createTexture2D
-			Adds a Texture2D resource.
+			Adds a 2D Texture resource.
 		
-		This function tries to create and add a Texture2D resource with the specified name to the resource
-		manager. If a Texture2D resource with the same name is already existing, the function fails. The
+		This function tries to create and add a 2D Texture resource with the specified name to the resource
+		manager. If a Texture resource with the same name is already existing, the function fails. The
 		texture is initialized with the specified dimensions and the resource is declared as loaded. This
 		function is especially useful to create dynamic textures (e.g. for displaying videos) or output buffers
 		for render-to-texture.

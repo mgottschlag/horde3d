@@ -53,9 +53,29 @@
 #	define strncpy_s( dst, dstSize, src, count ) strncpy( dst, src, min( count, dstSize ) )
 #endif
 
-// The following lines will produce a compiler error if integer types have unexpected sizes
-typedef unsigned char validate_int32[sizeof( int ) == 4];
-typedef unsigned char validate_int16[sizeof( short ) == 2];
-typedef unsigned char validate_int8[sizeof( char ) == 1];
+// Runtime assertion
+#if defined( _DEBUG )
+#	define ASSERT( exp ) assert( exp )
+#else
+#	define ASSERT( exp )
+#endif
+
+// Static compile-time assertion
+namespace StaticAssert
+{
+	template< bool > struct FAILED;
+	template<> struct FAILED< true > { };
+}
+#define ASSERT_STATIC( exp ) (StaticAssert::FAILED< (exp) != 0 >())
+
+
+// Check the size of some common types
+// Note: this function is never called but just wraps the compile time asserts
+static void __ValidatePlatform__()
+{
+	ASSERT_STATIC( sizeof( int ) == 4 );
+	ASSERT_STATIC( sizeof( short ) == 2 );
+	ASSERT_STATIC( sizeof( char ) == 1 );
+}
 
 #endif // _utPlatform_H_
