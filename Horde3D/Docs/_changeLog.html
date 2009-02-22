@@ -13,6 +13,39 @@
 <p>Here you can see what has changed in the Horde3D SDK releases.</p>
 
 
+<h3>Version [1.0.0] Beta3</h3>
+<ul>
+	<li>Refactored shader system: new shader file format without XML CDATA sections, support for #include directive and automatic permutation generation based on flags.</li>
+	<li>Replaced texture unit configuration in materials by named samplers (pipeline command BindBuffer was changed and UnbindBuffers added).</li>
+	<li>Added more configurable render states to shader contexts.</li>
+	<li>Added configurable sampler states to shader format (resource flags NoTexFiltering and NoTexRepeat were removed).</li>
+	<li>Adapted all sample shaders to refactored shader system and implemented a single übershader for models.</li>
+	<li>Refactored LOD system: models can have LOD meshes now (Group node params MinDist and MaxDist were removed).</li>
+	<li>Optimized scene management by implementing a basic spatial graph.</li>
+	<li>Optimized performance of adding nodes to large scene graphs.</li>
+	<li>Added support for loading DDS files (cube maps must be stored as dds now; vertical cross layout no longer supported).</li>
+	<li>Merged Texture2D and TextureCube resources to a single Texture resource.</li>
+	<li>Removed POT conversion of NPOT textures.</li>
+	<li>Added color support for overlays (added shader uniform and modified API function showOverlay and utility function showText).</li>
+	<li>Changed overlay coordinate system origin from bottom-left to top-left in order to make overlay system more intuitive.</li>
+	<li>Exposed camera transformation to pipeline fullscreen-quad passes.</li>
+	<li>Added nicer looking info box for frame stats.</li>
+	<li>Added engine option DumpFailedShaders for dumping corrupt shader code to a file.</li>
+	<li>Added API function getNextResource for iterating over resources.</li>
+	<li>Added API function finalizeFrame which should be called after all rendering for the current frame has been done.</li>
+	<li>Replaced API function resize by setupViewport.</li>
+	<li>Added API function checkNodeVisibility to find out if a node is visible.</li>
+	<li>Renamed API function calcCameraProjectionMatrix to getCameraProjectionMatrix since it just returns the matrix now instead of recalculating it.</li>
+	<li>Renamed AnisotropyFactor to MaxAnisotropy in EngineOptions enum.</li>
+	<li>Renamed resource Effect to ParticleEffect in order to avoid confusion with shader effects (also adapted emitter node params and default file extension).</li>
+	<li>Did many smaller bug fixes, code cleanups and optimizations in engine core.</li>
+	<li>ColladaConv update: Removed shader name command line parameter since it is usually not required with übershaders.</li>
+	<li>ColladaConv update: ColladaConv writes skinning shader flag to materials when the model has joints.</li>
+	<li>Added support for node libraries to ColladaConv.</li>
+	<li>Added support for polygon tags to ColladaConv.</li>
+</ul>
+
+
 <h3>Version [1.0.0] Beta2</h3>
 <ul>
 	<li>Implemented simple animation compression scheme and updated animation format to version 3.</li>

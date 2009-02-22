@@ -40,7 +40,7 @@ using namespace std;
 int main( int argc, char **argv )
 {
 	log( "Horde3D Collada Converter" );
-	log( "Version 1.0.0 Beta2" );
+	log( "Version 1.0.0 Beta3" );
 	log( "" );
 	
 	if( argc < 2 )

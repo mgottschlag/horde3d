@@ -126,9 +126,13 @@ namespace Horde3DUtils
 	
 	/*	Group: Resource management */
 	/* 	Function: getResourcePath
+			*Deprecated*
 			Returns  the search path of a resource type.
 		
 		This function returns the search path of a specified resource type.
+
+		The function is now marked as deprecated since it is better practice to make all paths
+		relative to the content directory.
 		
 		Parameters:
 			type  - type of resource
@@ -139,9 +143,13 @@ namespace Horde3DUtils
 	DLL const char *getResourcePath( int type );
 	
 	/* 	Function: setResourcePath
+			*Deprecated*
 			Sets the search path for a resource type.
-		
+
 		This function sets the search path for a specified resource type.
+		
+		The function is now marked as deprecated since it is better practice to make all paths
+		relative to the content directory.
 		
 		Parameters:
 			type  - type of resource
