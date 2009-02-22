@@ -65,23 +65,23 @@ bool ParticleChannel::parse( XMLNode &node )
 
 
 // *************************************************************************************************
-// EffectResource
+// ParticleEffectResource
 // *************************************************************************************************
 
-EffectResource::EffectResource( const string &name, int flags ) :
-	Resource( ResourceTypes::Effect, name, flags )
+ParticleEffectResource::ParticleEffectResource( const string &name, int flags ) :
+	Resource( ResourceTypes::ParticleEffect, name, flags )
 {
 	initDefault();	
 }
 
 
-EffectResource::~EffectResource()
+ParticleEffectResource::~ParticleEffectResource()
 {
 	release();
 }
 
 
-void EffectResource::initDefault()
+void ParticleEffectResource::initDefault()
 {
 	_lifeMin = 0; _lifeMax = 0;
 	_moveVel.reset();
@@ -94,27 +94,27 @@ void EffectResource::initDefault()
 }
 
 
-void EffectResource::release()
+void ParticleEffectResource::release()
 {
 }
 
 
-bool EffectResource::raiseError( const string &msg, int line )
+bool ParticleEffectResource::raiseError( const string &msg, int line )
 {
 	// Reset
 	release();
 	initDefault();
 
 	if( line < 0 )
-		Modules::log().writeError( "Effect resource '%s': %s", _name.c_str(), msg.c_str() );
+		Modules::log().writeError( "ParticleEffect resource '%s': %s", _name.c_str(), msg.c_str() );
 	else
-		Modules::log().writeError( "Effect resource '%s' in line %i: %s", _name.c_str(), line, msg.c_str() );
+		Modules::log().writeError( "ParticleEffect resource '%s' in line %i: %s", _name.c_str(), line, msg.c_str() );
 	
 	return false;
 }
 
 
-bool EffectResource::load( const char *data, int size )
+bool ParticleEffectResource::load( const char *data, int size )
 {
 	if( !Resource::load( data, size ) ) return false;
 	if( data[size - 1] != '\0' )
@@ -122,9 +122,9 @@ bool EffectResource::load( const char *data, int size )
 		return raiseError( "Data block not NULL-terminated" );
 	}
 
-	// Parse effect
+	// Parse particle effect
 	XMLResults res;
-	XMLNode rootNode = XMLNode::parseString( data, "ParticleConfig", &res );
+	XMLNode rootNode = XMLNode::parseString( data, "ParticleEffect", &res );
 	if( res.error != eXMLErrorNone )
 	{
 		return raiseError( XMLNode::getError( res.error ), res.nLine );
@@ -160,55 +160,55 @@ bool EffectResource::load( const char *data, int size )
 }
 
 
-float EffectResource::getParamf( int param )
+float ParticleEffectResource::getParamf( int param )
 {
 	switch( param )
 	{
-	case EffectResParams::LifeMin:
+	case ParticleEffectResParams::LifeMin:
 		return _lifeMin;
-	case EffectResParams::LifeMax:
+	case ParticleEffectResParams::LifeMax:
 		return _lifeMax;
-	case EffectResParams::MoveVelMin:
+	case ParticleEffectResParams::MoveVelMin:
 		return _moveVel.startMin;
-	case EffectResParams::MoveVelMax:
+	case ParticleEffectResParams::MoveVelMax:
 		return _moveVel.startMax;
-	case EffectResParams::MoveVelEndRate:
+	case ParticleEffectResParams::MoveVelEndRate:
 		return _moveVel.endRate;
-	case EffectResParams::RotVelMin:
+	case ParticleEffectResParams::RotVelMin:
 		return _moveVel.startMin;
-	case EffectResParams::RotVelMax:
+	case ParticleEffectResParams::RotVelMax:
 		return _moveVel.startMax;
-	case EffectResParams::RotVelEndRate:
+	case ParticleEffectResParams::RotVelEndRate:
 		return _moveVel.endRate;
-	case EffectResParams::SizeMin:
+	case ParticleEffectResParams::SizeMin:
 		return _size.startMin;
-	case EffectResParams::SizeMax:
+	case ParticleEffectResParams::SizeMax:
 		return _size.startMax;
-	case EffectResParams::SizeEndRate:
+	case ParticleEffectResParams::SizeEndRate:
 		return _size.endRate;
-	case EffectResParams::Col_R_Min:
+	case ParticleEffectResParams::Col_R_Min:
 		return _colR.startMin;
-	case EffectResParams::Col_R_Max:
+	case ParticleEffectResParams::Col_R_Max:
 		return _colR.startMax;
-	case EffectResParams::Col_R_EndRate:
+	case ParticleEffectResParams::Col_R_EndRate:
 		return _colR.endRate;
-	case EffectResParams::Col_G_Min:
+	case ParticleEffectResParams::Col_G_Min:
 		return _colG.startMin;
-	case EffectResParams::Col_G_Max:
+	case ParticleEffectResParams::Col_G_Max:
 		return _colG.startMax;
-	case EffectResParams::Col_G_EndRate:
+	case ParticleEffectResParams::Col_G_EndRate:
 		return _colG.endRate;
-	case EffectResParams::Col_B_Min:
+	case ParticleEffectResParams::Col_B_Min:
 		return _colB.startMin;
-	case EffectResParams::Col_B_Max:
+	case ParticleEffectResParams::Col_B_Max:
 		return _colB.startMax;
-	case EffectResParams::Col_B_EndRate:
+	case ParticleEffectResParams::Col_B_EndRate:
 		return _colB.endRate;
-	case EffectResParams::Col_A_Min:
+	case ParticleEffectResParams::Col_A_Min:
 		return _colA.startMin;
-	case EffectResParams::Col_A_Max:
+	case ParticleEffectResParams::Col_A_Max:
 		return _colA.startMax;
-	case EffectResParams::Col_A_EndRate:
+	case ParticleEffectResParams::Col_A_EndRate:
 		return _colA.endRate;
 	default:
 		return Resource::getParamf( param );
@@ -216,77 +216,77 @@ float EffectResource::getParamf( int param )
 }
 
 
-bool EffectResource::setParamf( int param, float value )
+bool ParticleEffectResource::setParamf( int param, float value )
 {
 	switch( param )
 	{
-	case EffectResParams::LifeMin:
+	case ParticleEffectResParams::LifeMin:
 		_lifeMin = value;
 		return true;
-	case EffectResParams::LifeMax:
+	case ParticleEffectResParams::LifeMax:
 		_lifeMax = value;
 		return true;
-	case EffectResParams::MoveVelMin:
+	case ParticleEffectResParams::MoveVelMin:
 		_moveVel.startMin = value;
 		return true;
-	case EffectResParams::MoveVelMax:
+	case ParticleEffectResParams::MoveVelMax:
 		_moveVel.startMax = value;
 		return true;
-	case EffectResParams::MoveVelEndRate:
+	case ParticleEffectResParams::MoveVelEndRate:
 		_moveVel.endRate = value;
 		return true;
-	case EffectResParams::RotVelMin:
+	case ParticleEffectResParams::RotVelMin:
 		_rotVel.startMin = value;
 		return true;
-	case EffectResParams::RotVelMax:
+	case ParticleEffectResParams::RotVelMax:
 		_rotVel.startMax = value;
 		return true;
-	case EffectResParams::RotVelEndRate:
+	case ParticleEffectResParams::RotVelEndRate:
 		_rotVel.endRate = value;
 		return true;
-	case EffectResParams::SizeMin:
+	case ParticleEffectResParams::SizeMin:
 		_size.startMin = value;
 		return true;
-	case EffectResParams::SizeMax:
+	case ParticleEffectResParams::SizeMax:
 		_size.startMax = value;
 		return true;
-	case EffectResParams::SizeEndRate:
+	case ParticleEffectResParams::SizeEndRate:
 		_size.endRate = value;
 		return true;
-	case EffectResParams::Col_R_Min:
+	case ParticleEffectResParams::Col_R_Min:
 		_colR.startMin = value;
 		return true;
-	case EffectResParams::Col_R_Max:
+	case ParticleEffectResParams::Col_R_Max:
 		_colR.startMax = value;
 		return true;
-	case EffectResParams::Col_R_EndRate:
+	case ParticleEffectResParams::Col_R_EndRate:
 		_colR.endRate = value;
 		return true;
-	case EffectResParams::Col_G_Min:
+	case ParticleEffectResParams::Col_G_Min:
 		_colG.startMin = value;
 		return true;
-	case EffectResParams::Col_G_Max:
+	case ParticleEffectResParams::Col_G_Max:
 		_colG.startMax = value;
 		return true;
-	case EffectResParams::Col_G_EndRate:
+	case ParticleEffectResParams::Col_G_EndRate:
 		_colG.endRate = value;
 		return true;
-	case EffectResParams::Col_B_Min:
+	case ParticleEffectResParams::Col_B_Min:
 		_colB.startMin = value;
 		return true;
-	case EffectResParams::Col_B_Max:
+	case ParticleEffectResParams::Col_B_Max:
 		_colB.startMax = value;
 		return true;
-	case EffectResParams::Col_B_EndRate:
+	case ParticleEffectResParams::Col_B_EndRate:
 		_colB.endRate = value;
 		return true;
-	case EffectResParams::Col_A_Min:
+	case ParticleEffectResParams::Col_A_Min:
 		_colA.startMin = value;
 		return true;
-	case EffectResParams::Col_A_Max:
+	case ParticleEffectResParams::Col_A_Max:
 		_colA.startMax = value;
 		return true;
-	case EffectResParams::Col_A_EndRate:
+	case ParticleEffectResParams::Col_A_EndRate:
 		_colA.endRate = value;
 		return true;
 	default:
@@ -354,12 +354,12 @@ SceneNodeTpl *EmitterNode::parsingFunc( map< string, string > &attribs )
 			emitterTpl->matRes = (MaterialResource *)Modules::resMan().resolveResHandle( res );
 	}
 	else result = false;
-	itr = attribs.find( "effect" );
+	itr = attribs.find( "particleEffect" );
 	if( itr != attribs.end() )
 	{
-		uint32 res = Modules::resMan().addResource( ResourceTypes::Effect, itr->second, 0, false );
+		uint32 res = Modules::resMan().addResource( ResourceTypes::ParticleEffect, itr->second, 0, false );
 		if( res != 0 )
-			emitterTpl->effectRes = (EffectResource *)Modules::resMan().resolveResHandle( res );
+			emitterTpl->effectRes = (ParticleEffectResource *)Modules::resMan().resolveResHandle( res );
 	}
 	else result = false;
 	itr = attribs.find( "maxCount" );
@@ -485,7 +485,7 @@ int EmitterNode::getParami( int param )
 	case EmitterNodeParams::MaterialRes:
 		if( _materialRes != 0x0 ) return _materialRes->getHandle();
 		else return 0;
-	case EmitterNodeParams::EffectRes:
+	case EmitterNodeParams::ParticleEffectRes:
 		if( _effectRes != 0x0 ) return _effectRes->getHandle();
 		else return 0;
 	case EmitterNodeParams::MaxCount:
@@ -513,14 +513,14 @@ bool EmitterNode::setParami( int param, int value )
 		}
 		_materialRes = (MaterialResource *)res;
 		return true;
-	case EmitterNodeParams::EffectRes:
+	case EmitterNodeParams::ParticleEffectRes:
 		res = Modules::resMan().resolveResHandle( value );
-		if( res == 0x0 || res->getType() != ResourceTypes::Effect )
+		if( res == 0x0 || res->getType() != ResourceTypes::ParticleEffect )
 		{	
-			Modules::log().writeDebugInfo( "Invalid Effect resource for Emitter node %i", _handle );
+			Modules::log().writeDebugInfo( "Invalid ParticleEffect resource for Emitter node %i", _handle );
 			return false;
 		}
-		_effectRes = (EffectResource *)res;
+		_effectRes = (ParticleEffectResource *)res;
 		return true;
 	case EmitterNodeParams::MaxCount:
 		setMaxParticleCount( (uint32)value );

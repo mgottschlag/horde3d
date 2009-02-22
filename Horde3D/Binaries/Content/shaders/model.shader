@@ -179,7 +179,7 @@ void main( void )
 #endif
 
 	// Flip texture vertically to match the GL coordinate system
-	newCoords.t *= -1;
+	newCoords.t *= -1.0;
 
 	vec3 albedo = texture2D( albedoMap, newCoords.st ).rgb;
 	
@@ -284,7 +284,7 @@ void main( void )
 #endif
 
 	// Flip texture vertically to match the GL coordinate system
-	newCoords.t *= -1;
+	newCoords.t *= -1.0;
 
 	vec3 albedo = texture2D( albedoMap, newCoords.st ).rgb;
 	
@@ -357,7 +357,7 @@ void main( void )
 #endif
 
 	// Flip texture vertically to match the GL coordinate system
-	newCoords.t *= -1;
+	newCoords.t *= -1.0;
 
 	vec3 albedo = texture2D( albedoMap, newCoords.st ).rgb;
 	

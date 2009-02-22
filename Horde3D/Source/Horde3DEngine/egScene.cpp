@@ -164,6 +164,12 @@ bool SceneNode::setParamstr( int param, const char *value )
 }
 
 
+uint32 SceneNode::calcLodLevel( const Vec3f &viewPoint )
+{
+	return 0;
+}
+
+
 bool SceneNode::canAttach( SceneNode &/*parent*/ )
 {
 	return true;
@@ -819,16 +825,9 @@ int SceneManager::checkNodeVisibility( SceneNode *node, CameraNode *cam, bool ch
 	
 	// Frustum culling
 	if( cam->getFrustum().cullBox( node->getBBox() ) )
-	{
 		return -1;
-	}
-	else if( node->getType() == SceneNodeTypes::Model )
-	{
-		// Calculate LOD level
-		return ((ModelNode *)node)->calcLodLevel( cam->getAbsPos() );
-	}
+	else if( calcLod )
+		return node->calcLodLevel( cam->getAbsPos() );
 	else
-	{
 		return 0;
-	}
 }

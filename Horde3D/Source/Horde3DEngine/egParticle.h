@@ -34,10 +34,10 @@ struct XMLNode;
 
 
 // =================================================================================================
-// Effect Resource
+// ParticleEffect Resource
 // =================================================================================================
 
-struct EffectResParams
+struct ParticleEffectResParams
 {
 	enum List
 	{
@@ -81,7 +81,7 @@ struct ParticleChannel
 
 // =================================================================================================
 
-class EffectResource : public Resource
+class ParticleEffectResource : public Resource
 {
 private:
 
@@ -95,10 +95,10 @@ private:
 public:
 	
 	static Resource *factoryFunc( const std::string &name, int flags )
-		{ return new EffectResource( name, flags ); }
+		{ return new ParticleEffectResource( name, flags ); }
 	
-	EffectResource( const std::string &name, int flags );
-	~EffectResource();
+	ParticleEffectResource( const std::string &name, int flags );
+	~ParticleEffectResource();
 	
 	void initDefault();
 	void release();
@@ -110,7 +110,7 @@ public:
 	friend class EmitterNode;
 };
 
-typedef SmartResPtr< EffectResource > PEffectResource;
+typedef SmartResPtr< ParticleEffectResource > PParticleEffectResource;
 
 
 // =================================================================================================
@@ -122,7 +122,7 @@ struct EmitterNodeParams
 	enum List
 	{
 		MaterialRes = 700,
-		EffectRes,
+		ParticleEffectRes,
 		MaxCount,
 		RespawnCount,
 		Delay,
@@ -138,15 +138,15 @@ struct EmitterNodeParams
 
 struct EmitterNodeTpl : public SceneNodeTpl
 {
-	PMaterialResource  matRes;
-	PEffectResource    effectRes;
-	uint32             maxParticleCount;
-	int                respawnCount;
-	float              delay, emissionRate, spreadAngle;
-	float              fx, fy, fz;
+	PMaterialResource        matRes;
+	PParticleEffectResource  effectRes;
+	uint32                   maxParticleCount;
+	int                      respawnCount;
+	float                    delay, emissionRate, spreadAngle;
+	float                    fx, fy, fz;
 
-	EmitterNodeTpl( const std::string &name, MaterialResource *materialRes, EffectResource *effectRes,
-	                uint32 maxParticleCount, int respawnCount) :
+	EmitterNodeTpl( const std::string &name, MaterialResource *materialRes,
+		ParticleEffectResource *effectRes, uint32 maxParticleCount, int respawnCount) :
 		SceneNodeTpl( SceneNodeTypes::Emitter, name ),
 		matRes( materialRes ), effectRes( effectRes ), maxParticleCount( maxParticleCount ),
 		respawnCount( respawnCount ), delay( 0 ), emissionRate( 0 ), spreadAngle( 0 ),
@@ -176,25 +176,25 @@ class EmitterNode : public SceneNode
 protected:
 
 	// Emitter data
-	float                  _timeDelta;
-	float                  _emissionAccum;
+	float                    _timeDelta;
+	float                    _emissionAccum;
 	
 	// Emitter params
-	PMaterialResource      _materialRes;
-	PEffectResource        _effectRes;
-	uint32                 _particleCount;
-	int                    _respawnCount;
-	float                  _delay, _emissionRate, _spreadAngle;
-	Vec3f                  _force;
+	PMaterialResource        _materialRes;
+	PParticleEffectResource  _effectRes;
+	uint32                   _particleCount;
+	int                      _respawnCount;
+	float                    _delay, _emissionRate, _spreadAngle;
+	Vec3f                    _force;
 
 	// Particle data
-	ParticleData           *_particles;
-	Vec3f                  *_parPositions;
-	float                  *_parSizesANDRotations;
-	float                  *_parColors;
+	ParticleData             *_particles;
+	Vec3f                    *_parPositions;
+	float                    *_parSizesANDRotations;
+	float                    *_parColors;
 
-	std::vector< uint32 >  _occQueries;
-	std::vector< uint32 >  _lastVisited;
+	std::vector< uint32 >    _occQueries;
+	std::vector< uint32 >    _lastVisited;
 
 	EmitterNode( const EmitterNodeTpl &emitterTpl );
 	void setMaxParticleCount( uint32 maxParticleCount );

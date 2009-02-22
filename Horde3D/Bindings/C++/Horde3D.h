@@ -130,16 +130,16 @@ struct ResourceTypes
 	/*	Enum: ResourceTypes
 			The available resource types.
 		
-		Undefined   - An undefined resource, returned by getResourceType in case of error
-		SceneGraph  - Scene graph subtree stored in XML format
-		Geometry    - Geometrical data containing bones, vertices and triangles
-		Animation   - Animation data
-		Material    - Material script
-		Code        - Text block containing shader source code
-		Shader      - Shader program
-		Texture     - Texture map
-		Effect      - Particle configuration
-		Pipeline    - Rendering pipeline
+		Undefined       - An undefined resource, returned by getResourceType in case of error
+		SceneGraph      - Scene graph subtree stored in XML format
+		Geometry        - Geometrical data containing bones, vertices and triangles
+		Animation       - Animation data
+		Material        - Material script
+		Code            - Text block containing shader source code
+		Shader          - Shader program
+		Texture         - Texture map
+		ParticleEffect  - Particle configuration
+		Pipeline        - Rendering pipeline
 	*/
 	enum List
 	{
@@ -151,7 +151,7 @@ struct ResourceTypes
 		Code,
 		Shader,
 		Texture,
-		Effect,
+		ParticleEffect,
 		Pipeline
 	};
 };
@@ -243,10 +243,10 @@ struct TextureResParams
 	};
 };
 
-struct EffectResParams
+struct ParticleEffectResParams
 {
-	/*	Enum: EffectResParams
-			The available Effect resource parameters.
+	/*	Enum: ParticleEffectResParams
+			The available ParticleEffect resource parameters.
 
 		LifeMin         - Minimum value for selecting random life time; valid for get-/setResourceParamf
 		LifeMax	        - Maximum value for selecting random life time; valid for get-/setResourceParamf
@@ -497,21 +497,21 @@ struct EmitterNodeParams
 	/*	Enum: EmitterNodeParams
 			The available Emitter node parameters.
 		
-		MaterialRes   - Material resource used for rendering [type: ResHandle]
-		EffectRes     - Effect resource which configures particle properties [type: ResHandle]
-		MaxCount      - Maximal number of particles living at the same time [type: int]
-		RespawnCount  - Number of times a single particle is recreated after dying (-1 for infinite) [type: int]
-		Delay         - Time in seconds before emitter begins creating particles (default: 0.0) [type: float]
-		EmissionRate  - Maximal number of particles to be created per second (default: 0.0) [type: float]
-		SpreadAngle   - Angle of cone for random emission direction (default: 0.0) [type: float]
-		ForceX        - X-component of force vector applied to particles (default: 0.0) [type: float]
-		ForceY        - Y-component of force vector applied to particles (default: 0.0) [type: float]
-		ForceZ        - Z-component of force vector applied to particles (default: 0.0) [type: float]
+		MaterialRes        - Material resource used for rendering [type: ResHandle]
+		ParticleEffectRes  - ParticleEffect resource which configures particle properties [type: ResHandle]
+		MaxCount           - Maximal number of particles living at the same time [type: int]
+		RespawnCount       - Number of times a single particle is recreated after dying (-1 for infinite) [type: int]
+		Delay              - Time in seconds before emitter begins creating particles (default: 0.0) [type: float]
+		EmissionRate       - Maximal number of particles to be created per second (default: 0.0) [type: float]
+		SpreadAngle        - Angle of cone for random emission direction (default: 0.0) [type: float]
+		ForceX             - X-component of force vector applied to particles (default: 0.0) [type: float]
+		ForceY             - Y-component of force vector applied to particles (default: 0.0) [type: float]
+		ForceZ             - Z-component of force vector applied to particles (default: 0.0) [type: float]
 	*/
 	enum List
 	{
 		MaterialRes = 700,
-		EffectRes,
+		ParticleEffectRes,
 		MaxCount,
 		RespawnCount,
 		Delay,
@@ -1830,19 +1830,19 @@ namespace Horde3D
 		This function creates a new Emitter node and attaches it to the specified parent node.
 		
 		Parameters:
-			parent            - handle to parent node to which the new node will be attached
-			name              - name of the node
-			materialRes       - handle to Material resource used for rendering
-			effectRes         - handle to Effect resource used for configuring particle properties
-			maxParticleCount  - maximal number of particles living at the same time
-			respawnCount      - number of times a single particle is recreated after dying (-1 for infinite)
+			parent             - handle to parent node to which the new node will be attached
+			name               - name of the node
+			materialRes        - handle to Material resource used for rendering
+			particleEffectRes  - handle to ParticleEffect resource used for configuring particle properties
+			maxParticleCount   - maximal number of particles living at the same time
+			respawnCount       - number of times a single particle is recreated after dying (-1 for infinite)
 			
 			
 		Returns:
 			handle to the created node or 0 in case of failure
 	*/
 	DLL NodeHandle addEmitterNode( NodeHandle parent, const char *name, ResHandle materialRes,
-	                               ResHandle effectRes, int maxParticleCount, int respawnCount );
+	                               ResHandle particleEffectRes, int maxParticleCount, int respawnCount );
 	
 	/* 	Function: advanceEmitterTime
 			Advances the time value of an Emitter node.

@@ -139,6 +139,8 @@ public:
 	virtual const char *getParamstr( int param );
 	virtual bool setParamstr( int param, const char* value );
 
+	virtual uint32 calcLodLevel( const Vec3f &viewPoint );
+
 	virtual BoundingBox *getLocalBBox() { return 0x0; }
 	virtual bool canAttach( SceneNode &parent );
 	void markDirty();

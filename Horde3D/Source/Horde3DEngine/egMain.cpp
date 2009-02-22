@@ -100,8 +100,8 @@ namespace Horde3D
 			ShaderResource::factoryFunc );
 		Modules::resMan().registerType( ResourceTypes::Texture, "Texture", TextureResource::initializationFunc,
 			TextureResource::releaseFunc, TextureResource::factoryFunc );
-		Modules::resMan().registerType( ResourceTypes::Effect, "Effect", 0x0, 0x0,
-			EffectResource::factoryFunc );
+		Modules::resMan().registerType( ResourceTypes::ParticleEffect, "ParticleEffect", 0x0, 0x0,
+			ParticleEffectResource::factoryFunc );
 		Modules::resMan().registerType( ResourceTypes::Pipeline, "Pipeline", 0x0, 0x0,
 			PipelineResource::factoryFunc );
 
@@ -1157,7 +1157,7 @@ namespace Horde3D
 
 
 	DLLEXP NodeHandle addEmitterNode( NodeHandle parent, const char *name, ResHandle materialRes,
-	                                  ResHandle effectRes, int maxParticleCount, int respawnCount )
+	                                  ResHandle particleEffectRes, int maxParticleCount, int respawnCount )
 	{
 		SceneNode *parentNode = Modules::sceneMan().resolveNodeHandle( parent );
 		if( parentNode == 0x0 )
@@ -1172,16 +1172,16 @@ namespace Horde3D
 			Modules::log().writeDebugInfo( "Invalid Material resource %i in addEmitterNode", materialRes );
 			return 0;
 		}
-		Resource *effRes = Modules::resMan().resolveResHandle( effectRes );
-		if( effRes == 0x0 || effRes->getType() != ResourceTypes::Effect )
+		Resource *effRes = Modules::resMan().resolveResHandle( particleEffectRes );
+		if( effRes == 0x0 || effRes->getType() != ResourceTypes::ParticleEffect )
 		{	
-			Modules::log().writeDebugInfo( "Invalid Effect resource %i in addEmitterNode", effectRes );
+			Modules::log().writeDebugInfo( "Invalid ParticleEffect resource %i in addEmitterNode", particleEffectRes );
 			return 0;
 		}
 		
 		Modules::log().writeInfo( "Adding Emitter node '%s'", safeStr( name ).c_str() );
 
-		EmitterNodeTpl tpl( safeStr( name ), (MaterialResource *)matRes, (EffectResource *)effRes,
+		EmitterNodeTpl tpl( safeStr( name ), (MaterialResource *)matRes, (ParticleEffectResource *)effRes,
 		                    (unsigned)maxParticleCount, respawnCount );
 		SceneNode *sn = Modules::sceneMan().findType( SceneNodeTypes::Emitter )->factoryFunc( tpl );
 		return Modules::sceneMan().addNode( sn, *parentNode );

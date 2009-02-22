@@ -47,7 +47,7 @@ struct ResourceTypes
 		Code,
 		Shader,
 		Texture,
-		Effect,
+		ParticleEffect,
 		Pipeline
 	};
 };

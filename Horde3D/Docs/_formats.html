@@ -450,8 +450,8 @@ The following XML elements and attributes are supported for defining the scene n
                     <td>(file-)name of material resource {required}</td>
                 </tr>
                 <tr>
-                    <td><b>effect</b></td>
-                    <td>(file-)name of effect resource {required}</td>
+                    <td><b>particleEffect</b></td>
+                    <td>(file-)name of particle effect resource {required}</td>
                 </tr>
                 <tr>
                     <td><b>maxCount</b></td>
@@ -498,10 +498,10 @@ The XML document can have an arbitrary scene node as root element.
 <br /><br />
 
 
-<h2>Effect Files</h2>
-<p><i>Filename-extension: .effect.xml</i></p>
+<h2>ParticleEffect Files</h2>
+<p><i>Filename-extension: .particle.xml</i></p>
 <p>
-Effect files are used to configure particles of a particle system. Each particle has a randomly selected
+ParticleEffect files are used to configure particles of a particle system. Each particle has a randomly selected
 life time which is assigned when the particle is created. This time is continually decreased and when
 it is equal to zero the particle has died and can possibly be reborn. The particle has several channels
 defining its properties over the life time. The following channels are available:
@@ -517,12 +517,12 @@ defining its properties over the life time. The following channels are available
 
 
 <br /><br />
-The following XML node elements with the described attributes are supported for an effect file:
+The following XML node elements with the described attributes are supported for a particle-effect file:
 </p>
 <div class="syntaxbox">
 <table>
     <tr>
-        <td><b>ParticleConfig</b></td>
+        <td><b>ParticleEffect</b></td>
         <td>
 			root element of the document {1}
 			<table>
