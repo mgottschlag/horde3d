@@ -34,6 +34,7 @@
 bool parseString( char *s, unsigned int &pos, std::string &token );
 bool parseFloat( char *s, unsigned int &pos, float &value );
 bool parseUInt( char *s, unsigned int &pos, unsigned int &value );
+bool parseInt( char *s, unsigned int &pos, int &value );
 void removeGate( std::string &s );
 std::string decodeURL( const std::string &url );
 std::string extractFileName( const std::string &fullPath, bool extension );

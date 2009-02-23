@@ -90,6 +90,18 @@ bool parseUInt( char *s, unsigned int &pos, unsigned int &value )
 }
 
 
+bool parseInt( char *s, unsigned int &pos, int &value )
+{
+	string token;
+	
+	if( !parseString( s, pos, token ) ) return false;
+
+	value = atoi( token.c_str() );
+
+	return true;
+}
+
+
 void removeGate( string &s )
 {
 	if( s.length() == 0 ) return;

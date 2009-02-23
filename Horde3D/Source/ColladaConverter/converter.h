@@ -148,6 +148,8 @@ private:
 
 
 	Matrix4f getNodeTransform( ColladaDocument &doc, DaeNode &node, unsigned int frame );
+	SceneNode *findNode( const char *name, SceneNode *ignoredNode );
+	void checkNodeName( SceneNode *node );
 	SceneNode *processNode( ColladaDocument &doc, DaeNode &node, SceneNode *parentNode,
 	                        Matrix4f transAccum, std::vector< Matrix4f > animTransAccum );
 	void calcTangentSpaceBasis( std::vector< Vertex > &vertices );

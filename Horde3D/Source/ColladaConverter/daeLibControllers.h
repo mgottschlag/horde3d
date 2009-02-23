@@ -32,8 +32,8 @@
 
 struct DaeWeight
 {
-	unsigned int  joint;
-	float         weight;
+	int  joint;
+	int  weight;
 };
 
 
@@ -194,11 +194,11 @@ struct DaeSkin
 			{
 				for( unsigned int k = 0; k < numInputs; ++k )
 				{
-					float f;
-					parseFloat( s, pos, f );
+					int si;
+					parseInt( s, pos, si );
 
-					if( k == jointOffset ) vertWeights[i][j].joint = (unsigned int)f;
-					if( k == weightOffset ) vertWeights[i][j].weight = f;
+					if( k == jointOffset ) vertWeights[i][j].joint = si;
+					if( k == weightOffset ) vertWeights[i][j].weight = si;
 				}
 			}
 		}

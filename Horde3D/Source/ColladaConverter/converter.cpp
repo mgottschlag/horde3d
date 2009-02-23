@@ -109,6 +109,55 @@ Matrix4f Converter::getNodeTransform( ColladaDocument &doc, DaeNode &node, unsig
 }
 
 
+SceneNode *Converter::findNode( const char *name, SceneNode *ignoredNode )
+{
+	for( size_t i = 0, s = _joints.size(); i < s; ++i )
+	{
+		if( _joints[i] != ignoredNode && strcmp( _joints[i]->name, name ) == 0 )
+			return _joints[i];
+	}
+
+	for( size_t i = 0, s = _meshes.size(); i < s; ++i )
+	{
+		if( _meshes[i] != ignoredNode && strcmp( _meshes[i]->name, name ) == 0 )
+			return _meshes[i];
+	}
+
+	return 0x0;
+}
+
+
+void Converter::checkNodeName( SceneNode *node )
+{
+	// Check if a different node with the same name exists
+	if( findNode( node->name, node ) != 0x0 )
+	{
+		// If necessary, cut name to make room for the postfix
+		if( strlen( node->name ) > 240 ) node->name[240] = '\0';
+
+		char newName[256];
+		unsigned int index = 2;
+
+		// Find a free name
+		while( true )
+		{
+			sprintf( newName, "%s_%i", node->name, index++ );
+
+			if( !findNode( newName, node ) )
+			{
+				char msg[1024];
+				sprintf( msg, "Warning: Node with name '%s' already exists. "
+				         "Node was renamed to '%s'.", node->name, newName );
+				log( msg );
+				
+				strcpy( node->name, newName );
+				break;
+			}
+		}
+	}
+}
+
+
 SceneNode *Converter::processNode( ColladaDocument &doc, DaeNode &node, SceneNode *parentNode,
 								   Matrix4f transAccum, vector< Matrix4f > animTransAccum )
 {
@@ -165,6 +214,9 @@ SceneNode *Converter::processNode( ColladaDocument &doc, DaeNode &node, SceneNod
 			node.name.erase( 255, node.name.length() - 255 );
 		}
 		strcpy( oNode->name, node.name.c_str() );
+
+		// Check for duplicate node name
+		checkNodeName( oNode );
 			
 		// Calculate absolute transformation
 		if( parentNode != 0x0 ) oNode->matAbs = parentNode->matAbs * oNode->matRel;
@@ -534,22 +586,20 @@ void Converter::processMeshes( ColladaDocument &doc, bool optimize )
 					{
 						DaeVertWeights vertWeights = skin->vertWeights[v.daePosIndex];
 						
-						// Sort weights if necessary
-						if( vertWeights.size() > 4 )
+						// Sort weights
+						for( unsigned int xx = 0; xx < vertWeights.size(); ++xx )
 						{
-							for( unsigned int xx = 0; xx < vertWeights.size(); ++xx )
+							for( unsigned int yy = 0; yy < xx; ++yy )
 							{
-								for( unsigned int yy = 0; yy < vertWeights.size(); ++yy )
+								if( skin->weightArray->floatArray[(int)vertWeights[xx].weight] >
+								    skin->weightArray->floatArray[(int)vertWeights[yy].weight] )
 								{
-									if( skin->weightArray->floatArray[(int)vertWeights[xx].weight] >
-									    skin->weightArray->floatArray[(int)vertWeights[yy].weight] )
-									{
-										swap( vertWeights[xx], vertWeights[yy] );
-									}
+									swap( vertWeights[xx], vertWeights[yy] );
 								}
 							}
 						}
 						
+						// Take the four most significant weights
 						for( unsigned int l = 0; l < vertWeights.size(); ++l )
 						{
 							if( l == 4 ) break;
@@ -557,9 +607,19 @@ void Converter::processMeshes( ColladaDocument &doc, bool optimize )
 							v.joints[l] = jointLookup[vertWeights[l].joint];
 						}
 
-						if( vertWeights.size() > 4 )
+						// Normalize weights
+						float weightSum = v.weights[0] + v.weights[1] + v.weights[2] + v.weights[3];
+						if( weightSum > Math::Epsilon )
 						{
-							v.weights[0] = 1.0f - (v.weights[1] + v.weights[2] + v.weights[3]);
+							v.weights[0] /= weightSum;
+							v.weights[1] /= weightSum;
+							v.weights[2] /= weightSum;
+							v.weights[3] /= weightSum;
+						}
+						else
+						{
+							v.weights[0] = 1.0f;
+							v.weights[1] = v.weights[2] = v.weights[3] = 0.0f;
 						}
 
 						// Apply skinning to vertex
