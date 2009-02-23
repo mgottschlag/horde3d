@@ -37,12 +37,13 @@ These libraries are included directly as code in the SDK.
 Release Notes:
 	
 	The new Beta3 release brings a few substantial improvements. It features a refactored
-	shader system with a cleaner and more powerful FX-like file format and support for automatic
-	shader permutation generation. The performance of Beta3 was optimized a lot, for example by
-	introducing an enhanced LOD system. Another new feature is support for loading textures
-	from DDS files. Besides these major upgrades, there are many samller API improvements,
-	optimizations and bug fixes. Finally, Beta3 got improvements to the Collada Converter
-	so that it now supports a wider range of DCC tools.
+	shader system with a cleaner and more powerful FX-like file format along with support for 
+	automatic shader permutation generation. The performance of Beta3 has been optimized 
+	considerably, for example by the introduction of an enhanced LOD system. Another new 
+	feature is support for loading textures from DDS files. Besides these major upgrades, 
+	there are many smaller API improvements, optimizations and bug fixes. Finally, Beta3 
+	features improvements to the Collada Converter such that it supports a wider range of 
+	DCC tools.
 
 
 Special thanks go to the University of Augsburg for supporting this project!
