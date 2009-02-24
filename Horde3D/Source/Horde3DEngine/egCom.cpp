@@ -91,16 +91,16 @@ bool EngineConfig::setOption( EngineOptions::List param, float value )
 	switch( param )
 	{
 	case EngineOptions::MaxLogLevel:
-		maxLogLevel = (int)value;
+		maxLogLevel = ftoi_r( value );
 		return true;
 	case EngineOptions::MaxNumMessages:
-		Modules::log().setMaxNumMessages( (uint32) value );
+		Modules::log().setMaxNumMessages( (uint32)ftoi_r( value ) );
 		return true;
 	case EngineOptions::TrilinearFiltering:
 		trilinearFiltering = (value != 0);
 		return true;
 	case EngineOptions::MaxAnisotropy:
-		maxAnisotropy = (int)value;
+		maxAnisotropy = ftoi_r( value );
 		return true;
 	case EngineOptions::TexCompression:
 		texCompression = (value != 0);
@@ -112,7 +112,7 @@ bool EngineConfig::setOption( EngineOptions::List param, float value )
 		fastAnimation = (value != 0);
 		return true;
 	case EngineOptions::ShadowMapSize:
-		size = (int)value;
+		size = ftoi_r( value );
 
 		if( size == shadowMapSize ) return true;
 		if( size != 128 && size != 256 && size != 512 && size != 1024 && size != 2048 ) return false;
@@ -133,7 +133,7 @@ bool EngineConfig::setOption( EngineOptions::List param, float value )
 			return true;
 		}
 	case EngineOptions::SampleCount:
-		sampleCount = (int)value;
+		sampleCount = ftoi_r( value );
 		return true;
 	case EngineOptions::WireframeMode:
 		wireframeMode = (value != 0);

@@ -138,7 +138,7 @@ namespace Horde3DTerrain
 		uint32 offset = 0;
 		for( int i = 0; i < level; ++i ) offset += (1 << i) * (1 << i);
 		
-		const uint32 blockIndex =  offset + (int)(minV * (1 << level)) * (1 << level) + (int)(minU * (1 << level));
+		const uint32 blockIndex = offset + ftoi_t( minV * (1 << level) ) * (1 << level) + ftoi_t( minU * (1 << level) );
 		BlockInfo &block = terrain->_blockTree[blockIndex];
 
 		// Create AABB for block
@@ -177,7 +177,7 @@ namespace Horde3DTerrain
 					float *vertHeight = &terrain->_heightArray[v * size + u];
 					const float newU = (s * scale + minU) * (terrain->_hmapSize) + 0.5f;
 					const float newV = (t * scale + minV) * (terrain->_hmapSize) + 0.5f;
-					uint32 index = ((int)newV * (terrain->_hmapSize + 1) + (int)newU );
+					uint32 index = ftoi_t( newV ) * (terrain->_hmapSize + 1) + ftoi_t( newU );
 					
 					*vertHeight = terrain->_heightData[index] / 65535.0f;
 					
@@ -656,15 +656,15 @@ namespace Horde3DTerrain
 
 		dir /= dir.length();
 
-		int x = (int)(startX * (_hmapSize + 1) );
-		int y = (int)(startZ * (_hmapSize + 1) );
+		int x = ftoi_t( startX * (_hmapSize + 1) );
+		int y = ftoi_t( startZ * (_hmapSize + 1) );
 
 		// Check heightmap with Bresenham algorithm (code based on http://de.wikipedia.org/wiki/Bresenham-Algorithmus)
 		int t, dx, dy, incX, incY, pdx, pdy, ddx, ddy, err_step_fast, err_step_slow, err;
 
 		// Get deltas in image space
-		dx = (int)((endX - startX) * (_hmapSize + 1) );
-		dy = (int)((endZ - startZ) * (_hmapSize + 1) );
+		dx = ftoi_t( (endX - startX) * (_hmapSize + 1) );
+		dy = ftoi_t( (endZ - startZ) * (_hmapSize + 1) );
 
 		// Check directions
 		incX = (dx > 0) ? 1 : (dx < 0) ? -1 : 0;
@@ -764,7 +764,7 @@ namespace Horde3DTerrain
 		uint32 offset = 0;
 		for( int i = 0; i < level; ++i ) offset += (1 << i) * (1 << i);
 
-		const uint32 blockIndex =  offset + (int)(minV * (1 << level)) * (1 << level) + (int)(minU * (1 << level));
+		const uint32 blockIndex = offset + ftoi_t( minV * (1 << level) ) * (1 << level) + ftoi_t( minU * (1 << level) );
 		BlockInfo &block = _blockTree[blockIndex];
 		
 		const float p = block.geoError;
@@ -804,7 +804,7 @@ namespace Horde3DTerrain
 		uint32 offset = 0;
 		for( int i = 0; i < level; ++i ) offset += (1 << i) * (1 << i);
 
-		const uint32 blockIndex =  offset + (int)(minV * (1 << level)) * (1 << level) + (int)(minU * (1 << level));
+		const uint32 blockIndex =  offset + ftoi_t( minV * (1 << level) ) * (1 << level) + ftoi_t( minU * (1 << level) );
 		BlockInfo &block = _blockTree[blockIndex];
 
 		// Determine level of detail
@@ -827,7 +827,7 @@ namespace Horde3DTerrain
 
 					const float newU = (s * scale + minU) * _hmapSize + 0.5f;
 					const float newV = (t * scale + minV) * _hmapSize + 0.5f;
-					uint32 index = (int)newV * (_hmapSize + 1) + (int)newU;
+					uint32 index = ftoi_t( newV ) * (_hmapSize + 1) + ftoi_t( newU );
 
 					*vertData++ = (s * scale + minU);
 

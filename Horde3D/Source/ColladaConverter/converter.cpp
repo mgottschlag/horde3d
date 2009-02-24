@@ -603,7 +603,7 @@ void Converter::processMeshes( ColladaDocument &doc, bool optimize )
 						for( unsigned int l = 0; l < vertWeights.size(); ++l )
 						{
 							if( l == 4 ) break;
-							v.weights[l] = skin->weightArray->floatArray[(int)vertWeights[l].weight];
+							v.weights[l] = skin->weightArray->floatArray[vertWeights[l].weight];
 							v.joints[l] = jointLookup[vertWeights[l].joint];
 						}
 

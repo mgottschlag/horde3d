@@ -141,7 +141,7 @@ namespace Horde3DTerrain
 		
 		BoundingBox *getLocalBBox() { return &_localBBox; }
 		float getHeight( float x, float y )
-			{ return _heightData[(int)(y * _hmapSize + 0.5f) * (_hmapSize + 1) + (int)(x * _hmapSize + 0.5f) ] / 65535.0f; }
+			{ return _heightData[ftoi_r( y * _hmapSize ) * (_hmapSize + 1) + ftoi_r( x * _hmapSize ) ] / 65535.0f; }
 	};
 }
 

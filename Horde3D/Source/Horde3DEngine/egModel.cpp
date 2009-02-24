@@ -478,7 +478,7 @@ bool ModelNode::updateGeometry()
 			
 			for( uint32 j = 0; j < 4; ++j )
 			{
-				uint32 ind0 = (uint32)vd.staticData[i].jointVec[j] * 3 + 0;
+				uint32 ind0 = (uint32)ftoi_r( vd.staticData[i].jointVec[j] ) * 3 + 0;
 				uint32 ind1 = ind0 + 1, ind2 = ind0 + 2;
 				
 				mat.x[0] = _skinMatRows[ind0].x;
@@ -583,7 +583,7 @@ void ModelNode::onPostUpdate()
 				AnimResEntity *ae = _nodeList[i].animEntities[firstStage];
 				if( ae != 0x0 && !ae->frames.empty() )
 				{
-					uint32 frame = (uint32)_animStages[firstStage]->animTime % ae->frames.size();
+					uint32 frame = (uint32)ftoi_t( _animStages[firstStage]->animTime ) % ae->frames.size();
 					if( ae->frames.size() == 1 ) frame = 0;		// Animation compression
 					_nodeList[i].node->getRelTrans() = ae->frames[frame].bakedTransMat;
 				}
@@ -625,7 +625,7 @@ void ModelNode::onPostUpdate()
 						// Fast animation with sampled frame data
 						if( Modules::config().fastAnimation )
 						{
-							uint32 f0 = (int)curStage.animTime % numFrames;
+							uint32 f0 = ftoi_t( curStage.animTime ) % numFrames;
 							if( numFrames == 1 ) f0 = 0;	// Animation compression
 							Frame &frame = _nodeList[i].animEntities[stageIdx]->frames[f0];
 							
@@ -668,7 +668,7 @@ void ModelNode::onPostUpdate()
 						}
 						else	// Animation with inter-frame interpolation
 						{
-							uint32 f0 = (int)curStage.animTime;
+							uint32 f0 = ftoi_t( curStage.animTime );
 							float amount = curStage.animTime - f0;
 							f0 = f0 % numFrames;
 							uint32 f1 = f0 + 1;

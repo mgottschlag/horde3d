@@ -261,13 +261,13 @@ void Renderer::incStat( int param, float value )
 	switch( param )
 	{
 	case EngineStats::TriCount:
-		_statTriCount += (int)value;
+		_statTriCount += ftoi_r( value );
 		break;
 	case EngineStats::BatchCount:
-		_statBatchCount += (int)value;
+		_statBatchCount += ftoi_r( value );
 		break;
 	case EngineStats::LightPassCount:
-		_statLightPassCount += (int)value;
+		_statLightPassCount += ftoi_r( value );
 		break;
 	}
 }
@@ -1416,8 +1416,8 @@ void Renderer::drawLightGeometry( const string shaderContext, const string &theC
 		// Set scissor rectangle
 		if( bbx != 0 || bby != 0 || bbw != 1 || bbh != 1 )
 		{
-			glScissor( (int)(bbx * _fbWidth), (int)(bby * _fbHeight),
-			           (int)(bbw * _fbWidth), (int)(bbh * _fbHeight) );
+			glScissor( ftoi_r( bbx * _fbWidth ), ftoi_r( bby * _fbHeight ),
+			           ftoi_r( bbw * _fbWidth ), ftoi_r( bbh * _fbHeight ) );
 			glEnable( GL_SCISSOR_TEST );
 		}
 		
@@ -1937,7 +1937,7 @@ void Renderer::drawParticles( const string &shaderContext, const string &theClas
 		uint32 count = emitter->_particleCount % ParticlesPerBatch;
 		if( count > 0 )
 		{
-			uint32 offset = (int)(emitter->_particleCount / ParticlesPerBatch) * ParticlesPerBatch;
+			uint32 offset = (emitter->_particleCount / ParticlesPerBatch) * ParticlesPerBatch;
 			
 			// Check if batch needs to be rendered
 			bool allDead = true;
@@ -2045,7 +2045,7 @@ bool Renderer::render( CameraNode *camNode )
 				rt = (RenderTarget *)pc.refParams[0];
 			
 				bindBuffer( &rt->rendBuf, ((PCStringParam *)pc.valParams[0])->get(),
-				            (uint32)((PCFloatParam *)pc.valParams[1])->get() );
+				            (uint32)((PCIntParam *)pc.valParams[1])->get() );
 				break;
 
 			case PipelineCommands::UnbindBuffers:

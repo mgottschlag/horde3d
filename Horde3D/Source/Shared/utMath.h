@@ -104,6 +104,27 @@ static inline float fsel( float test, float a, float b )
 
 
 // -------------------------------------------------------------------------------------------------
+// Conversion
+// -------------------------------------------------------------------------------------------------
+
+static inline int ftoi_t( double val )
+{
+	// Float to int conversion using truncation
+	
+	return (int)val;
+}
+
+static inline int ftoi_r( double val )
+{
+	// Fast round (banker's round) using Sree Kotay's method
+	// This function is much faster than a naive cast from float to int
+
+	val	= val + 6755399441055744.0;  // Magic number: 2^52 * 1.5;
+	return ((int *)&val)[0];         // Needs to be [1] for big-endian
+}
+
+
+// -------------------------------------------------------------------------------------------------
 // Vector
 // -------------------------------------------------------------------------------------------------
 

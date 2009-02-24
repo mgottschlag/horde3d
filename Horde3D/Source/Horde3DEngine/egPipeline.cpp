@@ -138,7 +138,7 @@ const string PipelineResource::parseStage( XMLNode &node, PipelineStage &stage )
 			vector< PCParam * > &valParams = stage.commands.back().valParams;
 			valParams.resize( 2 );
 			valParams[0] = new PCStringParam( node1.getAttribute( "sampler" ) );
-			valParams[1] = new PCFloatParam( (float)atof( node1.getAttribute( "bufIndex" ) ) );
+			valParams[1] = new PCIntParam( atoi( node1.getAttribute( "bufIndex" ) ) );
 		}
 		else if( strcmp( node1.getName(), "UnbindBuffers" ) == 0 )
 		{
@@ -300,9 +300,9 @@ bool PipelineResource::createRenderTargets()
 	{
 		RenderTarget &rt = _renderTargets[i];
 	
-		uint32 width = (int)(rt.width * rt.scale), height = (int)(rt.height * rt.scale);
-		if( width == 0 ) width = (int)(Modules::renderer().getVPWidth() * rt.scale);
-		if( height == 0 ) height = (int)(Modules::renderer().getVPHeight() * rt.scale);
+		uint32 width = ftoi_r( rt.width * rt.scale ), height = ftoi_r( rt.height * rt.scale );
+		if( width == 0 ) width = ftoi_r( Modules::renderer().getVPWidth() * rt.scale );
+		if( height == 0 ) height = ftoi_r( Modules::renderer().getVPHeight() * rt.scale );
 		
 		rt.rendBuf = Modules::renderer().createRenderBuffer(
 			width, height, rt.format, rt.hasDepthBuf, rt.numColBufs, 0 );

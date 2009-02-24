@@ -536,14 +536,10 @@ bool EmitterNode::setParami( int param, int value )
 
 float randomF( float min, float max )
 {
-	if ((int)(max * 100.0f) - (int)(min * 100.0f) == 0)
-	{
-		return min;
-	}
-	else
-	{
-		return (rand()%((int)(max * 100.0f) - (int)(min * 100.0f))) / 100.0f + min;
-	}
+	int range = ftoi_r( max * 100.0f ) - ftoi_r( min * 100.0f );
+	
+	if( range == 0 ) return min;
+	else return min + (rand() % range) / 100.0f;
 }
 
 
