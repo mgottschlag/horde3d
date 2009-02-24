@@ -96,6 +96,11 @@ static inline float maxf( float a, float b )
 	return a > b ? a : b;
 }
 
+static inline int maxi( int a, int b )
+{
+	return a > b ? a : b;
+}
+
 static inline float fsel( float test, float a, float b )
 {
 	// Branchless selection
