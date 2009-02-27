@@ -662,7 +662,7 @@ bool Renderer::setMaterialRec( MaterialResource *materialRes, const string &shad
 		if( mips )
 		{
 			glTexParameteri( target, GL_TEXTURE_MAX_ANISOTROPY_EXT,
-				min( sampler.maxAnisotropy, Modules::config().maxAnisotropy ) );
+				std::min( sampler.maxAnisotropy, Modules::config().maxAnisotropy ) );
 		}
 		else
 		{
@@ -875,12 +875,12 @@ Matrix4f Renderer::calcLightMat( const Frustum &frustum )
 	}
 
 	// Combine frustum and bounding box
-	float minX = max( frustMinX, bbMinX );
-	float minY = max( frustMinY, bbMinY );
-	float minZ = min( frustMinZ, bbMinZ );
-	float maxX = min( frustMaxX, bbMaxX );
-	float maxY = min( frustMaxY, bbMaxY );
-	float maxZ = min( frustMaxZ, bbMaxZ );
+	float minX = maxf( frustMinX, bbMinX );
+	float minY = maxf( frustMinY, bbMinY );
+	float minZ = minf( frustMinZ, bbMinZ );
+	float maxX = minf( frustMaxX, bbMaxX );
+	float maxY = minf( frustMaxY, bbMaxY );
+	float maxZ = minf( frustMaxZ, bbMaxZ );
 	
 	// Clamp the min and max values to post projection range [-1, 1]
 	minX = clamp( minX, -1, 1 );
@@ -1245,7 +1245,7 @@ void Renderer::bindBuffer( RenderBuffer *rb, const string &sampler, uint32 bufIn
 		
 		// Add binding
 		_pipeSamplerBindings.push_back( PipeSamplerBinding() );
-		size_t len = min( sampler.length(), 63 );
+		size_t len = std::min( sampler.length(), (size_t)63 );
 		strncpy_s( _pipeSamplerBindings.back().sampler, 63, sampler.c_str(), len );
 		_pipeSamplerBindings.back().sampler[len] = '\0';
 		_pipeSamplerBindings.back().rb = rb;

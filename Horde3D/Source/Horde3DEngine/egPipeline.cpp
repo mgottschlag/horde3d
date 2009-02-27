@@ -384,7 +384,7 @@ bool PipelineResource::load( const char *data, int size )
 			float scale = (float)atof( node2.getAttribute( "scale", "1" ) );
 
 			addRenderTarget( id, depth, numBuffers, format,
-				min( maxSamples, Modules::config().sampleCount ), width, height, scale );
+				std::min( maxSamples, Modules::config().sampleCount ), width, height, scale );
 
 			node2 = node1.getChildNode( "RenderTarget", ++nodeItr2 );
 		}

@@ -28,6 +28,7 @@
 
 #ifdef PLATFORM_WIN
 #   define WIN32_LEAN_AND_MEAN 1
+#	define NOMINMAX
 #	include <windows.h>
 #	include <direct.h>
 #else

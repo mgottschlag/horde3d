@@ -173,11 +173,11 @@ uint32 RendererBase::calcTexSize( TextureFormats::List format, int width, int he
 	case TextureFormats::BGRA8:
 		return width * height * 4;
 	case TextureFormats::DXT1:
-		return maxi( width / 4, 1 ) * maxi( height / 4, 1 ) * 8;
+		return std::max( width / 4, 1 ) * std::max( height / 4, 1 ) * 8;
 	case TextureFormats::DXT3:
-		return maxi( width / 4, 1 ) * maxi( height / 4, 1 ) * 16;
+		return std::max( width / 4, 1 ) * std::max( height / 4, 1 ) * 16;
 	case TextureFormats::DXT5:
-		return maxi( width / 4, 1 ) * maxi( height / 4, 1 ) * 16;
+		return std::max( width / 4, 1 ) * std::max( height / 4, 1 ) * 16;
 	case TextureFormats::RGBA16F:
 		return width * height * 8;
 	case TextureFormats::RGBA32F:
