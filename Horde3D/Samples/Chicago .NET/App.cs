@@ -27,12 +27,12 @@ namespace Horde3DNET.Samples.ChicagoNET
 	    private float			_curFPS, _timer;
         private string          _fpsText;
 
-        private bool _freeze, _showStats, _debugViewMode, _wireframeMode;
+        private bool            _freeze, _showStats, _debugViewMode, _wireframeMode;
 
 	    private CrowdSim		_crowdSim;
     	
 	    // Engine objects
-	    private int	            _fontMatRes, _logoMatRes;
+        private int             _fontMatRes, _panelMatRes, _logoMatRes;
 
         private int             _cam, _deferredPipeRes, _forwardPipeRes;
                 
@@ -63,39 +63,27 @@ namespace Horde3DNET.Samples.ChicagoNET
                 return false;
             }
 
-            // Set paths for resources
-            Horde3DUtils.setResourcePath(Horde3D.ResourceTypes.SceneGraph, "models");
-            Horde3DUtils.setResourcePath(Horde3D.ResourceTypes.Geometry, "models");
-            Horde3DUtils.setResourcePath(Horde3D.ResourceTypes.Animation, "models");
-            Horde3DUtils.setResourcePath(Horde3D.ResourceTypes.Material, "materials");
-            Horde3DUtils.setResourcePath(Horde3D.ResourceTypes.Code, "shaders");
-            Horde3DUtils.setResourcePath(Horde3D.ResourceTypes.Shader, "shaders");
-            Horde3DUtils.setResourcePath(Horde3D.ResourceTypes.Texture2D, "textures");
-            Horde3DUtils.setResourcePath(Horde3D.ResourceTypes.TextureCube, "textures");
-            Horde3DUtils.setResourcePath(Horde3D.ResourceTypes.Effect, "effects");
-            Horde3DUtils.setResourcePath(Horde3D.ResourceTypes.Pipeline, "pipelines"); //horde3d 1.0
-
 	        // Set options
 	        Horde3D.setOption( Horde3D.EngineOptions.LoadTextures, 1 );
 	        Horde3D.setOption( Horde3D.EngineOptions.TexCompression, 0 );
-	        Horde3D.setOption( Horde3D.EngineOptions.AnisotropyFactor, 8 );
+	        Horde3D.setOption( Horde3D.EngineOptions.MaxAnisotropy, 4 );
 	        Horde3D.setOption( Horde3D.EngineOptions.ShadowMapSize, 2048 );
             Horde3D.setOption( Horde3D.EngineOptions.FastAnimation, 1 );
 
             // Add resources
  	        // Pipelines
-	        _forwardPipeRes = Horde3D.addResource( Horde3D.ResourceTypes.Pipeline, "forward.pipeline.xml", 0 );
-            _deferredPipeRes = Horde3D.addResource(Horde3D.ResourceTypes.Pipeline, "deferred.pipeline.xml", 0);
-           // Font
-            _fontMatRes = Horde3D.addResource(Horde3D.ResourceTypes.Material, "font.material.xml", 0);
-            // Logo
-            _logoMatRes = Horde3D.addResource(Horde3D.ResourceTypes.Material, "logo.material.xml", 0);
+            _forwardPipeRes = Horde3D.addResource((int)Horde3D.ResourceTypes.Pipeline, "pipelines/forward.pipeline.xml", 0);
+            _deferredPipeRes = Horde3D.addResource((int)Horde3D.ResourceTypes.Pipeline, "pipelines/deferred.pipeline.xml", 0);
+            // Overlays
+            _fontMatRes = Horde3D.addResource((int)Horde3D.ResourceTypes.Material, "overlays/font.material.xml", 0);            
+            _panelMatRes = Horde3D.addResource( (int) Horde3D.ResourceTypes.Material, "overlays/panel.material.xml", 0 );
+            _logoMatRes = Horde3D.addResource((int)Horde3D.ResourceTypes.Material, "overlays/logo.material.xml", 0);
             // Shader for deferred shading
-            int lightMatRes = Horde3D.addResource(Horde3D.ResourceTypes.Material, "light.material.xml", 0);
+            int lightMatRes = Horde3D.addResource((int) Horde3D.ResourceTypes.Material, "materials/light.material.xml", 0);
             // Environment
-            int envRes = Horde3D.addResource(Horde3D.ResourceTypes.SceneGraph, "platform.scene.xml", 0);
+            int envRes = Horde3D.addResource((int) Horde3D.ResourceTypes.SceneGraph, "models/platform/platform.scene.xml", 0);
             // Skybox
-            int skyBoxRes = Horde3D.addResource(Horde3D.ResourceTypes.SceneGraph, "skybox.scene.xml", 0);
+            int skyBoxRes = Horde3D.addResource((int) Horde3D.ResourceTypes.SceneGraph, "models/skybox/skybox.scene.xml", 0);
 
 
             // Load resources
@@ -150,17 +138,20 @@ namespace Horde3DNET.Samples.ChicagoNET
 
             if (_showStats)
             {
-                Horde3DUtils.showFrameStats(_fontMatRes, _curFPS);
+                Horde3DUtils.showFrameStats(_fontMatRes, _panelMatRes, _curFPS);
             }
             
             // Show logo
-            Horde3D.showOverlay(0.75f, 0, 0, 0, 1, 0, 1, 0,
-                                1, 0.2f, 1, 1, 0.75f, 0.2f, 0, 1,
-                                7, _logoMatRes);
+            Horde3D.showOverlay(0.75f, 0.8f, 0, 1, 0.75f, 1, 0, 0,
+                                1, 1, 1, 0, 1, 0.8f, 1, 1,
+                                1, 1, 1, 1, _logoMatRes, 7);
 
 
             // Render scene
             Horde3D.render(_cam);
+
+            // Finish rendering of frame
+            Horde3D.finalizeFrame();
 
             // Clear Overlays
             Horde3D.clearOverlays();
@@ -180,7 +171,7 @@ namespace Horde3DNET.Samples.ChicagoNET
             if (!_initialized) return;
 
             // Resize viewport
-            Horde3D.resize( 0, 0, width, height );
+            Horde3D.setupViewport( 0, 0, width, height, true );
 
             // Set virtual camera parameters
             Horde3D.setupCameraView(_cam, 45.0f, (float) width/height, 0.1f, 1000.0f);

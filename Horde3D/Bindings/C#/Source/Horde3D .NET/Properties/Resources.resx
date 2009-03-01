@@ -139,7 +139,7 @@
     <value>The parameter value is lesser than zero. Internally this value is represented by an unsigned integer.</value>
   </data>
   <data name="VersionString" xml:space="preserve">
-    <value>Horde3D 1.0.0 Beta2</value>
+    <value>Horde3D 1.0.0 Beta3</value>
     <comment>The supported version of the Horde library.</comment>
   </data>
 </root>

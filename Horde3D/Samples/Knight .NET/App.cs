@@ -31,7 +31,7 @@ namespace Horde3DNET.Samples.KnightNET
         private float           _animTime, _weight;
     	
 	    // Engine objects
-	    private int	            _fontMatRes, _logoMatRes;
+	    private int	            _fontMatRes, _panelMatRes, _logoMatRes;
         private int             _knight, _particleSys;
 
         //horde3d 1.0
@@ -69,43 +69,30 @@ namespace Horde3DNET.Samples.KnightNET
                 return false;
             }
 
-            // Set paths for resources
-            Horde3DUtils.setResourcePath(Horde3D.ResourceTypes.SceneGraph, "models");
-            Horde3DUtils.setResourcePath(Horde3D.ResourceTypes.Geometry, "models");
-            Horde3DUtils.setResourcePath(Horde3D.ResourceTypes.Animation, "models");
-            Horde3DUtils.setResourcePath(Horde3D.ResourceTypes.Material, "materials");
-            Horde3DUtils.setResourcePath(Horde3D.ResourceTypes.Code, "shaders");
-            Horde3DUtils.setResourcePath(Horde3D.ResourceTypes.Shader, "shaders");
-            Horde3DUtils.setResourcePath(Horde3D.ResourceTypes.Texture2D, "textures");
-            Horde3DUtils.setResourcePath(Horde3D.ResourceTypes.TextureCube, "textures");
-            Horde3DUtils.setResourcePath(Horde3D.ResourceTypes.Effect, "effects");
-            Horde3DUtils.setResourcePath(Horde3D.ResourceTypes.Pipeline, "pipelines");
-
 	        // Set options
 	        Horde3D.setOption( Horde3D.EngineOptions.LoadTextures, 1 );
 	        Horde3D.setOption( Horde3D.EngineOptions.TexCompression, 0 );
             Horde3D.setOption( Horde3D.EngineOptions.FastAnimation, 0 );
-	        Horde3D.setOption( Horde3D.EngineOptions.AnisotropyFactor, 8 );
+	        Horde3D.setOption( Horde3D.EngineOptions.MaxAnisotropy, 4 );
 	        Horde3D.setOption( Horde3D.EngineOptions.ShadowMapSize, 2048 );
 
             // Add resources
             // added horde3d 1.0            
 	        // Pipelines
-            _hdrPipeRes = Horde3D.addResource( Horde3D.ResourceTypes.Pipeline, "hdr.pipeline.xml", 0 );
-            _forwardPipeRes = Horde3D.addResource(Horde3D.ResourceTypes.Pipeline, "forward.pipeline.xml", 0);
-            //////////
-            // Font
-            _fontMatRes = Horde3D.addResource(Horde3D.ResourceTypes.Material, "font.material.xml", 0);
-            // Logo
-            _logoMatRes = Horde3D.addResource(Horde3D.ResourceTypes.Material, "logo.material.xml", 0);
+            _hdrPipeRes = Horde3D.addResource( (int) Horde3D.ResourceTypes.Pipeline, "pipelines/hdr.pipeline.xml", 0);
+            _forwardPipeRes = Horde3D.addResource((int) Horde3D.ResourceTypes.Pipeline, "pipelines/forward.pipeline.xml", 0);
+            // Overlays
+            _fontMatRes = Horde3D.addResource((int)Horde3D.ResourceTypes.Material, "overlays/font.material.xml", 0);
+            _panelMatRes = Horde3D.addResource((int)Horde3D.ResourceTypes.Material, "overlays/panel.material.xml", 0);
+            _logoMatRes = Horde3D.addResource((int)Horde3D.ResourceTypes.Material, "overlays/logo.material.xml", 0);
             // Environment
-            int envRes = Horde3D.addResource(Horde3D.ResourceTypes.SceneGraph, "sphere.scene.xml", 0);
+            int envRes = Horde3D.addResource((int)Horde3D.ResourceTypes.SceneGraph, "models/sphere/sphere.scene.xml", 0);
 	        // Knight
-	        int knightRes = Horde3D.addResource( Horde3D.ResourceTypes.SceneGraph, "knight.scene.xml", 0 );
-	        int knightAnim1Res = Horde3D.addResource( Horde3D.ResourceTypes.Animation, "knight_order.anim", 0 );
-	        int knightAnim2Res = Horde3D.addResource( Horde3D.ResourceTypes.Animation, "knight_attack.anim", 0 );
+            int knightRes = Horde3D.addResource((int)Horde3D.ResourceTypes.SceneGraph, "models/knight/knight.scene.xml", 0);
+            int knightAnim1Res = Horde3D.addResource((int)Horde3D.ResourceTypes.Animation, "animations/knight_order.anim", 0);
+            int knightAnim2Res = Horde3D.addResource((int)Horde3D.ResourceTypes.Animation, "animations/knight_attack.anim", 0);
 	        // Particle system
-            int particleSysRes = Horde3D.addResource(Horde3D.ResourceTypes.SceneGraph, "particleSys1.scene.xml", 0);
+            int particleSysRes = Horde3D.addResource((int)Horde3D.ResourceTypes.SceneGraph, "particles/particleSys1/particleSys1.scene.xml", 0);
 
 
             // Load resources
@@ -151,7 +138,7 @@ namespace Horde3DNET.Samples.KnightNET
             /////////////
 
 	        // Customize post processing effects
-            int matRes = Horde3D.findResource( Horde3D.ResourceTypes.Material, "postHDR.material.xml" );
+            int matRes = Horde3D.findResource((int)Horde3D.ResourceTypes.Material, "pipelines/postHDR.material.xml");
             // hdrParams: exposure, brightpass threshold, brightpass offset
             Horde3D.setMaterialUniform(matRes, "hdrParams", 2.5f, 0.5f, 0.08f, 0);
 
@@ -187,20 +174,22 @@ namespace Horde3DNET.Samples.KnightNET
 
             if (_showStats)
             {
-                Horde3DUtils.showFrameStats( _fontMatRes, _curFPS );		        
+                Horde3DUtils.showFrameStats( _fontMatRes, _panelMatRes, _curFPS );		        
 
                 string text = string.Format("Weight: {0:F2}", _weight);
-                Horde3DUtils.showText(text, 0, 0.78f, 0.03f, 0, _fontMatRes);
+                Horde3DUtils.showText(text, 0.03f, 0.24f, 0.026f, 1, 1, 1, _fontMatRes, 5);
             }
 
             // Show logo
-            Horde3D.showOverlay(0.75f, 0, 0, 0, 1, 0, 1, 0,
-                                1, 0.2f, 1, 1, 0.75f, 0.2f, 0, 1,
-                                7, _logoMatRes);
+            Horde3D.showOverlay( 0.75f, 0.8f, 0, 1, 0.75f, 1, 0, 0,
+	                      1, 1, 1, 0, 1, 0.8f, 1, 1,
+	                      1, 1, 1, 1, _logoMatRes, 7 );
 
 
             // Render scene
             Horde3D.render( _cam );//horde3D 1.0
+
+            Horde3D.finalizeFrame();
 
             //horde3D 1.0
             Horde3D.clearOverlays();
@@ -220,7 +209,7 @@ namespace Horde3DNET.Samples.KnightNET
             if (!_initialized) return;
 
             // Resize viewport
-            Horde3D.resize( 0, 0, width, height );
+            Horde3D.setupViewport( 0, 0, width, height, true );
 
             // Set virtual camera parameters
             //depreceated Horde3D.setupCameraView(Horde3D.PrimeTimeCam, 45.0f, (float)width / height, 0.1f, 1000.0f);

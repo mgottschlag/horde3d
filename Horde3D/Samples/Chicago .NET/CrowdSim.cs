@@ -60,8 +60,8 @@ namespace Horde3DNET.Samples.ChicagoNET
 	        _rand = new Random((int)DateTime.Now.Ticks);
         	
 	        // Load character with walk animation
-	        int characterRes = Horde3D.addResource( Horde3D.ResourceTypes.SceneGraph, "man.scene.xml", 0 );
-	        int characterWalkRes = Horde3D.addResource( Horde3D.ResourceTypes.Animation, "man.anim", 0 );
+            int characterRes = Horde3D.addResource((int)Horde3D.ResourceTypes.SceneGraph, "models/man/man.scene.xml", 0);
+            int characterWalkRes = Horde3D.addResource((int)Horde3D.ResourceTypes.Animation, "animations/man.anim", 0);
 	        Horde3DUtils.loadResourcesFromDisk( "../Content" );
         	
 	        // Add characters

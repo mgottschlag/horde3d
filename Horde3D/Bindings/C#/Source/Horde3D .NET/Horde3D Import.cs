@@ -52,13 +52,17 @@ namespace Horde3DNET
         internal static extern void release();
 
         [DllImport(ENGINE_DLL), SuppressUnmanagedCodeSecurity]
-        internal static extern void resize(int x, int y, int width, int height);
+        internal static extern void setupViewport(int x, int y, int width, int height, [MarshalAs(UnmanagedType.U1)]bool resizeBuffers);
         
         //horde3d 1.0
         [DllImport(ENGINE_DLL), SuppressUnmanagedCodeSecurity]
         [return: MarshalAs(UnmanagedType.U1)]
         internal static extern bool render(int node);
         /////
+
+        [DllImport(ENGINE_DLL), SuppressUnmanagedCodeSecurity]
+        [return: MarshalAs(UnmanagedType.U1)]
+        internal static extern bool finalizeFrame();
 
         [DllImport(ENGINE_DLL), SuppressUnmanagedCodeSecurity]
         internal static extern void clear();
@@ -84,23 +88,27 @@ namespace Horde3DNET
 						                      float x_lr, float y_lr, float u_lr, float v_lr,
 						                      float x_ur, float y_ur, float u_ur, float v_ur,
 						                      float x_ul, float y_ul, float u_ul, float v_ul,
-						                      int layer, int material);
+                                              float colR, float colG, float colB, float colA,
+						                      int material, int layer );
 
         [DllImport(ENGINE_DLL), SuppressUnmanagedCodeSecurity]
         internal static extern void clearOverlays();
 
         // --- Resource functions ---
         [DllImport(ENGINE_DLL), SuppressUnmanagedCodeSecurity]
-        internal static extern Horde3D.ResourceTypes getResourceType(int res);
+        internal static extern int getResourceType(int res);
 
         [DllImport(ENGINE_DLL), SuppressUnmanagedCodeSecurity]
         internal static extern IntPtr getResourceName(int res);
-        
-        [DllImport(ENGINE_DLL), SuppressUnmanagedCodeSecurity]
-	    internal static extern int findResource(Horde3D.ResourceTypes type, string name);
 
         [DllImport(ENGINE_DLL), SuppressUnmanagedCodeSecurity]
-        internal static extern int addResource(Horde3D.ResourceTypes type, string name, int flags);
+        internal static extern int getNextResource(int type, int start);
+        
+        [DllImport(ENGINE_DLL), SuppressUnmanagedCodeSecurity]
+	    internal static extern int findResource( int type, string name);
+
+        [DllImport(ENGINE_DLL), SuppressUnmanagedCodeSecurity]
+        internal static extern int addResource(int type, string name, int flags);
 
         [DllImport(ENGINE_DLL), SuppressUnmanagedCodeSecurity]
         internal static extern int cloneResource(int sourceRes, string name);
@@ -114,7 +122,7 @@ namespace Horde3DNET
 
         [DllImport(ENGINE_DLL), SuppressUnmanagedCodeSecurity]
         [return: MarshalAs(UnmanagedType.U1)]   // represents C++ bool type 
-        internal static extern bool loadResource(string name, IntPtr data, int size);
+        internal static extern bool loadResource(int name, IntPtr data, int size);
 
         [DllImport(ENGINE_DLL), SuppressUnmanagedCodeSecurity]
         [return: MarshalAs(UnmanagedType.U1)]   // represents C++ bool type 
@@ -273,6 +281,9 @@ namespace Horde3DNET
         [return: MarshalAs(UnmanagedType.U1)]   // represents C++ bool type 
         internal static extern bool getCastRayResult(int index, int node, out float distance, float[] intersection);
 
+        [DllImport(ENGINE_DLL), SuppressUnmanagedCodeSecurity]
+        internal static extern int checkNodeVisibility(int node, int cameraNode, [MarshalAs(UnmanagedType.U1)]bool checkOcclusion, [MarshalAs(UnmanagedType.U1)]bool calcLod);
+
         // Group specific
         [DllImport(ENGINE_DLL), SuppressUnmanagedCodeSecurity]
         internal static extern int addGroupNode(int parent, string name);
@@ -326,7 +337,7 @@ namespace Horde3DNET
             
         [DllImport(ENGINE_DLL), SuppressUnmanagedCodeSecurity]
         [return : MarshalAs(UnmanagedType.U1)] // represents C++ bool type 
-        internal static extern bool calcCameraProjectionMatrix(int node, float[] projMat);
+        internal static extern bool getCameraProjectionMatrix(int node, float[] projMat);
 
 
 	    // Emitter specific
@@ -342,5 +353,6 @@ namespace Horde3DNET
         [DllImport(ENGINE_DLL), SuppressUnmanagedCodeSecurity]
         [return: MarshalAs(UnmanagedType.U1)]   // represents C++ bool type 
         internal static extern bool hasEmitterFinished(int emitterNode);
+        
     }
 }

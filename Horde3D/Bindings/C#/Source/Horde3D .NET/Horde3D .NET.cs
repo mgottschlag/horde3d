@@ -48,14 +48,15 @@ namespace Horde3DNET
             MaxLogLevel = 1,
             MaxNumMessages,
             TrilinearFiltering,
-            AnisotropyFactor,
+            MaxAnisotropy,
             TexCompression,
             LoadTextures,
             FastAnimation,
             ShadowMapSize,
             SampleCount,
             WireframeMode,
-            DebugViewMode
+            DebugViewMode,
+            DumpFailedShaders
         }
 
         public enum EngineStats
@@ -74,9 +75,8 @@ namespace Horde3DNET
             Material,
             Code,
             Shader,
-            Texture2D,
-            TextureCube,
-            Effect,
+            Texture,
+            ParticleEffect,
             Pipeline
         }
 
@@ -84,11 +84,8 @@ namespace Horde3DNET
         public enum ResourceFlags
         {
             NoQuery = 1, //horde3d 1.0
-            NoTexPOTConversion = 2, //horde3d 1.0
-            NoTexCompression = 4, //horde3d 1.0
-            NoTexMipmaps = 8, //horde3d 1.0
-            NoTexFiltering = 16, //horde3d 1.0
-            NoTexRepeat = 32 //horde3d 1.0
+            NoTexCompression = 2, //horde3d 1.0
+            NoTexMipmaps = 4 //horde3d 1.0
         }
 
         public enum GeometryResParams
@@ -108,28 +105,16 @@ namespace Horde3DNET
         {
             Class = 400,
             Link,
-            Shader,
-            TexUnit_0,
-            TexUnit_1,
-            TexUnit_2,
-            TexUnit_3,
-            TexUnit_4,
-            TexUnit_5,
-            TexUnit_6,
-            TexUnit_7,
-            TexUnit_8,
-            TexUnit_9,
-            TexUnit_10,
-            TexUnit_11
+            Shader
         }
 
         public enum TextureResParams
         {
             PixelData = 700,
+            TexType,
+            TexFormat,
             Width,
-            Height,
-            Comps,
-            HDR
+            Height
         }
 
         public enum EffectResParams
@@ -186,7 +171,11 @@ namespace Horde3DNET
         public enum ModelNodeParams
         {
             GeometryRes = 200,
-            SoftwareSkinning
+            SoftwareSkinning,
+            LodDist1,
+            LodDist2,
+            LodDist3,
+            LodDist4
         }
 
         public enum MeshNodeParams
@@ -195,7 +184,8 @@ namespace Horde3DNET
             BatchStart,
             BatchCount,
             VertRStart,
-            VertREnd
+            VertREnd,
+            LodLevel
         }
 
         public enum JointNodeParams
@@ -234,7 +224,7 @@ namespace Horde3DNET
         public enum EmitterNodeParams
         {
             MaterialRes = 700,
-            EffectRes,
+            ParticleEffectRes,
             MaxCount,
             RespawnCount,
             Delay,
@@ -292,16 +282,21 @@ namespace Horde3DNET
         }
 
         /// <summary>
-        /// This function sets the dimensions of the rendering viewport. 
-        /// It has to be called after initialization and whenever the viewport size changes.
+        /// This function sets the location and size of the viewport. It has to be called
+        /// after engine initialization and whenever the size of the rendering context/window
+        /// changes. The resizeBuffers parameter specifies whether render targets with a size
+        /// relative to the viewport dimensions should be resized. This is usually desired
+        /// after engine initialization and when the window is resized but not for just rendering
+        /// to a part of the framebuffer.
         /// </summary>
         /// <param name="x">the x-position of the viewport in the rendering context</param>
         /// <param name="y">the y-position of the viewport in the rendering context</param>
         /// <param name="width">the width of the viewport</param>
         /// <param name="height">the height of the viewport</param>
-        public static void resize(int x, int y, int width, int height)
+        /// <param name="resizeBuffers">specifies whether render targets should be adapted to new size</param>
+        public static void setupViewport(int x, int y, int width, int height, bool resizeBuffers)
         {
-            NativeMethodsEngine.resize(x, y, width, height);
+            NativeMethodsEngine.setupViewport(x, y, width, height,resizeBuffers);
         }
 
         /// <summary>
@@ -316,6 +311,16 @@ namespace Horde3DNET
         public static bool render(int node)
         {
             return NativeMethodsEngine.render(node);
+        }
+
+        /// <summary>
+        /// This function tells the engine that the current frame is finished and that all
+        /// subsequent rendering operations will be for the next frame.
+        /// </summary>
+        /// <returns>true in case of success, otherwise false</returns>
+        public static bool finalizeFrame()
+        {
+            return NativeMethodsEngine.finalizeFrame();
         }
 
         /// <summary>
@@ -402,15 +407,20 @@ namespace Horde3DNET
         /// <param name="y_ul">y position of the upper left corner</param>
         /// <param name="u_ul">u texture coordinate of the upper left corner</param>
         /// <param name="v_ul">v texture coordinate of the upper left corner</param>
-        /// <param name="layer">layer index of the overlay (Values: from 0 to 7)</param>
+        /// <param name="colR">red color value of the overlay that is set for the material's shader</param>
+        /// <param name="colG">green color value of the overlay that is set for the material's shader</param>
+        /// <param name="colB">blue color value of the overlay that is set for the material's shader</param>
+        /// <param name="colA">alpha color value of the overlay that is set for the material's shader</param>
         /// <param name="material">material resource used for rendering</param>
+        /// <param name="layer">layer index of the overlay (Values: from 0 to 7)</param>
         public static void showOverlay(float x_ll, float y_ll, float u_ll, float v_ll,
                                         float x_lr, float y_lr, float u_lr, float v_lr,
                                         float x_ur, float y_ur, float u_ur, float v_ur,
                                         float x_ul, float y_ul, float u_ul, float v_ul,
+                                        float colR, float colG, float colB, float colA,
                                         int layer, int material)
         {
-            NativeMethodsEngine.showOverlay(x_ll, y_ll, u_ll, v_ll, x_lr, y_lr, u_lr, v_lr, x_ur, y_ur, u_ur, v_ur, x_ul, y_ul, u_ul, v_ul, layer, material);
+            NativeMethodsEngine.showOverlay(x_ll, y_ll, u_ll, v_ll, x_lr, y_lr, u_lr, v_lr, x_ur, y_ur, u_ur, v_ur, x_ul, y_ul, u_ul, v_ul, colR, colG, colB, colA, material, layer);
         }
 
         /// <summary>
@@ -429,7 +439,7 @@ namespace Horde3DNET
         /// </summary>
         /// <param name="res">handle to the resource whose type will be returned</param>
         /// <returns>type of the scene node</returns>
-        public static ResourceTypes getResourceType(int res)
+        public static int getResourceType(int res)
         {
             return NativeMethodsEngine.getResourceType(res);
         }
@@ -447,6 +457,18 @@ namespace Horde3DNET
         }
 
         /// <summary>
+        /// This function searches the resource of the specified type and name and returns its handle. If
+        /// the resource is not available in the resource manager a zero handle is returned.
+        /// </summary>
+        /// <param name="type">type of the resource</param>
+        /// <param name="start">name of the resource</param>
+        /// <returns></returns>
+        public static int getNextResource(int type, int start)
+        {
+            return (int)NativeMethodsEngine.getNextResource(type, start);
+        }
+
+        /// <summary>
         /// This function searches the resource of the specified type and name and returns its handle. If the resource is not available in the resource manager a zero handle is returned.
         /// </summary>
         /// <remarks>
@@ -455,7 +477,7 @@ namespace Horde3DNET
         /// <param name="type">type of the resource</param>
         /// <param name="name">name of the resource</param>
         /// <returns>handle to the resource or 0 if not found</returns>
-        public static int findResource(ResourceTypes type, string name)
+        public static int findResource(int type, string name)
         {
             if (name == null) throw new ArgumentNullException("name", Resources.StringNullExceptionString);
             return (int)NativeMethodsEngine.findResource(type, name);
@@ -469,7 +491,7 @@ namespace Horde3DNET
         /// <param name="name">name of the resource</param>
         /// <param name="flags">flags used for creating the resource</param>
         /// <returns>handle to the resource to be added or 0 in case of failure</returns>
-        public static int addResource(ResourceTypes type, string name, int flags)
+        public static int addResource(int type, string name, int flags)
         {
             if (name == null) throw new ArgumentNullException("name", Resources.StringNullExceptionString);
 
@@ -518,20 +540,23 @@ namespace Horde3DNET
         }
 
         /// <summary>
-        /// This function loads data for a resource that was previously added to the resource manager.
+        /// Loads a resource.
         /// </summary>
         /// <remarks>
-        /// If data is null the resource manager is told that the resource doesn't have any data. 
-        /// The function can only be called once for every resource.
-        /// Important Note: The data block must be null terminated!
+        /// This function loads data for a resource that was previously added to the resource manager.
+		/// If data is a NULL-pointer the resource manager is told that the resource doesn't have any data
+		/// (e.g. the corresponding file was not found). In this case, the resource remains in the unloaded state
+		/// but is no more returned when querying unloaded resources. When the specified resource is already loaded,
+        /// the function returns false.
+        /// 
+        /// *Important Note: XML-data must be NULL-terminated*
         /// </remarks>
-        /// <param name="name">name of the resource for which the data is loaded</param>
-        /// <param name="data">the data to be loaded (null terminated block)</param>
+        /// <param name="name">res handle to the resource for which data will be loaded</param>
+        /// <param name="data">the data to be loaded</param>
         /// <param name="size">size of the data block</param>
         /// <returns>true in case of success, otherwise false</returns>
-        public static bool loadResource(string name, byte[] data, int size)
-        {
-            if (name == null) throw new ArgumentNullException("name", Resources.StringNullExceptionString);
+        public static bool loadResource(int res, byte[] data, int size)
+        {            
             if (data == null) throw new ArgumentNullException("data");
 
             if (data.Length < size)
@@ -547,7 +572,7 @@ namespace Horde3DNET
             Marshal.WriteByte(ptr, size, 0x00);
 
             // load resource
-            bool result = NativeMethodsEngine.loadResource(name, ptr, size);
+            bool result = NativeMethodsEngine.loadResource(res, ptr, size);
 
             // free previously allocated memory
             Marshal.FreeHGlobal(ptr);
@@ -1015,12 +1040,14 @@ namespace Horde3DNET
         }
 
         /// <summary>
-        /// 
+        /// Sets a property of a scene node.
         /// </summary>
-        /// <param name="node"></param>
-        /// <param name="param"></param>
-        /// <param name="value"></param>
-        /// <returns></returns>
+        /// <remarks>This function sets a specified property of the specified node to a specified value.
+		/// The property must be of the type int or ResHandle.</remarks>
+        /// <param name="node">handle to the node to be modified</param>
+        /// <param name="param">parameter to be modified</param>
+        /// <param name="value">new value for the specified parameter</param>
+        /// <returns>true in case of success otherwise false</returns>
         public static bool setNodeParami(int node, int param, int value)
         {
             return NativeMethodsEngine.setNodeParami(node, param, value);
@@ -1092,10 +1119,13 @@ namespace Horde3DNET
         }
 
         /// <summary>
-        /// 
+        /// Gets a result from the findNodes query.
         /// </summary>
-        /// <param name="index"></param>
-        /// <returns></returns>
+        /// <remarks>This function returns the n-th (index) result of a previous findNodes query. The result is the handle
+        /// to a scene node with the poperties specified at the findNodes query. If the index doesn't exist in the
+        /// result list the function returns 0.</remarks>
+        /// <param name="index">index of search result</param>
+        /// <returns>handle to scene node from findNodes query or 0 if result doesn't exist</returns>
         public static int getNodeFindResult(int index)
         {
             return NativeMethodsEngine.getNodeFindResult(index);
@@ -1135,6 +1165,25 @@ namespace Horde3DNET
         public static bool getCastRayResult(int index, int node, out float distance, float[] intersection)
         {
             return NativeMethodsEngine.getCastRayResult(index, node, out distance, intersection);
+        }
+
+        /// <summary>
+        /// Checks if a node is visible.
+        /// </summary>
+        /// <remarks>This function checks if a specified node is visible from the perspective of a specified
+        /// camera. The function always checks if the node is in the camera's frustum. If checkOcclusion
+        /// is true, the function will take into account the occlusion culling information from the previous
+        /// frame (if occlusion culling is disabled the flag is ignored). The flag calcLod determines whether the
+        /// detail level for the node should be returned in case it is visible. The function returns -1 if the node
+        /// is not visible, otherwise 0 (base LOD level) or the computed LOD level.</remarks>
+        /// <param name="node">node to be checked for visibility</param>
+        /// <param name="cameraNode">camera node from which the visibility test is done</param>
+        /// <param name="checkOcclusion">specifies if occlusion info from previous frame should be taken into account</param>
+        /// <param name="calcLod">specifies if LOD level should be computed</param>
+        /// <returns>computed LOD level or -1 if node is not visible</returns>
+        public static int checkNodeVisibility(int node, int cameraNode, bool checkOcclusion, bool calcLod)
+        {
+            return NativeMethodsEngine.checkNodeVisibility(node, cameraNode, checkOcclusion, calcLod);
         }
 
         // Group specific
@@ -1326,16 +1375,17 @@ namespace Horde3DNET
         }
 
         /// <summary>
-        /// This function calculates the camera projection matrix used for bringing the geometry to screen space and copies it to the specified array.
+        /// This function gets the camera projection matrix used for bringing the geometry to
+        /// screen space and copies it to the specified array.
         /// </summary>
         /// <param name="node">handle to Camera node</param>
         /// <param name="projMat">pointer to float array with 16 elements</param>
         /// <returns>true in case of success, otherwise false</returns>
-        public static bool calcCameraProjectionMatrix(int node, float[] projMat)
+        public static bool getCameraProjectionMatrix(int node, float[] projMat)
         {
             if (projMat.Length != 16) throw new ArgumentOutOfRangeException("projMat", Resources.MatrixOutOfRangeExceptionString);
 
-            return NativeMethodsEngine.calcCameraProjectionMatrix(node, projMat);
+            return NativeMethodsEngine.getCameraProjectionMatrix(node, projMat);
         }
 
 

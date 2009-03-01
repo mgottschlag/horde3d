@@ -2,7 +2,7 @@
 //
 // Horde3D .NET wrapper
 // ----------------------------------
-// Copyright (C) 2007 Martin Burkhard
+// Copyright (C) 2007-2009 Martin Burkhard, Volker Wiendl
 //
 //
 // This library is free software; you can redistribute it and/or
@@ -78,10 +78,11 @@ namespace Horde3DNET
 
         [DllImport(UTILS_DLL), SuppressUnmanagedCodeSecurity]
         internal static extern void showText(string text, float x, float y, float size,
-                                             int layer, uint fontMatRes);
+                                             float colR, float colG, float colB,
+                                             int fontMatRes, int layer);
 
         [DllImport(UTILS_DLL), SuppressUnmanagedCodeSecurity]
-        internal static extern void showFrameStats(int fontMaterialRes, float curFPS);
+        internal static extern void showFrameStats(int fontMaterialRes, int panelMaterialRes, float curFPS);
 
 
     }
