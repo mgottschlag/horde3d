@@ -72,7 +72,7 @@ protected:
 	std::string          _name;
 	ResHandle            _handle;
 	int                  _flags;
-	
+
 	uint32               _refCount;  // Number of other objects referencing to this resource
 	uint32               _userRefCount;  // Number of handles created by user
 
@@ -84,18 +84,25 @@ public:
 	Resource( int type, const std::string &name, int flags );
 	virtual ~Resource();
 	virtual Resource *clone();  // TODO: Implement this for all resource types
-	
+
 	virtual void initDefault();
 	virtual void release();
 	virtual bool load( const char *data, int size );
 	void unload();
-	
+
 	virtual int getParami( int param );
 	virtual bool setParami( int param, int value );
 	virtual float getParamf( int param );
 	virtual bool setParamf( int param, float value );
 	virtual const char *getParamstr( int param );
 	virtual bool setParamstr( int param, const char *value );
+
+	virtual int getParamItemi( int param, const char *item );
+	virtual bool setParamItemi( int param, const char *item, int value );
+	virtual float getParamItemf( int param, const char *item );
+	virtual bool setParamItemf( int param, const char *item, float value );
+	virtual const char *getParamItemstr( int param, const char *item );
+	virtual bool setParamItemstr( int param, const char *item, const char *value );
 
 	virtual const void *getData( int param );
 	virtual bool updateData( int param, const void *data, int size );
@@ -123,7 +130,7 @@ private:
 	void subRef() { if( _ptr != 0x0 ) _ptr->subRef(); }
 
 public:
-	
+
 	SmartResPtr( T *ptr = 0x0 ) : _ptr( ptr ) { addRef(); }
 	SmartResPtr( const SmartResPtr &smp ) : _ptr( smp._ptr ) { addRef(); }
 	~SmartResPtr() { subRef(); }
@@ -134,7 +141,7 @@ public:
     operator const T*() const { return _ptr; }
 	operator bool() const { return _ptr != 0x0; }
 	T *getPtr() { return _ptr; }
-	
+
 	SmartResPtr &operator=( const SmartResPtr &smp ) { return *this = smp._ptr; }
 	SmartResPtr &operator=( T *ptr )
 	{
@@ -180,7 +187,7 @@ public:
 
 	void registerType( int type, const std::string &typeString, ResTypeInitializationFunc inf,
 	                   ResTypeReleaseFunc rf, ResTypeFactoryFunc ff );
-	
+
 	Resource *getNextResource( int type, ResHandle start );
 	Resource *findResource( int type, const std::string &name );
 	ResHandle addResource( int type, const std::string &name, int flags, bool userCall );

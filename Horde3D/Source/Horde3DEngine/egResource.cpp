@@ -49,7 +49,7 @@ Resource::Resource( int type, const string &name, int flags )
 	_refCount = 0;
 	_userRefCount = 0;
 	_flags = flags;
-	
+
 	if( (flags & ResourceFlags::NoQuery) == ResourceFlags::NoQuery ) _noQuery = true;
 	else _noQuery = false;
 }
@@ -80,20 +80,20 @@ void Resource::release()
 
 
 bool Resource::load( const char *data, int size )
-{	
+{
 	// Resources can only be loaded once
 	if( _loaded ) return false;
-	
+
 	// A NULL pointer can be used if the file could not be loaded
 	if( data == 0x0 || size <= 0 )
-	{	
+	{
 		Modules::log().writeWarning( "Resource '%s' of type %i: No data loaded (file not found?)", _name.c_str(), _type );
 		_noQuery = true;
 		return false;
 	}
 
 	_loaded = true;
-	
+
 	return true;
 }
 
@@ -140,6 +140,43 @@ bool Resource::setParamstr( int param, const char *value )
 {
 	return false;
 }
+
+
+int Resource::getParamItemi( int param, const char *item )
+{
+	return 0;
+}
+
+
+bool Resource::setParamItemi( int param, const char *item, int value )
+{
+	return false;
+}
+
+
+float Resource::getParamItemf( int param, const char *item )
+{
+	return 0.0f;
+}
+
+
+bool Resource::setParamItemf( int param, const char *item, float value )
+{
+	return false;
+}
+
+
+const char *Resource::getParamItemstr( int param, const char *item )
+{
+	return "";
+}
+
+
+bool Resource::setParamItemstr( int param, const char *item, const char *value )
+{
+	return false;
+}
+
 
 
 const void *Resource::getData( int /*param*/ )
@@ -204,7 +241,7 @@ Resource *ResourceManager::findResource( int type, const string &name )
 			return _resources[i];
 		}
 	}
-	
+
 	return 0x0;
 }
 
@@ -219,7 +256,7 @@ Resource *ResourceManager::getNextResource( int type, ResHandle start )
 			return _resources[i];
 		}
 	}
-	
+
 	return 0x0;
 }
 
@@ -236,7 +273,7 @@ ResHandle ResourceManager::addResource( Resource &resource )
 			return i + 1;
 		}
 	}
-	
+
 	// If there is no free slot, add resource to end
 	resource._handle = (ResHandle)_resources.size() + 1;
 	_resources.push_back( &resource );
@@ -248,11 +285,11 @@ ResHandle ResourceManager::addResource( int type, const string &name,
 										int flags, bool userCall )
 {
 	if( name == "" || (userCall && name.find( ":" ) != string::npos) )
-	{	
+	{
 		Modules::log().writeDebugInfo( "Invalid name for added resource of type %i", type );
 		return 0;
 	}
-	
+
 	// Check if resource is already in list and return index
 	for( uint32 i = 0; i < _resources.size(); ++i )
 	{
@@ -265,7 +302,7 @@ ResHandle ResourceManager::addResource( int type, const string &name,
 			}
 		}
 	}
-	
+
 	// Create resource
 	Resource *resource = 0x0;
 	map< int, ResourceRegEntry >::iterator itr = _registry.find( type );
@@ -273,9 +310,9 @@ ResHandle ResourceManager::addResource( int type, const string &name,
 	if( resource == 0x0 ) return 0;
 
 	Modules::log().writeInfo( "Adding %s resource '%s'", itr->second.typeString.c_str(), name.c_str() );
-	
+
 	if( userCall ) resource->_userRefCount = 1;
-	
+
 	return addResource( *resource );
 }
 
@@ -299,14 +336,14 @@ ResHandle ResourceManager::cloneResource( ResHandle sourceRes, const string &nam
 {
 	Resource *res = resolveResHandle( sourceRes );
 	if( res == 0x0 ) return 0;
-	
+
 	// Check that name does not yet exist
 	if( name != "" )
 	{
 		for( uint32 i = 0; i < _resources.size(); ++i )
 		{
 			if( _resources[i] != 0x0 && _resources[i]->_name == name )
-			{	
+			{
 				Modules::log().writeDebugInfo( "Name '%s' used for cloneResource already exists", name.c_str() );
 				return 0;
 			}
@@ -319,7 +356,7 @@ ResHandle ResourceManager::cloneResource( ResHandle sourceRes, const string &nam
 	newRes->_name = name != "" ? name : "|tmp|";
 	newRes->_userRefCount = 1;
 	int handle = addResource( *newRes );
-	
+
 	if( name == "" )
 	{
 		stringstream ss;
@@ -336,7 +373,7 @@ int ResourceManager::removeResource( ResHandle handle, bool userCall )
 	Resource *res = resolveResHandle( handle );
 
 	if( res == 0x0 )
-	{	
+	{
 		Modules::log().writeDebugInfo( "Invalid resource handle %i in removeResource", handle );
 		return -1;
 	}
@@ -374,7 +411,7 @@ ResHandle ResourceManager::queryUnloadedResource( int index )
 	for( uint32 i = 0; i < _resources.size(); ++i )
 	{
 		if( _resources[i] != 0x0 && !_resources[i]->_loaded && !_resources[i]->_noQuery )
-		{	
+		{
 			if( j == index ) return _resources[i]->_handle;
 			else ++j;
 		}
@@ -387,7 +424,7 @@ ResHandle ResourceManager::queryUnloadedResource( int index )
 void ResourceManager::releaseUnusedResources()
 {
 	vector< uint32 > killList;
-	
+
 	// Find unesed resources and release dependencies
 	for( uint32 i = 0; i < _resources.size(); ++i )
 	{
@@ -397,7 +434,7 @@ void ResourceManager::releaseUnusedResources()
 			_resources[i]->release();
 		}
 	}
-	
+
 	// Delete unused resources
 	for( uint32 i = 0; i < killList.size(); ++i )
 	{

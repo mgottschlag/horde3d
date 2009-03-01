@@ -438,6 +438,90 @@ namespace Horde3D
 	}
 
 
+	DLLEXP int getResourceParamItemi( ResHandle res, int param, const char *item )
+	{
+		Resource *resObj = Modules::resMan().resolveResHandle( res );
+		if( resObj == 0x0 )
+		{
+			Modules::log().writeDebugInfo( "Invalid resource handle %i in getResourceParamItemi", res );
+			return 0x0;
+		}
+
+		return resObj->getParamItemi( param, item );
+	}
+
+
+	DLLEXP bool setResourceParamItemi( ResHandle res, int param, const char *item, int value )
+	{
+		Resource *resObj = Modules::resMan().resolveResHandle( res );
+		if( resObj == 0x0 )
+		{
+			Modules::log().writeDebugInfo( "Invalid resource handle %i in setResourceParamItemi", res );
+			return false;
+		}
+
+		return resObj->setParamItemi( param, item, value );
+	}
+
+
+	DLLEXP float getResourceParamItemf( ResHandle res, int param, const char *item )
+	{
+		Resource *resObj = Modules::resMan().resolveResHandle( res );
+		if( resObj == 0x0 )
+		{
+			Modules::log().writeDebugInfo( "Invalid resource handle %i in getResourceParamItemf", res );
+			return 0x0;
+		}
+
+		return resObj->getParamItemf( param, item );
+	}
+
+
+	DLLEXP bool setResourceParamItemf( ResHandle res, int param, const char *item, float value )
+	{
+		Resource *resObj = Modules::resMan().resolveResHandle( res );
+		if( resObj == 0x0 )
+		{
+			Modules::log().writeDebugInfo( "Invalid resource handle %i in setResourceParamItemf", res );
+			return false;
+		}
+
+		return resObj->setParamItemf( param, item, value );
+	}
+
+	DLLEXP const char *getResourceParamItemstr( ResHandle res, int param, const char *item )
+	{
+		static char emptyString = '\0';
+
+		Resource *resObj = Modules::resMan().resolveResHandle( res );
+		if( resObj == 0x0 )
+		{
+			Modules::log().writeDebugInfo( "Invalid resource handle %i in getResourceParamItemstr", res );
+			return &emptyString;
+		}
+
+		return resObj->getParamItemstr( param, item );
+	}
+
+
+	DLLEXP bool setResourceParamItemstr( ResHandle res, int param, const char *item, const char *value )
+	{
+		Resource *resObj = Modules::resMan().resolveResHandle( res );
+		if( resObj == 0x0 )
+		{
+			Modules::log().writeDebugInfo( "Invalid resource handle %i in setResourceParamItemstr", res );
+			return false;
+		}
+		if( value == 0x0 )
+		{
+			Modules::log().writeDebugInfo( "Invalid value for setResourceParamstr: NULL" );
+			return false;
+		}
+
+		return resObj->setParamItemstr( param, item, value );
+	}
+
+
 	DLLEXP const void *getResourceData( ResHandle res, int param )
 	{
 		Resource *resObj = Modules::resMan().resolveResHandle( res );

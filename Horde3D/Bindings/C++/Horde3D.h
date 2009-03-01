@@ -1022,6 +1022,109 @@ namespace Horde3D
 	*/
 	DLL bool setResourceParamstr( ResHandle res, int param, const char *value );
 
+	/* 	Function: getResourceParamItemi
+			Gets a property of a resource item.
+
+		This function returns a specified property of the specified resource.
+		The property must be of the type int.
+
+		Parameters:
+			res    - handle to the resource to be accessed
+			param  - parameter to be accessed
+			item   - parameter item to be accessed
+
+		Returns:
+			value of the parameter
+	*/
+	DLL int getResourceParamItemi( ResHandle res, int param, const char *item );
+
+	/* 	Function: setResourceParamItemi
+			Sets a property of a resource item.
+
+		This function sets a specified property of the specified resource to a specified value.
+		The property must be of the type int.
+
+		Parameters:
+			node   - handle to the node to be modified
+			param  - parameter to be modified
+			item   - parameter item to be modified
+			value  - new value for the specified parameter
+
+		Returns:
+			 true in case of success otherwise false
+	*/
+	DLL bool setResourceParamItemi( ResHandle res, int param, const char *item, int value );
+
+	/* 	Function: getResourceParamItemf
+			Gets a property of a resource item.
+
+		This function returns a specified property of the specified resource.
+		The property must be of the type float.
+
+		Parameters:
+			res    - handle to the resource to be accessed
+			param  - parameter to be accessed
+			item   - parameter item to be accessed
+
+		Returns:
+			value of the parameter
+	*/
+	DLL float getResourceParamItemf( ResHandle res, int param, const char *item );
+
+	/* 	Function: setResourceParamItemf
+			Sets a property of a resource item.
+
+		This function sets a specified property of the specified resource to a specified value.
+		The property must be of the type float.
+
+		Parameters:
+			node   - handle to the node to be modified
+			param  - parameter to be modified
+			item   - parameter item to be modified
+			value  - new value for the specified parameter
+
+		Returns:
+			true in case of success otherwise false
+	*/
+	DLL bool setResourceParamItemf( ResHandle res, int param, const char *item, float value );
+
+	/* 	Function: getResourceParamItemstr
+			Gets a property of a resource item.
+
+		This function returns a specified property of the specified resource.
+		The property must be of the type string (const char *).
+
+		*Important Note: The pointer is const and allows only read access to the data. Do never try to modify the
+		data of the pointer since that can corrupt the engine's internal states!*
+
+		Parameters:
+			res    - handle to the resource to be accessed
+			param  - parameter to be accessed
+			item   - parameter item to be accessed
+
+		Returns:
+			value of the property or empty string if no such property exists
+	*/
+	DLL const char *getResourceParamItemstr( ResHandle res, int param, const char *item );
+
+	/* 	Function: setResourceParamItemstr
+			Sets a property of a resource item.
+
+		This function sets a specified property of the specified resource to a specified value.
+		The property must be of the type string (const char *).
+
+		Parameters:
+			node   - handle to the node to be modified
+			param  - parameter to be modified
+			item   - parameter item to be modified
+			value  - new value for the specified parameter
+
+		Returns:
+			true in case of success otherwise false
+	*/
+	DLL bool setResourceParamItemstr( ResHandle res, int param, const char *item, const char *value );
+
+
 	/* 	Function: getResourceData
 			Gives access to resource data.
 		
