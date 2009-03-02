@@ -336,3 +336,45 @@ bool MaterialResource::setParamstr( int param, const char *value )
 		return Resource::setParamstr( param, value );
 	}
 }
+
+
+int MaterialResource::getParamItemi( int param, const char *item )
+{
+	switch( param )
+	{
+	case MaterialResParams::Sampler:
+		for( int i = 0; i < _samplers.size(); i++ )
+		{
+			if( _samplers[i].name == item )
+			{
+				return _samplers[i].texRes->getHandle();
+			}
+		}
+		return 0;
+	default:
+		return Resource::getParamItemi( param, item );
+	}
+}
+
+
+bool MaterialResource::setParamItemi( int param, const char *item, int value )
+{
+	switch( param )
+	{
+	case MaterialResParams::Sampler:
+		for( int i = 0; i < _samplers.size(); i++ )
+		{
+			if( _samplers[i].name == item )
+			{
+				TextureResource *texture = (TextureResource *)Modules::resMan().resolveResHandle( value );
+				if( !texture )
+					return false;
+				_samplers[i].texRes = texture;
+				return true;
+			}
+		}
+		return false;
+	default:
+		return Resource::setParamItemi( param, item, value );
+	}
+}

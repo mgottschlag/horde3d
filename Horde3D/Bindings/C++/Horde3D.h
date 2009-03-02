@@ -217,12 +217,14 @@ struct MaterialResParams
 		Class   - Hierarchical class name (Default: empty string); valid for get-/setResourceParamstr
 		Link    - Link to other material resource; valid for get-/setResourceParami
 		Shader  - Shader resource used for rendering; valid for get-/setResourceParami
+		Sampler - Texture resource, in the material connected to a name, valid for get-/setResourceParamItemi
 	 */
 	enum List
 	{
 		Class = 400,
 		Link,
-		Shader
+		Shader,
+		Sampler
 	};	
 };
 

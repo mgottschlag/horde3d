@@ -41,7 +41,8 @@ struct MaterialResParams
 	{
 		Class = 400,
 		Link,
-		Shader
+		Shader,
+		Sampler
 	};	
 };
 
@@ -105,6 +106,9 @@ public:
 	bool setParami( int param, int value );
 	const char *getParamstr( int param );
 	bool setParamstr( int param, const char *value );
+
+	int getParamItemi( int param, const char *item );
+	bool setParamItemi( int param, const char *item, int value );
 
 	friend class ResourceManager;
 	friend class Renderer;
