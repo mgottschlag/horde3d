@@ -990,4 +990,20 @@ inline float nearestDistToAABB( const Vec3f &pos, const Vec3f &mins, const Vec3f
 	return nearestVec.length();
 }
 
+inline bool rayPlaneIntersection( const Plane &plane, const Vec3f &rayOrig, const Vec3f &rayDir,
+                                  Vec3f &intsPoint )
+{
+	float dotnd = plane.normal.dot( rayDir );
+	// Ray lies directly on the plane
+	if ( dotnd == 0 )
+		return false;
+	// Get intersection
+	float dotno = plane.normal.dot( rayOrig );
+	float i = ( plane.dist - dotno ) / dotnd;
+	if ( i < 0 || i > 1 )
+		return false;
+	intsPoint = rayOrig + rayDir * i;
+	return true;
+}
+
 #endif // _utMath_H_
