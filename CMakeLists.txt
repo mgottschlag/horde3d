@@ -34,6 +34,28 @@ if(HORDE3D_BUILD_TERRAIN)
 		)
 endif(HORDE3D_BUILD_TERRAIN)
 
+# water extension (check egExtensions.cpp if it's activated)
+option(HORDE3D_BUILD_WATER "Build the water extension into Horde3D" ON)
+if(HORDE3D_BUILD_WATER)
+	set(HORDE3D_EXTENSION_SOURCES
+		${HORDE3D_EXTENSION_SOURCES}
+		${Horde3D_SOURCE_DIR}/Extensions/Water/Source/water.h
+		${Horde3D_SOURCE_DIR}/Extensions/Water/Source/water.cpp
+		${Horde3D_SOURCE_DIR}/Extensions/Water/Source/extension.h
+		${Horde3D_SOURCE_DIR}/Extensions/Water/Source/extension.cpp
+		${Horde3D_SOURCE_DIR}/Extensions/Water/Source/noise.h
+		${Horde3D_SOURCE_DIR}/Extensions/Water/Source/noise.cpp
+		)
+	set(HORDE3D_EXTENSION_INSTALLS
+		${HORDE3D_EXTENSION_INSTALLS}
+		"installExtension(Horde3DWater::getExtensionName, Horde3DWater::initExtension, Horde3DWater::releaseExtension);\n"
+		)
+	set(HORDE3D_EXTENSION_INCLUDES
+		${HORDE3D_EXTENSION_INCLUDES}
+		"\n#include \"Extensions/Water/Source/extension.h\"\n"
+		)
+endif(HORDE3D_BUILD_WATER)
+
 IF("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" GREATER 2.4)    
   IF(WIN32)
 	IF(MSVC)

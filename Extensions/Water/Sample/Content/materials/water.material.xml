@@ -1,0 +1,9 @@
+<Material>
+	<Shader source="materials/water.shader.xml"/>
+
+	<Sampler name="fresnel" map="materials/fresnel.png" />
+	<Sampler name="sky" map="models/skybox/skybox.dds" />
+	<!--<TexUnit unit="0" map="skybox.jpg" type="CUBE" />-->
+	
+	<!--<Uniform name="sunDir" a="1.0" b="-1.0" c="0.0" />-->
+</Material>
