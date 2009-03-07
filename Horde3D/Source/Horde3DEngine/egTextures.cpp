@@ -213,7 +213,7 @@ bool TextureResource::load( const char *data, int size )
 
 		// Store properties
 		_width = ddsHeader.dwWidth;
-		_height = ddsHeader.dwWidth;
+		_height = ddsHeader.dwHeight;
 		_texFormat = (TextureFormats::List)-1;
 		_texObject = 0;
 		int mipCount = ddsHeader.dwFlags & DDSD_MIPMAPCOUNT ? ddsHeader.dwMipMapCount : 1;
