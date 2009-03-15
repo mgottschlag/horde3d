@@ -32,7 +32,8 @@ private:
 	float              _curFPS;
 	std::stringstream  _text;
 
-	bool               _freeze, _showStats, _debugViewMode, _wireframeMode;
+	int                _statMode;
+	bool               _freeze, _debugViewMode, _wireframeMode;
 	float              _animTime, _weight;
 	
 	// Engine objects

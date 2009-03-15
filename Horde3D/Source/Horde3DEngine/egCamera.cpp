@@ -247,17 +247,17 @@ bool CameraNode::setParami( int param, int value )
 }
 
 
-void CameraNode::setupViewParams( float fov, float aspect, float near, float far )
+void CameraNode::setupViewParams( float fov, float aspect, float nearPlane, float farPlane )
 {
-	float ymax = near * tanf( degToRad( fov / 2 ) );
+	float ymax = nearPlane * tanf( degToRad( fov / 2 ) );
 	float xmax = ymax * aspect;
 
 	_frustLeft = -xmax;
 	_frustRight = xmax;
 	_frustBottom = -ymax;
 	_frustTop = ymax;
-	_frustNear = near;
-	_frustFar = far;
+	_frustNear = nearPlane;
+	_frustFar = farPlane;
 	
 	markDirty();
 }

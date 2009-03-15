@@ -27,22 +27,24 @@
 
 const char *versionString = "Horde3D 1.0.0 Beta3";
 
-EngineConfig		*Modules::_engineConfig = 0x0;
-EngineLog			*Modules::_engineLog = 0x0;
-SceneManager		*Modules::_sceneManager = 0x0;
-ResourceManager		*Modules::_resourceManager = 0x0;
-Renderer			*Modules::_renderer = 0x0;
-ExtensionManager	*Modules::_extensionManager = 0x0;
+EngineConfig      *Modules::_engineConfig = 0x0;
+EngineLog         *Modules::_engineLog = 0x0;
+StatManager       *Modules::_statManager = 0x0;
+SceneManager      *Modules::_sceneManager = 0x0;
+ResourceManager   *Modules::_resourceManager = 0x0;
+Renderer          *Modules::_renderer = 0x0;
+ExtensionManager  *Modules::_extensionManager = 0x0;
 
 
 void Modules::init()
 {
 	if( _extensionManager == 0x0 ) _extensionManager = new ExtensionManager();
-	if( _sceneManager == 0x0 ) _sceneManager = new SceneManager();
-	if( _resourceManager == 0x0 ) _resourceManager = new ResourceManager();
-	if( _renderer == 0x0 ) _renderer = new Renderer();
 	if( _engineLog == 0x0 ) _engineLog = new EngineLog();
 	if( _engineConfig == 0x0 ) _engineConfig = new EngineConfig();
+	if( _sceneManager == 0x0 ) _sceneManager = new SceneManager();
+	if( _statManager == 0x0 ) _statManager = new StatManager();
+	if( _resourceManager == 0x0 ) _resourceManager = new ResourceManager();
+	if( _renderer == 0x0 ) _renderer = new Renderer();
 }
 
 
@@ -56,6 +58,7 @@ void Modules::release()
 	delete _sceneManager; _sceneManager = 0x0;
 	delete _resourceManager; _resourceManager = 0x0;
 	delete _renderer; _renderer = 0x0;
+	delete _statManager; _statManager = 0x0;
 	delete _engineLog; _engineLog = 0x0;
 	delete _engineConfig; _engineConfig = 0x0;
 }

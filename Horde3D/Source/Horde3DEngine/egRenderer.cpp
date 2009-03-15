@@ -212,10 +212,13 @@ bool Renderer::init()
 
 	_overlays.reserve( 100 );
 
-	_statTriCount = 0; _statBatchCount = 0; _statLightPassCount = 0;
-
 	// Reset GL states
 	finishRendering();
+
+	// Start frame timer
+	Timer *timer = Modules::stats().getTimer( EngineStats::FrameTime );
+	ASSERT( timer != 0x0 );
+	timer->setEnabled( true );
 	
 	return true;
 }
@@ -231,47 +234,6 @@ void Renderer::resize( int x, int y, int width, int height )
 // =================================================================================================
 // Misc Helper Functions
 // =================================================================================================
-
-float Renderer::getStat( int param, bool reset )
-{
-	float value;	
-	
-	switch( param )
-	{
-	case EngineStats::TriCount:
-		value = (float)_statTriCount;
-		if( reset ) _statTriCount = 0;
-		return value;
-	case EngineStats::BatchCount:
-		value = (float)_statBatchCount;
-		if( reset ) _statBatchCount = 0;
-		return value;
-	case EngineStats::LightPassCount:
-		value = (float)_statLightPassCount;
-		if( reset ) _statLightPassCount = 0;
-		return value;
-	default:
-		return 0;
-	}
-}
-
-
-void Renderer::incStat( int param, float value )
-{
-	switch( param )
-	{
-	case EngineStats::TriCount:
-		_statTriCount += ftoi_r( value );
-		break;
-	case EngineStats::BatchCount:
-		_statBatchCount += ftoi_r( value );
-		break;
-	case EngineStats::LightPassCount:
-		_statLightPassCount += ftoi_r( value );
-		break;
-	}
-}
-
 
 int Renderer::registerOccSet()
 {
@@ -1431,7 +1393,7 @@ void Renderer::drawLightGeometry( const string shaderContext, const string &theC
 		setupViewMatrices( _curCamera );
 		drawRenderables( context, theClass, false, &_curCamera->getFrustum(),
 		                 &_curLight->getFrustum(), order, occSet );
-		incStat( EngineStats::LightPassCount, 1 );
+		Modules().stats().incStat( EngineStats::LightPassCount, 1 );
 
 		// Reset
 		glDisable( GL_SCISSOR_TEST );
@@ -1538,7 +1500,7 @@ void Renderer::drawLightShapes( const string shaderContext, bool noShadows, int 
 		glTexCoord2f( bbx + bbw, bby + bbh ); glVertex3f( bbx + bbw, bby + bbh, 1 );
 		glTexCoord2f( bbx, bby + bbh ); glVertex3f( bbx, bby + bbh, 1 );
 		glEnd();
-		incStat( EngineStats::LightPassCount, 1 );
+		Modules().stats().incStat( EngineStats::LightPassCount, 1 );
 
 		// Reset
 		glActiveTexture( GL_TEXTURE12 );
@@ -1800,8 +1762,8 @@ void Renderer::drawModels( const string &shaderContext, const string &theClass, 
 			                     curGeoRes->_16BitIndices ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT,
 			                     (char *)0 + meshNode->getBatchStart() *
 			                     (curGeoRes->_16BitIndices ? sizeof( short ) : sizeof( int )) );
-			Modules::renderer().incStat( EngineStats::BatchCount, 1 );
-			Modules::renderer().incStat( EngineStats::TriCount, meshNode->getBatchCount() / 3.0f );
+			Modules::stats().incStat( EngineStats::BatchCount, 1 );
+			Modules::stats().incStat( EngineStats::TriCount, meshNode->getBatchCount() / 3.0f );
 		}
 
 		if( occCulling )
@@ -1930,8 +1892,8 @@ void Renderer::drawParticles( const string &shaderContext, const string &theClas
 				glUniform4fv( curShader->uni_parColorArray, ParticlesPerBatch, (float *)emitter->_parColors + j*ParticlesPerBatch*4 );
 
 			glDrawArrays( GL_QUADS, 0, ParticlesPerBatch * 4 );
-			Modules::renderer().incStat( EngineStats::BatchCount, 1 );
-			Modules::renderer().incStat( EngineStats::TriCount, ParticlesPerBatch * 2.0f );
+			Modules::stats().incStat( EngineStats::BatchCount, 1 );
+			Modules::stats().incStat( EngineStats::TriCount, ParticlesPerBatch * 2.0f );
 		}
 
 		uint32 count = emitter->_particleCount % ParticlesPerBatch;
@@ -1960,8 +1922,8 @@ void Renderer::drawParticles( const string &shaderContext, const string &theClas
 				glUniform4fv( curShader->uni_parColorArray, count, (float *)emitter->_parColors + offset*4 );
 			
 			glDrawArrays( GL_QUADS, 0, count * 4 );
-			Modules::renderer().incStat( EngineStats::BatchCount, 1 );
-			Modules::renderer().incStat( EngineStats::TriCount, count * 2.0f );
+			Modules::stats().incStat( EngineStats::BatchCount, 1 );
+			Modules::stats().incStat( EngineStats::TriCount, count * 2.0f );
 		}
 
 		if( occCulling )
@@ -2099,6 +2061,17 @@ bool Renderer::render( CameraNode *camNode )
 	
 	finishRendering();
 	return true;
+}
+
+
+void Renderer::finalizeFrame()
+{
+	// Reset frame timer
+	Timer *timer = Modules::stats().getTimer( EngineStats::FrameTime );
+	ASSERT( timer != 0x0 );
+	Modules::stats().getStat( EngineStats::FrameTime, true );  // Reset
+	Modules::stats().incStat( EngineStats::FrameTime, timer->getElapsedTimeMS() );
+	timer->reset();
 }
 
 

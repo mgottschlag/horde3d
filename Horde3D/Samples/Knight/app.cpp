@@ -35,7 +35,8 @@ Application::Application( const std::string &contentDir )
 	_x = 5; _y = 3; _z = 19; _rx = 7; _ry = 15; _velocity = 10.0f;
 	_curFPS = 30;
 
-	_freeze = false; _showStats = false; _debugViewMode = false; _wireframeMode = false;
+	_statMode = 0;
+	_freeze = false; _debugViewMode = false; _wireframeMode = false;
 	_animTime = 0; _weight = 1.0f;
 	_cam = 0;
 
@@ -143,10 +144,10 @@ void Application::mainLoop( float fps )
 	// Set camera parameters
 	Horde3D::setNodeTransform( _cam, _x, _y, _z, _rx ,_ry, 0, 1, 1, 1 );
 	
-	if( _showStats )
-	{
-		Horde3DUtils::showFrameStats( _fontMatRes, _panelMatRes, _curFPS );
-
+	// Show stats
+	Horde3DUtils::showFrameStats( _fontMatRes, _panelMatRes, _statMode );
+	if( _statMode > 0 )
+	{	
 		// Display weight
 		_text.str( "" );
 		_text << fixed << setprecision( 2 ) << "Weight: " << _weight;
@@ -209,7 +210,10 @@ void Application::keyPressEvent( int key )
 		_wireframeMode = !_wireframeMode;
 	
 	if( key == 266 )	// F9
-		_showStats = !_showStats;
+	{
+		_statMode += 1;
+		if( _statMode > Horde3DUtils::MaxStatMode ) _statMode = 0;
+	}
 }
 
 

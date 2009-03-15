@@ -527,6 +527,7 @@ bool ModelNode::updateGeometry()
 	// Upload geometry
 	_geometryRes->updateDynamicVertData();
 	markMeshBBoxesDirty();
+
 	return true;
 }
 

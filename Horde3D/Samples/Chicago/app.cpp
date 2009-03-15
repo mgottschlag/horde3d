@@ -35,7 +35,8 @@ Application::Application( const string &contentDir )
 	_x = 15; _y = 3; _z = 20; _rx = -10; _ry = 60; _velocity = 10.0f;
 	_curFPS = 30;
 
-	_freeze = false; _showStats = false; _debugViewMode = false; _wireframeMode = false;
+	_statMode = 0;
+	_freeze = false; _debugViewMode = false; _wireframeMode = false;
 	_cam = 0;
 
 	_contentDir = contentDir;
@@ -122,10 +123,10 @@ void Application::mainLoop( float fps )
 	// Set camera parameters
 	Horde3D::setNodeTransform( _cam, _x, _y, _z, _rx ,_ry, 0, 1, 1, 1 );
 	
-	if( _showStats )
+	// Show stats
+	Horde3DUtils::showFrameStats( _fontMatRes, _panelMatRes, _statMode );
+	if( _statMode > 0 )
 	{
-		Horde3DUtils::showFrameStats( _fontMatRes, _panelMatRes, _curFPS );
-
 		if( Horde3D::getNodeParami( _cam, CameraNodeParams::PipelineRes ) == _forwardPipeRes )
 			Horde3DUtils::showText( "Pipeline: forward", 0.03f, 0.24f, 0.026f, 1, 1, 1, _fontMatRes, 5 );
 		else
@@ -190,7 +191,10 @@ void Application::keyPressEvent( int key )
 		_wireframeMode = !_wireframeMode;
 	
 	if( key == 266 )	// F9
-		_showStats = !_showStats;
+	{
+		_statMode += 1;
+		if( _statMode > Horde3DUtils::MaxStatMode ) _statMode = 0;
+	}
 }
 
 

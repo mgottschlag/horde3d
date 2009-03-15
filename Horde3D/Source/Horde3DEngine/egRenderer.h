@@ -50,18 +50,6 @@ extern const char *fsOccBox;
 // Renderer
 // =================================================================================================
 
-struct EngineStats
-{
-	enum List
-	{
-		TriCount = 100,
-		BatchCount,
-		LightPassCount
-	};
-};
-
-// =================================================================================================
-
 struct Overlay
 {
 	PMaterialResource  materialRes;
@@ -142,8 +130,6 @@ protected:
 	float                              _splitPlanes[5];
 	Matrix4f                           _lightMats[4];
 
-	int                                _statTriCount, _statBatchCount, _statLightPassCount;
-
 
 	static bool nodeFrontToBackOrder( NodeListEntry e1, NodeListEntry e2 )
 		{ return ((MeshNode *)e1.node)->tmpSortValue < ((MeshNode *)e2.node)->tmpSortValue; }
@@ -189,8 +175,6 @@ public:
 	bool init();
 	void resize( int x, int y, int width, int height );
 	
-	float getStat( int param, bool reset );
-	void incStat( int param, float value );
 	int registerOccSet();
 	void unregisterOccSet( int occSet );
 
@@ -213,6 +197,7 @@ public:
 		const Frustum *frust1, const Frustum *frust2, RenderingOrder::List order, int occSet );
 
 	bool render( CameraNode *camNode );
+	void finalizeFrame();
 
 	uint32 getFrameID() { return _frameID; }
 	uint32 getVPWidth() { return _vpWidth; }

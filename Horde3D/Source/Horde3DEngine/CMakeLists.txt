@@ -49,6 +49,7 @@ set(HORDE3D_SOURCES
 	egShader.h
 	egTextures.h
 	utImage.h
+	utTimer.h
 	utOpenGL.h
 	../Shared/utXMLParser.cpp
 

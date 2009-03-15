@@ -34,6 +34,8 @@
 #include <queue>
 #include <vector>
 
+#include "utTimer.h"
+
 
 // =================================================================================================
 // Engine Config
@@ -133,5 +135,48 @@ public:
 	void setMaxNumMessages( uint32 maxNumMessages ) { _maxNumMessages = maxNumMessages; }
 	
 };
+
+
+// =================================================================================================
+// Engine Stats
+// =================================================================================================
+
+struct EngineStats
+{
+	enum List
+	{
+		TriCount = 100,
+		BatchCount,
+		LightPassCount,
+		FrameTime,
+		CustomTime
+	};
+};
+
+// =================================================================================================
+
+class StatManager
+{
+protected:
+
+	uint32  _statTriCount;
+	uint32  _statBatchCount;
+	uint32  _statLightPassCount;
+
+	Timer   _frameTimer;
+	Timer   _customTimer;
+	float   _frameTime;
+
+public:
+
+	StatManager();
+	
+	float getStat( int param, bool reset );
+	void incStat( int param, float value );
+	Timer *getTimer( int param );
+
+	friend class ProfSample;
+};
+
 
 #endif // _egCom_H_

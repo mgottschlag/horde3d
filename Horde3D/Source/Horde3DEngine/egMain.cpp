@@ -147,6 +147,7 @@ namespace Horde3D
 
 	DLLEXP bool finalizeFrame()
 	{
+		Modules::renderer().finalizeFrame();
 		return true;
 	}
 
@@ -213,7 +214,7 @@ namespace Horde3D
 
 	DLLEXP float getStat( EngineStats::List param, bool reset )
 	{
-		return Modules::renderer().getStat( param, reset );
+		return Modules::stats().getStat( param, reset );
 	}
 
 

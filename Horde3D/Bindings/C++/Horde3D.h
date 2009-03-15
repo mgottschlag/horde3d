@@ -116,12 +116,16 @@ struct EngineStats
 		TriCount        - Number of triangles that were pushed to the renderer
 		BatchCount      - Number of batches (draw calls)
 		LightPassCount  - Number of lighting passes
+		FrameTime       - Time in ms between two finalizeFrame calls
+		CustomTime      - Value of custom timer (useful for profiling engine functions)
 	*/
 	enum List
 	{
 		TriCount = 100,
 		BatchCount,
-		LightPassCount
+		LightPassCount,
+		FrameTime,
+		CustomTime
 	};
 };
 

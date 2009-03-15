@@ -194,8 +194,8 @@ namespace Horde3DTerrain
 			Modules::renderer().updateVertices( terrain->_heightArray, terrain->getVertexCount() * sizeof( float ) * 3,
 				terrain->getVertexCount() * sizeof( float ), terrain->_vertexBuffer );
 			glDrawElements( GL_TRIANGLE_STRIP, terrain->getIndexCount(), GL_UNSIGNED_SHORT, (char *)0 );
-			Modules::renderer().incStat( EngineStats::BatchCount, 1 );
-			Modules::renderer().incStat( EngineStats::TriCount, (terrain->_blockSize - 1) * (terrain->_blockSize - 1) * 2.0f );
+			Modules::stats().incStat( EngineStats::BatchCount, 1 );
+			Modules::stats().incStat( EngineStats::TriCount, (terrain->_blockSize - 1) * (terrain->_blockSize - 1) * 2.0f );
 		}
 		else 
 		{

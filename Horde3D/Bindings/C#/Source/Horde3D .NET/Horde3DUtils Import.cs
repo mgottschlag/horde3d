@@ -82,7 +82,7 @@ namespace Horde3DNET
                                              int fontMatRes, int layer);
 
         [DllImport(UTILS_DLL), SuppressUnmanagedCodeSecurity]
-        internal static extern void showFrameStats(int fontMaterialRes, int panelMaterialRes, float curFPS);
+        internal static extern void showFrameStats(int fontMaterialRes, int panelMaterialRes, int mode);
 
 
     }

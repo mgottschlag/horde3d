@@ -63,7 +63,9 @@ namespace Horde3DNET
         {
             TriCount = 100,
             BatchCount,
-            LightPassCount
+            LightPassCount,
+            FrameTime,
+            CustomTime
         }
 
         public enum ResourceTypes

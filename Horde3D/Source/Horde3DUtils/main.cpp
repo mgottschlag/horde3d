@@ -448,40 +448,74 @@ namespace Horde3DUtils
 	}
 
 
-	DLLEXP void showFrameStats( ResHandle fontMaterialRes, ResHandle boxMaterialRes, float curFPS )
+	DLLEXP void showFrameStats( ResHandle fontMaterialRes, ResHandle boxMaterialRes, int mode )
 	{
 		static stringstream text;
-		static float timer = 0;
-		static float fps = curFPS;
+		static float curFPS = 30;
+		static float timer = 100;
+		static float fps = 30;
+		static float frameTime = 0;
+		static float customTime = 0;
+
+		// Calculate FPS
+		float curFrameTime = Horde3D::getStat( EngineStats::FrameTime, true );
+		curFPS = 1000.0f / curFrameTime;
 		
-		// InfoBox
-		beginInfoBox( 0.03f, 0.03f, 0.3f, 4, "Frame Stats", fontMaterialRes, boxMaterialRes );
-		
-		// FPS
-		timer += 1.0f / curFPS;
-		if( timer > 0.3f )
-		{
+		timer += curFrameTime / 1000.0f;
+		if( timer > 0.8f )
+		{	
 			fps = curFPS;
+			frameTime = curFrameTime;
+			customTime = Horde3D::getStat( EngineStats::CustomTime, true );
 			timer = 0;
 		}
-		text.str( "" );
-		text << fixed << setprecision( 2 ) << fps;
-		addInfoBoxRow( "FPS", text.str().c_str() );
+		else
+		{
+			// Reset counters
+			Horde3D::getStat( EngineStats::CustomTime, true );
+		}
 		
-		// Triangle count
-		text.str( "" );
-		text << (int)Horde3D::getStat( EngineStats::TriCount, true );
-		addInfoBoxRow( "Tris", text.str().c_str() );
-		
-		// Number of batches
-		text.str( "" );
-		text << (int)Horde3D::getStat( EngineStats::BatchCount, true );
-		addInfoBoxRow( "Batches", text.str().c_str() );
-		
-		// Number of lighting passes
-		text.str( "" );
-		text << (int)Horde3D::getStat( EngineStats::LightPassCount, true );
-		addInfoBoxRow( "Lights", text.str().c_str() );
+		if( mode > 0 )
+		{
+			// InfoBox
+			beginInfoBox( 0.03f, 0.03f, 0.3f, 4, "Frame Stats", fontMaterialRes, boxMaterialRes );
+			
+			// FPS
+			text.str( "" );
+			text << fixed << setprecision( 2 ) << fps;
+			addInfoBoxRow( "FPS", text.str().c_str() );
+			
+			// Triangle count
+			text.str( "" );
+			text << (int)Horde3D::getStat( EngineStats::TriCount, true );
+			addInfoBoxRow( "Tris", text.str().c_str() );
+			
+			// Number of batches
+			text.str( "" );
+			text << (int)Horde3D::getStat( EngineStats::BatchCount, true );
+			addInfoBoxRow( "Batches", text.str().c_str() );
+			
+			// Number of lighting passes
+			text.str( "" );
+			text << (int)Horde3D::getStat( EngineStats::LightPassCount, true );
+			addInfoBoxRow( "Lights", text.str().c_str() );
+		}
+
+		if( mode > 1 )
+		{
+			// CPU time
+			beginInfoBox( 0.03f, 0.3f, 0.3f, 2, "CPU Time", fontMaterialRes, boxMaterialRes );
+			
+			// Frame time
+			text.str( "" );
+			text << frameTime << "ms";
+			addInfoBoxRow( "Frame Total", text.str().c_str() );
+			
+			// Custom time
+			text.str( "" );
+			text << customTime << "ms";
+			addInfoBoxRow( "Custom", text.str().c_str() );
+		}
 	}
 
 

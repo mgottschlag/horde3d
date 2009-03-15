@@ -50,6 +50,13 @@
 
 namespace Horde3DUtils
 {
+	/* Group: Typedefs and constants */
+	/*	Constants: Predefined constants
+		MaxStatMode  - Maximum stat mode number supported in showFrameStats
+	*/
+	const int MaxStatMode = 2;
+
+	
 	/*	Group: General functions */
 	/*	Function: freeMem
 			Frees memory allocated by the Utility Library.
@@ -272,10 +279,10 @@ namespace Horde3DUtils
 		Parameters:
 			fontMaterialRes	  - font material resource used for drawing text
 			panelMaterialRes  - material resource used for drawing info box
-			curFPS            - frames per second with which application is currently running
+			mode              - display mode, specifying which data is shown (<= MaxStatMode)
 			
 		Returns:
 			nothing
 	*/
-	DLL void showFrameStats( ResHandle fontMaterialRes, ResHandle panelMaterialRes, float curFPS );
+	DLL void showFrameStats( ResHandle fontMaterialRes, ResHandle panelMaterialRes, int mode );
 };

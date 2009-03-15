@@ -236,3 +236,83 @@ bool EngineLog::getMessage( LogMessage &msg )
 	else
 		return false;
 }
+
+
+// *************************************************************************************************
+// Class StatManager
+// *************************************************************************************************
+
+StatManager::StatManager()
+{
+	_statTriCount = 0;
+	_statBatchCount = 0;
+	_statLightPassCount = 0;
+
+	_frameTime = 0;
+}
+
+
+float StatManager::getStat( int param, bool reset )
+{
+	float value;	
+	
+	switch( param )
+	{
+	case EngineStats::TriCount:
+		value = (float)_statTriCount;
+		if( reset ) _statTriCount = 0;
+		return value;
+	case EngineStats::BatchCount:
+		value = (float)_statBatchCount;
+		if( reset ) _statBatchCount = 0;
+		return value;
+	case EngineStats::LightPassCount:
+		value = (float)_statLightPassCount;
+		if( reset ) _statLightPassCount = 0;
+		return value;
+	case EngineStats::FrameTime:
+		value = _frameTime;
+		if( reset ) _frameTime = 0;
+		return value;
+	case EngineStats::CustomTime:
+		value = _customTimer.getElapsedTimeMS();
+		if( reset ) _customTimer.reset();
+		return value;
+	default:
+		return 0;
+	}
+}
+
+
+void StatManager::incStat( int param, float value )
+{
+	switch( param )
+	{
+	case EngineStats::TriCount:
+		_statTriCount += ftoi_r( value );
+		break;
+	case EngineStats::BatchCount:
+		_statBatchCount += ftoi_r( value );
+		break;
+	case EngineStats::LightPassCount:
+		_statLightPassCount += ftoi_r( value );
+		break;
+	case EngineStats::FrameTime:
+		_frameTime += value;
+		break;
+	}
+}
+
+
+Timer *StatManager::getTimer( int param )
+{
+	switch( param )
+	{
+	case EngineStats::FrameTime:
+		return &_frameTimer;
+	case EngineStats::CustomTime:
+		return &_customTimer;
+	default:
+		return 0x0;
+	}
+}

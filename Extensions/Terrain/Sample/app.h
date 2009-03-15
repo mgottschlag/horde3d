@@ -29,7 +29,8 @@ private:
 	float        _velocity;  // Velocity for movement
 	float        _curFPS;
 
-	bool         _freeze, _showStats, _debugViewMode, _wireframeMode;
+	int          _statMode;
+	bool         _freeze, _debugViewMode, _wireframeMode;
 	
 	// Engine objects
 	ResHandle    _fontMatRes, _panelMatRes, _logoMatRes;

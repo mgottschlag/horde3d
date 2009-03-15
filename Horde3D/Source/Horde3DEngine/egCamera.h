@@ -110,7 +110,7 @@ public:
 	int getParami( int param );
 	bool setParami( int param, int value );
 
-	void setupViewParams( float fov, float aspect, float near, float far );
+	void setupViewParams( float fov, float aspect, float nearPlane, float farPlane );
 
 	const Frustum &getFrustum() { return _frustum; }
 	const Matrix4f &getViewMat() { return _viewMat; }
