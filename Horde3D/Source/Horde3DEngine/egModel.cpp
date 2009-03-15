@@ -469,56 +469,59 @@ bool ModelNode::updateGeometry()
 
 	if( _skinningDirty )
 	{
-		// TODO: Optimize this routine
+		//Timer *timer = Modules::stats().getTimer( EngineStats::CustomTime );
+		//timer->setEnabled( true );
+		
+		Matrix4f skinningMat;
+		Vec4f *rows = &_skinMatRows[0];
+		VertexData &vd = *_geometryRes->_vertData;
 
 		for( uint32 i = 0, s = _geometryRes->getVertCount(); i < s; ++i )
 		{
-			Matrix4f mat, skinningMat;
-			VertexData &vd = *_geometryRes->getVertData();
-			
-			for( uint32 j = 0; j < 4; ++j )
-			{
-				uint32 ind0 = (uint32)ftoi_r( vd.staticData[i].jointVec[j] ) * 3 + 0;
-				uint32 ind1 = ind0 + 1, ind2 = ind0 + 2;
-				
-				mat.x[0] = _skinMatRows[ind0].x;
-				mat.x[1] = _skinMatRows[ind1].x;
-				mat.x[2] = _skinMatRows[ind2].x;
-				mat.x[4] = _skinMatRows[ind0].y;
-				mat.x[5] = _skinMatRows[ind1].y;
-				mat.x[6] = _skinMatRows[ind2].y;
-				mat.x[8] = _skinMatRows[ind0].z;
-				mat.x[9] = _skinMatRows[ind1].z;
-				mat.x[10] = _skinMatRows[ind2].z;
-				mat.x[12] = _skinMatRows[ind0].w;
-				mat.x[13] = _skinMatRows[ind1].w;
-				mat.x[14] = _skinMatRows[ind2].w;
+			Vec4f *row0 = &rows[ftoi_r( vd.staticData[i].jointVec[0] ) * 3];
+			Vec4f *row1 = &rows[ftoi_r( vd.staticData[i].jointVec[1] ) * 3];
+			Vec4f *row2 = &rows[ftoi_r( vd.staticData[i].jointVec[2] ) * 3];
+			Vec4f *row3 = &rows[ftoi_r( vd.staticData[i].jointVec[3] ) * 3];
 
-				if( j == 0) skinningMat = mat * vd.staticData[i].weightVec[j];
-				else skinningMat += mat * vd.staticData[i].weightVec[j];
-			}
+			Vec4f weights = *((Vec4f*)&vd.staticData[i].weightVec[0]);
+
+			skinningMat.x[0] = (row0)->x * weights.x + (row1)->x * weights.y + (row2)->x * weights.z + (row3)->x * weights.w;
+			skinningMat.x[1] = (row0+1)->x * weights.x + (row1+1)->x * weights.y + (row2+1)->x * weights.z + (row3+1)->x * weights.w;
+			skinningMat.x[2] = (row0+2)->x * weights.x + (row1+2)->x * weights.y + (row2+2)->x * weights.z + (row3+2)->x * weights.w;
+			skinningMat.x[4] = (row0)->y * weights.x + (row1)->y * weights.y + (row2)->y * weights.z + (row3)->y * weights.w;
+			skinningMat.x[5] = (row0+1)->y * weights.x + (row1+1)->y * weights.y + (row2+1)->y * weights.z + (row3+1)->y * weights.w;
+			skinningMat.x[6] = (row0+2)->y * weights.x + (row1+2)->y * weights.y + (row2+2)->y * weights.z + (row3+2)->y * weights.w;
+			skinningMat.x[8] = (row0)->z * weights.x + (row1)->z * weights.y + (row2)->z * weights.z + (row3)->z * weights.w;
+			skinningMat.x[9] = (row0+1)->z * weights.x + (row1+1)->z * weights.y + (row2 + 1)->z * weights.z + (row3+1)->z * weights.w;
+			skinningMat.x[10] = (row0+2)->z * weights.x + (row1+2)->z * weights.y + (row2+2)->z * weights.z + (row3+2)->z * weights.w;
+			skinningMat.x[12] = (row0)->w * weights.x + (row1)->w * weights.y + (row2)->w * weights.z + (row3)->w * weights.w;
+			skinningMat.x[13] = (row0+1)->w * weights.x + (row1+1)->w * weights.y + (row2+1)->w * weights.z + (row3+1)->w * weights.w;
+			skinningMat.x[14] = (row0+2)->w * weights.x + (row1+2)->w * weights.y + (row2+2)->w * weights.z + (row3+2)->w * weights.w;
 
 			// Skin position
 			vd.positions[i] = skinningMat * vd.positions[i];
-			
+
 			// Skin tangent space basis
-			skinningMat.x[12] = 0;
-			skinningMat.x[13] = 0;
-			skinningMat.x[14] = 0;
-			vd.normals[i] = skinningMat * vd.normals[i];
-			vd.tangents[i] = skinningMat * vd.tangents[i];
-			vd.bitangents[i] = skinningMat * vd.bitangents[i];
+			// Note: We skip the normalization of the tangent space basis for performance reasons;
+			//       the error is usually not huge and should hardly be noticable
+			vd.normals[i] = skinningMat.mult33Vec( vd.normals[i] ); //.normalized();
+			vd.tangents[i] = skinningMat.mult33Vec( vd.tangents[i] ); //.normalized();
+			vd.bitangents[i] = skinningMat.mult33Vec( vd.bitangents[i] ); //.normalized();
 		}
+
+		//timer->setEnabled( false );
 	}
-		
-	// Renormalize tangent space basis
-	for( uint32 i = 0, s = _geometryRes->getVertCount(); i < s; ++i )
+	else if( _morpherUsed )
 	{
-		VertexData &vd = *_geometryRes->getVertData();
-		
-		vd.normals[i].normalize();
-		vd.tangents[i].normalize();
-		vd.bitangents[i].normalize();
+		// Renormalize tangent space basis
+		for( uint32 i = 0, s = _geometryRes->getVertCount(); i < s; ++i )
+		{
+			VertexData &vd = *_geometryRes->getVertData();
+			
+			vd.normals[i].normalize();
+			vd.tangents[i].normalize();
+			vd.bitangents[i].normalize();
+		}
 	}
 
 	_morpherDirty = false;

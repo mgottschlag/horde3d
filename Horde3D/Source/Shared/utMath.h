@@ -301,13 +301,14 @@ public:
 	{
 	}
 
-	Vec4f& operator/=( const float value ) 
+	Vec4f operator+( const Vec4f &v ) const
 	{
-		x /= value;
-		y /= value;
-		z /= value;
-		w /= value;
-		return *this;
+		return Vec4f( x + v.x, y + v.y, z + v.z, w + v.w );
+	}
+	
+	Vec4f operator*( const float f ) const
+	{
+		return Vec4f( x * f, y * f, z * f, w * f );
 	}
 };
 
@@ -615,13 +616,10 @@ public:
 	{
 		Matrix4f m( *this );
 		
-		for( unsigned int y = 0; y < 4; ++y )
-		{
-			for( unsigned int x = 0; x < 4; ++x ) 
-			{
-				m.c[x][y] *= f;
-			}
-		}
+		m.x[0]  *= f; m.x[1]  *= f; m.x[2]  *= f; m.x[3]  *= f;
+		m.x[4]  *= f; m.x[5]  *= f; m.x[6]  *= f; m.x[7]  *= f;
+		m.x[8]  *= f; m.x[9]  *= f; m.x[10] *= f; m.x[11] *= f;
+		m.x[12] *= f; m.x[13] *= f; m.x[14] *= f; m.x[15] *= f;
 
 		return m;
 	}
@@ -642,6 +640,13 @@ public:
 		              v.x * c[0][1] + v.y * c[1][1] + v.z * c[2][1] + v.w * c[3][1],
 		              v.x * c[0][2] + v.y * c[1][2] + v.z * c[2][2] + v.w * c[3][2],
 		              v.x * c[0][3] + v.y * c[1][3] + v.z * c[2][3] + v.w * c[3][3] );
+	}
+
+	Vec3f mult33Vec( const Vec3f &v ) const
+	{
+		return Vec3f( v.x * c[0][0] + v.y * c[1][0] + v.z * c[2][0],
+		              v.x * c[0][1] + v.y * c[1][1] + v.z * c[2][1],
+		              v.x * c[0][2] + v.y * c[1][2] + v.z * c[2][2] );
 	}
 	
 	// ---------------

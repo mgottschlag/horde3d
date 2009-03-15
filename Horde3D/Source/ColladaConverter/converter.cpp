@@ -373,9 +373,18 @@ void Converter::calcTangentSpaceBasis( vector<Vertex> &verts )
 			}
 		}
 	}
+
 	// Normalize tangent space basis
+	unsigned int numInvalidBasis = 0;
 	for( unsigned int i = 0; i < verts.size(); ++i )
 	{
+		// Check if tangent space basis is valid
+		if( verts[i].normal.length() == 0 || verts[i].tangent.length() == 0 || verts[i].bitangent.length() == 0 )
+		{
+			++numInvalidBasis;
+		}
+		
+		// Normalize
 		const Vec3f &n = verts[i].normal.normalized();
 		const Vec3f &t = verts[i].tangent;
 		verts[i].tangent = (t - n * n.dot( t )).normalized();
@@ -385,6 +394,12 @@ void Converter::calcTangentSpaceBasis( vector<Vertex> &verts )
 			verts[i].bitangent = (n * -1).cross( t );
 		else
 			verts[i].bitangent = n.cross( t );
+	}
+
+	if( numInvalidBasis > 0 )
+	{
+		log( "Warning: Geometry has zero-length basis vectors" );
+		log( "   Maybe two faces point in opposite directions and share same vertices" );
 	}
 }
 
