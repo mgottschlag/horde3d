@@ -37,8 +37,8 @@ These libraries are included directly as code in the SDK.
 Release Notes:
 	
 	The new Beta3 release brings a few substantial improvements. It features a refactored
-	shader system with a cleaner and more powerful FX-like file format along with support for 
-	automatic shader permutation generation. The performance of Beta3 has been optimized 
+	shader system with a cleaner and more powerful FX-like file format along with support
+	for automatic shader permutation generation. The performance of Beta3 has been optimized 
 	considerably, for example by the introduction of an enhanced LOD system. Another new 
 	feature is support for loading textures from DDS files. Besides these major upgrades, 
 	there are many smaller API improvements, optimizations and bug fixes. Finally, Beta3 
