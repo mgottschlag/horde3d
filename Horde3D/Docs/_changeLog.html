@@ -27,12 +27,14 @@
 	<li>Merged Texture2D and TextureCube resources to a single Texture resource.</li>
 	<li>Removed POT conversion of NPOT textures.</li>
 	<li>Added color support for overlays (added shader uniform and modified API function showOverlay and utility function showText).</li>
+	<li>Extended utility function showFrameStats.</li>
 	<li>Changed overlay coordinate system origin from bottom-left to top-left in order to make overlay system more intuitive.</li>
 	<li>Exposed camera transformation to pipeline fullscreen-quad passes.</li>
 	<li>Added nicer looking info box for frame stats.</li>
 	<li>Added engine option DumpFailedShaders for dumping corrupt shader code to a file.</li>
 	<li>Added API function getNextResource for iterating over resources.</li>
 	<li>Added API function finalizeFrame which should be called after all rendering for the current frame has been done.</li>
+	<li>Added API function setMaterialSampler.</li>
 	<li>Replaced API function resize by setupViewport.</li>
 	<li>Added API function checkNodeVisibility to find out if a node is visible.</li>
 	<li>Renamed API function calcCameraProjectionMatrix to getCameraProjectionMatrix since it just returns the matrix now instead of recalculating it.</li>
