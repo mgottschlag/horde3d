@@ -27,12 +27,13 @@ namespace Horde3DNET.Samples.ChicagoNET
 	    private float			_curFPS, _timer;
         private string          _fpsText;
 
-        private bool            _freeze, _showStats, _debugViewMode, _wireframeMode;
+        private bool            _freeze, _debugViewMode, _wireframeMode;
 
 	    private CrowdSim		_crowdSim;
     	
 	    // Engine objects
         private int             _fontMatRes, _panelMatRes, _logoMatRes;
+        private int             _statMode = 0;
 
         private int             _cam, _deferredPipeRes, _forwardPipeRes;
                 
@@ -50,7 +51,7 @@ namespace Horde3DNET.Samples.ChicagoNET
         {
 	        _x = 0; _y = 2; _z = 0; _rx = 0; _ry = 0; _velocity = 10.0f;
             _curFPS = 0; _timer = 0.0f;
-            _freeze = false; _showStats = false; _debugViewMode = false;
+            _freeze = false; _debugViewMode = false;
             _fpsText = string.Empty;
         }
 
@@ -136,9 +137,9 @@ namespace Horde3DNET.Samples.ChicagoNET
             // Set camera parameters
             Horde3D.setNodeTransform(_cam, _x, _y, _z, _rx, _ry, 0, 1, 1, 1);
 
-            if (_showStats)
+            if (_statMode > 0 )
             {
-                Horde3DUtils.showFrameStats(_fontMatRes, _panelMatRes, _curFPS);
+                Horde3DUtils.showFrameStats(_fontMatRes, _panelMatRes, _statMode);
             }
             
             // Show logo
@@ -201,7 +202,8 @@ namespace Horde3DNET.Samples.ChicagoNET
                     break;
 
                 case Keys.F9:
-                    _showStats = !_showStats;
+                	_statMode += 1;
+		            if( _statMode > Horde3DUtils.MaxStatMode ) _statMode = 0;
                     break;
             }
         }

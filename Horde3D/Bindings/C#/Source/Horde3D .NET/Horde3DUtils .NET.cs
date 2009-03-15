@@ -32,7 +32,7 @@ namespace Horde3DNET
         /// <summary>        
         /// MaxStatMode  - Maximum stat mode number supported in showFrameStats
         /// </summary>
-        const int MaxStatMode = 2;
+        public const int MaxStatMode = 2;
 
         // Utilities functions
         /// <summary>

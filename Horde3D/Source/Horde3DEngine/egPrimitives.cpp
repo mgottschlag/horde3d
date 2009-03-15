@@ -99,16 +99,24 @@ void Frustum::buildViewFrustum( const Matrix4f &viewMat, const Matrix4f &projMat
 
 	_origin = viewMat.inverted() * Vec3f( 0, 0, 0 );
 
-	// Calculate corners (this is not tested)
-	/*Matrix4f mm = m.inverted();
-	_corners[0] = mm * Vec3f( -1, -1,  1 );
-	_corners[1] = mm * Vec3f(  1, -1,  1 );
-	_corners[2] = mm * Vec3f(  1,  1,  1 );
-	_corners[3] = mm * Vec3f( -1,  1,  1 );
-	_corners[4] = mm * Vec3f( -1, -1,  1 );
-	_corners[5] = mm * Vec3f(  1, -1,  1 );
-	_corners[6] = mm * Vec3f(  1,  1,  1 );
-	_corners[7] = mm * Vec3f( -1,  1,  1 );*/
+	// Calculate corners
+	Matrix4f mm = m.inverted();
+	Vec4f corner = mm * Vec4f( -1, -1,  1, 1 );
+	_corners[0] = Vec3f( corner.x / corner.w, corner.y / corner.w, corner.z / corner.w );
+	corner = mm * Vec4f( 1, -1,  1, 1 );
+	_corners[1] = Vec3f( corner.x / corner.w, corner.y / corner.w, corner.z / corner.w );
+	corner = mm * Vec4f( 1,  1,  1, 1 );
+	_corners[2] = Vec3f( corner.x / corner.w, corner.y / corner.w, corner.z / corner.w );
+	corner = mm * Vec4f( -1,  1,  1, 1 );
+	_corners[3] = Vec3f( corner.x / corner.w, corner.y / corner.w, corner.z / corner.w );
+	corner = mm * Vec4f( -1, -1, -1, 1 );
+	_corners[4] = Vec3f( corner.x / corner.w, corner.y / corner.w, corner.z / corner.w );
+	corner = mm * Vec4f( 1, -1, -1, 1 );
+	_corners[5] = Vec3f( corner.x / corner.w, corner.y / corner.w, corner.z / corner.w );
+	corner = mm * Vec4f( 1, 1, -1, 1 );
+	_corners[6] = Vec3f( corner.x / corner.w, corner.y / corner.w, corner.z / corner.w );
+	corner = mm * Vec4f( -1, 1, -1, 1 );
+	_corners[7] = Vec3f( corner.x / corner.w, corner.y / corner.w, corner.z / corner.w );
 }
 
 

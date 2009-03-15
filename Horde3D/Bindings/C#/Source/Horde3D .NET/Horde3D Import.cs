@@ -172,7 +172,12 @@ namespace Horde3DNET
         // --- Material specific ---
         [DllImport(ENGINE_DLL), SuppressUnmanagedCodeSecurity]
         [return: MarshalAs(UnmanagedType.U1)]   // represents C++ bool type 
-	    internal static extern bool setMaterialUniform(int matRes, string name, float a, float b, float c, float d);
+        internal static extern bool setMaterialUniform(int materialRes, string name, float a, float b, float c, float d);
+
+        [DllImport(ENGINE_DLL), SuppressUnmanagedCodeSecurity]
+        [return: MarshalAs(UnmanagedType.U1)]   // represents C++ bool type 
+        internal static extern bool setMaterialSampler(int materialRes, string name, int texRes);
+
 
         [DllImport(ENGINE_DLL), SuppressUnmanagedCodeSecurity]
         [return: MarshalAs(UnmanagedType.U1)]   // represents C++ bool type 
@@ -353,6 +358,6 @@ namespace Horde3DNET
         [DllImport(ENGINE_DLL), SuppressUnmanagedCodeSecurity]
         [return: MarshalAs(UnmanagedType.U1)]   // represents C++ bool type 
         internal static extern bool hasEmitterFinished(int emitterNode);
-        
+
     }
 }

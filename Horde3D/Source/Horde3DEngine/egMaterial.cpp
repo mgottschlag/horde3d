@@ -218,6 +218,21 @@ bool MaterialResource::setUniform( const string &name, float a, float b, float c
 }
 
 
+bool MaterialResource::setSampler( const std::string &name, TextureResource *texRes )
+{
+	for( uint32 i = 0; i < _samplers.size(); ++i )
+	{
+		if( _samplers[i].name == name )
+		{
+			_samplers[i].texRes = texRes;
+			return true;
+		}
+	}
+
+	return false;
+}
+
+
 bool MaterialResource::isOfClass( const string &theClass )
 {
 	static string theClass2;

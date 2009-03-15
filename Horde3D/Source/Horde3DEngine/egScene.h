@@ -126,7 +126,7 @@ public:
 	SceneNode( const SceneNodeTpl &tpl );
 	virtual ~SceneNode();
 
-	void setActivation( bool active ) { _active = active; }
+	void setActivation( bool active );
 	void getTransform( Vec3f &trans, Vec3f &rot, Vec3f &scale );	// Not virtual for performance
 	void setTransform( Vec3f trans, Vec3f rot, Vec3f scale );	// Not virtual for performance
 	void setTransform( const Matrix4f &mat );

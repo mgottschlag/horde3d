@@ -27,13 +27,14 @@ namespace Horde3DNET.Samples.KnightNET
         private float           _curFPS, _timer;
         private string          _fpsText;
 
-        private bool            _freeze, _showStats, _debugViewMode;
+        private bool            _freeze, _debugViewMode;
         private float           _animTime, _weight;
     	
 	    // Engine objects
 	    private int	            _fontMatRes, _panelMatRes, _logoMatRes;
         private int             _knight, _particleSys;
 
+        private int             _statMode = 0;
         //horde3d 1.0
         private int             _cam, _hdrPipeRes, _forwardPipeRes;
         private bool            _wireframeMode;
@@ -54,7 +55,7 @@ namespace Horde3DNET.Samples.KnightNET
             _x = 5; _y = 3; _z = 19; _rx = 7; _ry = 15; _velocity = 10.0f;
             _curFPS = 30; _timer = 0;
 
-            _freeze = false; _showStats = true; _debugViewMode = false;
+            _freeze = false; _debugViewMode = false;
             _animTime = 0; _weight = 1.0f;
             _fpsText = string.Empty;
             _wireframeMode = false;
@@ -172,9 +173,9 @@ namespace Horde3DNET.Samples.KnightNET
             // Set camera parameters
 	        Horde3D.setNodeTransform( _cam, _x, _y, _z, _rx ,_ry, 0, 1, 1, 1 ); //horde3d 1.0
 
-            if (_showStats)
+            if (_statMode > 0)
             {
-                Horde3DUtils.showFrameStats( _fontMatRes, _panelMatRes, _curFPS );		        
+                Horde3DUtils.showFrameStats( _fontMatRes, _panelMatRes, _statMode );		        
 
                 string text = string.Format("Weight: {0:F2}", _weight);
                 Horde3DUtils.showText(text, 0.03f, 0.24f, 0.026f, 1, 1, 1, _fontMatRes, 5);
@@ -236,7 +237,8 @@ namespace Horde3DNET.Samples.KnightNET
                     _wireframeMode = !_wireframeMode;
                     break;
                 case Keys.F9:
-                    _showStats = !_showStats;
+                    _statMode += 1;
+                    if (_statMode > Horde3DUtils.MaxStatMode) _statMode = 0;
                     break;
             }
         }

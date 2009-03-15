@@ -98,6 +98,7 @@ public:
 	void release();
 	bool load( const char *data, int size );
 	bool setUniform( const std::string &name, float a, float b, float c, float d );
+	bool setSampler( const std::string &name, TextureResource *texRes );
 	bool isOfClass( const std::string &theClass );
 
 	int getParami( int param );

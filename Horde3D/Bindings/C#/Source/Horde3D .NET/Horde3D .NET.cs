@@ -795,12 +795,24 @@ namespace Horde3DNET
         /// <param name="c">value of third component</param>
         /// <param name="d">value of fourth component</param>
         /// <returns>true in case of success, otherwise false</returns>
-        public static bool setMaterialUniform(int matRes, string name, float a, float b, float c, float d)
+        public static bool setMaterialUniform(int materialRes, string name, float a, float b, float c, float d)
         {
             if (name == null) throw new ArgumentNullException("name", Resources.StringNullExceptionString);
 
-            return NativeMethodsEngine.setMaterialUniform(matRes, name, a, b, c, d);
+            return NativeMethodsEngine.setMaterialUniform(materialRes, name, a, b, c, d);
         }
+
+       /// <summary>
+       /// Binds a texture to a sampler of a Material resource.
+       /// </summary>
+	   /// This function binds a texture resource to the specified sampler of the specified material.							
+	   public static bool setMaterialSampler( int materialRes, string name, int texRes )
+       {
+           if (name == null) throw new ArgumentNullException("name", Resources.StringNullExceptionString);
+
+           return NativeMethodsEngine.setMaterialSampler(materialRes, name, texRes);
+       }
+
 
         /// <summary>
         /// Sets the activation state of a pipeline stage.

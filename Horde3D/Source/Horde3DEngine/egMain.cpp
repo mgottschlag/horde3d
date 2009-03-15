@@ -519,6 +519,26 @@ namespace Horde3D
 	}
 
 
+	DLLEXP bool setMaterialSampler( ResHandle materialRes, const char *name, ResHandle texRes )
+	{
+		Resource *res = Modules::resMan().resolveResHandle( materialRes );
+		if( res == 0x0 || res->getType() != ResourceTypes::Material )
+		{
+			Modules::log().writeDebugInfo( "Invalid Material resource handle %i in setMaterialSampler", materialRes );
+			return false;
+		}
+		
+		Resource *textureRes = Modules::resMan().resolveResHandle( texRes );
+		if( textureRes == 0x0 || textureRes->getType() != ResourceTypes::Texture )
+		{
+			Modules::log().writeDebugInfo( "Invalid Texture resource handle %i in setMaterialSampler", texRes );
+			return false;
+		}
+
+		return ((MaterialResource *)res)->setSampler( safeStr( name ), (TextureResource *)textureRes );
+	}
+
+
 	DLLEXP bool setPipelineStageActivation( ResHandle pipelineRes, const char *stageName, bool enabled )
 	{
 		Resource *res = Modules::resMan().resolveResHandle( pipelineRes );

@@ -232,7 +232,7 @@ uint32 RendererBase::uploadTexture( TextureTypes::List type, void *pixels, int w
 		inputFormat = GL_BGRA;
 		break;
 	case TextureFormats::DXT1:
-		internalFormat = GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
+		internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
 		break;
 	case TextureFormats::DXT3:
 		internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;

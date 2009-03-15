@@ -53,6 +53,18 @@ SceneNode::~SceneNode()
 }
 
 
+void SceneNode::setActivation( bool active )
+{
+	_active = active;
+	
+	// Set same activation state for children
+	for( size_t i = 0, s = _children.size(); i < s; ++i )
+	{
+		if( _children[i]->_active != active ) _children[i]->setActivation( active );
+	}
+}
+
+
 void SceneNode::getTransform( Vec3f &trans, Vec3f &rot, Vec3f &scale )
 {
 	if( _dirty ) Modules::sceneMan().updateNodes();

@@ -1152,6 +1152,21 @@ namespace Horde3D
 	*/
 	DLL bool setMaterialUniform( ResHandle materialRes, const char *name, float a, float b, float c, float d );
 
+	/* 	Function: setMaterialSampler
+			Binds a texture to a sampler of a Material resource.
+		
+		This function binds a texture resource to the specified sampler of the specified material.
+		
+		Parameters:
+			materialRes  - handle to the Material resource to be accessed
+			name         - name of the sampler
+			texRes       - handle to texture resource
+			
+		Returns:
+			true in case of success, otherwise false
+	*/
+	DLL bool setMaterialSampler( ResHandle materialRes, const char *name, ResHandle texRes );
+
 	/* 	Function: setPipelineStageActivation
 			Sets the activation state of a pipeline stage.
 		
