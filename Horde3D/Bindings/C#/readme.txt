@@ -18,7 +18,7 @@ You should have a look at the included samples Chicago .NET and Knight.NET for s
 
 Package
 -------
-Includes Horde3D SDK binaries Version 1.0.0Beta - http://www.horde3d.org - Copyright (C) 2006-2007 Nicolas Schulz
+Includes Horde3D SDK C# bindings Version 1.0.0Beta3 - http://www.horde3d.org - Copyright (C) 2006-2007 Nicolas Schulz
 
 
 Requirements
