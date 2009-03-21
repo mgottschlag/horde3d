@@ -34,8 +34,9 @@ Application::Application( const string &contentDir )
 
 	_x = 0; _y = 120; _z = 0; _rx = 0; _ry = -45; _velocity = 10.0f;
 	_curFPS = 30;
+	_statMode = 0;
 
-	_freeze = false; _showStats = false; _debugViewMode = false; _wireframeMode = false;
+	_freeze = false; _debugViewMode = false; _wireframeMode = false;
 	_cam = 0;
 
 	_noiseTime = 0;
@@ -123,10 +124,7 @@ void Application::mainLoop( float fps )
 	// Set camera parameters
 	Horde3D::setNodeTransform( _cam, _x, _y, _z, _rx ,_ry, 0, 1, 1, 1 );
 	
-	if( _showStats )
-	{
-		Horde3DUtils::showFrameStats( _fontMatRes, _panelMatRes, _curFPS );
-	}
+	Horde3DUtils::showFrameStats( _fontMatRes, _panelMatRes, _statMode );
 
 	// Show logo
 	Horde3D::showOverlay( 0.75f, 0.8f, 0, 1, 0.75f, 1, 0, 0,
@@ -140,6 +138,9 @@ void Application::mainLoop( float fps )
 	// Render scene
 	Horde3D::render( _cam );
 	
+	// Finish rendering of frame
+	Horde3D::finalizeFrame();
+
 	// Remove all overlays
 	Horde3D::clearOverlays();
 
@@ -199,7 +200,10 @@ void Application::keyPressEvent( int key )
 		_wireframeMode = !_wireframeMode;
 	
 	if( key == 266 )	// F9
-		_showStats = !_showStats;
+	{
+		_statMode += 1;
+		if( _statMode > Horde3DUtils::MaxStatMode ) _statMode = 0;
+	}
 }
 
 

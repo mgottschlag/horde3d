@@ -213,8 +213,8 @@ namespace Horde3DWater
 
 
 		glDrawElements( GL_TRIANGLES, (GRID_SIZE - 1) * (GRID_SIZE - 1) * 2 * 3, GL_UNSIGNED_SHORT, (char *)0 );
-		Modules::renderer().incStat( EngineStats::BatchCount, 1 );
-		Modules::renderer().incStat( EngineStats::TriCount, (GRID_SIZE - 1) * (GRID_SIZE - 1) * 2.0f );
+		Modules::stats().incStat( EngineStats::BatchCount, 1 );
+		Modules::stats().incStat( EngineStats::TriCount, (GRID_SIZE - 1) * (GRID_SIZE - 1) * 2.0f );
 
 		glDisableClientState( GL_VERTEX_ARRAY );
 	}
@@ -273,29 +273,6 @@ namespace Horde3DWater
 									normalMat4.x[8], normalMat4.x[9], normalMat4.x[10] };
 				glUniformMatrix3fv( curShader->uni_worldNormalMat, 1, false, normalMat );
 			}
-
-			glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, water->_indexBuffer );
-			glBindBuffer( GL_ARRAY_BUFFER, water->_vertexBuffer );
-			glVertexPointer( 3, GL_FLOAT, sizeof( float ) * 3, (char *)0 );
-			glEnableClientState( GL_VERTEX_ARRAY );
-			glDrawElements( GL_TRIANGLES, 12, GL_UNSIGNED_SHORT, (char *)0 );
-			Modules::renderer().incStat( EngineStats::BatchCount, 1 );
-			Modules::renderer().incStat( EngineStats::TriCount, 4 );
-
-			glDisableClientState( GL_VERTEX_ARRAY );
-			//glUseProgram(0);
-			//glEnable(GL_TEXTURE_2D);
-			//glBindTexture(GL_TEXTURE_2D, water->_noiseRes->_octaveTex[0]);
-			//glDisableClientState( GL_VERTEX_ARRAY );
-			/*glBegin(GL_TRIANGLES);
-				glVertex3f(-1,1,0);
-				glVertex3f(-1,-1,0);
-				glVertex3f(1,-1,0);
-				glVertex3f(-1,1,0);
-				glVertex3f(1,-1,0);
-				glVertex3f(-1,-1,0);
-			glEnd();*/
-			//glDisable(GL_TEXTURE_2D);
 
 			water->render();
 		}
