@@ -7,6 +7,17 @@ ENDIF("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" GREATER 2.4)
 
 project(Horde3D)
 
+# Profiling target
+option(HORDE3D_PROFILE "Build with profiling enabled" OFF)
+if(HORDE3D_PROFILE)
+	IF(MSVC)
+	ELSE(MSVC)
+		SET(CMAKE_BUILD_TYPE Profile)
+		SET(CMAKE_CXX_FLAGS_PROFILE -pg)
+		SET(CMAKE_C_FLAGS_PROFILE -pg)
+	ENDIF(MSVC)
+ENDIF(HORDE3D_PROFILE)
+
 # accumulate list of sources of extension modules
 # this can not be done inside the Extensions folder since cmake can only pass variables to subdirectories, never upwards...
 set(HORDE3D_EXTENSION_SOURCES)
@@ -56,39 +67,39 @@ if(HORDE3D_BUILD_WATER)
 		)
 endif(HORDE3D_BUILD_WATER)
 
-IF("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" GREATER 2.4)    
+IF("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" GREATER 2.4)
   IF(WIN32)
 	IF(MSVC)
 	    SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/Horde3D/Binaries
-		  CACHE STRING "Where binaries and .dll files go" FORCE)  
+		  CACHE STRING "Where binaries and .dll files go" FORCE)
 	ELSE(MSVC)
 	    SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/Horde3D/Binaries/Win32
-		  CACHE STRING "Where binaries and .dll files go" FORCE)  
+		  CACHE STRING "Where binaries and .dll files go" FORCE)
 	ENDIF(MSVC)
   ELSE(WIN32)
     SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/Horde3D/Binaries/${CMAKE_SYSTEM_NAME}
 	    CACHE STRING "Where binaries and .dll files go" FORCE)
   ENDIF(WIN32)
-ELSE("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" GREATER 2.4)    
+ELSE("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" GREATER 2.4)
   IF(WIN32)
 	IF(MSVC)
 		SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/Horde3D/Binaries 
 		CACHE STRING "Where executable files go" FORCE)
 	ELSE(MSVC)
 		SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/Horde3D/Binaries/Win32
-		CACHE STRING "Where executable files go" FORCE)  	
+		CACHE STRING "Where executable files go" FORCE)
 	ENDIF(MSVC)
 	IF(MSVC)
 		SET(LIBRARY_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/Horde3D/Binaries
-		CACHE STRING "Where dll files go" FORCE)  
+		CACHE STRING "Where dll files go" FORCE)
 	ELSE(MSVC)
 		SET(LIBRARY_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/Horde3D/Binaries/Win32
-		CACHE STRING "Where dll files go" FORCE)  
-	ENDIF(MSVC)		
+		CACHE STRING "Where dll files go" FORCE)
+	ENDIF(MSVC)
   ELSE(WIN32)
      SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/Horde3D/Binaries/${CMAKE_SYSTEM_NAME}
-	  CACHE STRING "Where executable files go" FORCE)    
-  ENDIF(WIN32) 
+	  CACHE STRING "Where executable files go" FORCE)
+  ENDIF(WIN32)
 ENDIF("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" GREATER 2.4)
 
 # create egExtensions.cpp

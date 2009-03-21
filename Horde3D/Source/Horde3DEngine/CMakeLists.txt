@@ -58,9 +58,15 @@ set(HORDE3D_SOURCES
 
 add_definitions(-DCMAKE )
 
-add_library(Horde3D SHARED
-	${HORDE3D_SOURCES}
-	)
+if(${CMAKE_BUILD_TYPE} MATCHES "Profile")
+	add_library(Horde3D STATIC
+		${HORDE3D_SOURCES}
+		)
+else(${CMAKE_BUILD_TYPE} MATCHES "Profile")
+	add_library(Horde3D SHARED
+		${HORDE3D_SOURCES}
+		)
+endif(${CMAKE_BUILD_TYPE} MATCHES "Profile")
 
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
