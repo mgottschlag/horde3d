@@ -8,6 +8,8 @@
 	<StageConfig addressMode="CLAMP" filtering="BILINEAR" maxAnisotropy="1" />
 </Sampler>
 
+<Sampler id="normalmap" />
+
 <Context id="AMBIENT">
 	<Shaders vertex="VS_GENERAL" fragment="FS_AMBIENT" />
 </Context>
@@ -17,43 +19,48 @@
 
 #include "shaders/utilityLib/vertCommon.glsl"
 
-varying vec3 color;
-uniform vec4 waterInterpolation;
-attribute float waterHeight;
-attribute float waterHeight2;
-attribute vec3 waterNormal;
-attribute vec3 waterNormal2;
+varying vec3 position;
+//attribute vec3 waterNormal;
 
 uniform vec3 viewer;
 varying vec3 viewVec;
-varying vec3 normal;
+//varying vec3 normal;
 
 void main() {
-	vec4 pos = calcWorldPos( gl_Vertex );
+	vec4 pos = worldMat * gl_Vertex;
 	viewVec = normalize(pos.xyz - viewer);
 
-	float interpolation = cos( waterInterpolation.x * 3.1415 / 2.0 ) / 2.0;
-	normal = normalize(waterNormal * interpolation + waterNormal2 * (1.0 - interpolation));
-	color = reflect( viewVec, waterNormal * interpolation + waterNormal2 * (1.0 - interpolation) );
-	color = normalize(color);
+	//normal = normalize(waterNormal);
+	
+	//color = reflect( viewVec, waterNormal );
+	//color = normalize(color);
+	
 	//color = waterNormal * interpolation + waterNormal2 * (1.0 - interpolation);
 	//color = normalize(color);
 	//color.y *= -1.0;
+	//pos.y *= ;
 
-	gl_Position = gl_ModelViewProjectionMatrix * worldMat * (gl_Vertex
-		+ vec4( 0.0, waterHeight * waterInterpolation.x
-		+ waterHeight2 * ( 1.0 - waterInterpolation.x ), 0.0, 0.0 ) );
+	position = vec3(gl_Vertex.x, gl_Vertex.y, gl_Vertex.z);
+	//color /= 10;
+
+	gl_Position = gl_ModelViewProjectionMatrix * worldMat * gl_Vertex;
 };
 
 [[FS_AMBIENT]]
 // =================================================================================================
-varying vec3 color;
+varying vec3 position;
 uniform samplerCube sky;
 uniform sampler2D fresnel;
+uniform sampler2D normalmap;
 varying vec3 viewVec;
-varying vec3 normal;
+//varying vec3 normal;
 void main() {
-	//gl_FragColor.rgb = color;
-	float reflection = texture2D(fresnel, vec2(dot(viewVec, normal), 0.0)).r;
-	gl_FragColor = textureCube( sky, color ) * reflection + vec4(0.18, 0.28, 0.26, 0.0) * (1 - reflection);
+	vec3 normal = texture2D( normalmap, position.xz ).rgb;
+	vec3 reflVec = reflect( viewVec, normal );
+	//gl_FragColor.rgb = normalize(normal);
+	//gl_FragColor.rgb = -dot(viewVec, normal);
+	//gl_FragColor.rgb = texture2D(normalmap, position.xz).rgb;
+	float reflection = texture2D(fresnel, vec2(-dot(viewVec, normal), 0.0)).r;
+	gl_FragColor = textureCube( sky, reflVec ) * reflection + vec4(0.18, 0.28, 0.26, 0.0) * (1 - reflection);
+	//gl_FragColor = vec4(reflection, reflection, reflection, reflection);
 }

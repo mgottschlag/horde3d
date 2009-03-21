@@ -1,8 +1,8 @@
 // *************************************************************************************************
 //
-// Horde3D Nature Extension
+// Horde3D Water Extension
 // --------------------------------------------------------
-// Copyright (C) 2006-2008 Nicolas Schulz and Volker Wiendl
+// Copyright (C) 2009 Nicolas Schulz, Volker Wiendl, Mathias Gottschlag
 //
 //
 // This library is free software; you can redistribute it and/or
@@ -24,6 +24,7 @@
 #include "utPlatform.h"
 
 #include "water.h"
+#include "noise.h"
 #include "egModules.h"
 
 using namespace std;
@@ -38,6 +39,8 @@ namespace Horde3DWater
 	
 	bool initExtension()
 	{
+		Modules::resMan().registerType( RT_NoiseResource, "Noise", NoiseResource::initializationFunc,
+			NoiseResource::releaseFunc, NoiseResource::factoryFunc );
 		Modules::sceneMan().registerType( SNT_WaterNode, "Water",
 			WaterNode::parsingFunc, WaterNode::factoryFunc, WaterNode::renderFunc );
 
@@ -60,19 +63,57 @@ namespace Horde3DWater
 		else return "";
 	}
 
-	
+	DLLEXP ResHandle addNoise( const char *name, int octaves )
+	{
+		NoiseResource *noiseRes = new NoiseResource( safeStr( name ), 0, octaves );
+
+		ResHandle res = Modules::resMan().addNonExistingResource( *noiseRes, true );
+		if( res == 0 )
+		{
+			Modules::log().writeDebugInfo( "Failed to add resource in addNoise; might be the name is already in use?", res );
+			delete noiseRes;
+		}
+
+		return res;
+	}
+	DLLEXP void setNoiseTime( ResHandle noise, float time )
+	{
+		Resource *res = Modules::resMan().resolveResHandle( noise );
+
+		if( res != 0x0 && res->getType() == RT_NoiseResource )
+			((NoiseResource *)res)->setTime( time );
+		else
+		{
+			Modules::log().writeDebugInfo( "Invalid Noise resource handle %i in setNoiseTime", noise );
+		}
+	}
+	DLLEXP float getNoiseHeight( ResHandle noise, float x, float z)
+	{
+		Resource *res = Modules::resMan().resolveResHandle( noise );
+
+		if( res != 0x0 && res->getType() == RT_NoiseResource )
+			return ((NoiseResource *)res)->getHeight( x, z );
+		else
+		{
+			Modules::log().writeDebugInfo( "Invalid Noise resource handle %i in setNoiseTime", noise );
+			return 0.0f;
+		}
+	}
+
 	DLLEXP NodeHandle addWaterNode( NodeHandle parent, const char *name,
-									  ResHandle materialRes )
+	                                ResHandle noiseRes, ResHandle materialRes )
 	{
 		SceneNode *parentNode = Modules::sceneMan().resolveNodeHandle( parent );
 		if( parentNode == 0x0 ) return 0;
-		
+
 		Resource *matRes =  Modules::resMan().resolveResHandle( materialRes );
 		if( matRes == 0x0 || matRes->getType() != ResourceTypes::Material ) return 0;
-		
+		Resource *noiseResPtr =  Modules::resMan().resolveResHandle( noiseRes );
+		if( noiseResPtr == 0x0 || noiseResPtr->getType() != RT_NoiseResource ) return 0;
+
 		Modules::log().writeInfo( "Adding Water node '%s'", safeStr( name ).c_str() );
-		
-		WaterNodeTpl tpl( safeStr( name ), (MaterialResource *)matRes );
+
+		WaterNodeTpl tpl( safeStr( name ), (MaterialResource *)matRes, (NoiseResource *)noiseResPtr );
 		SceneNode *sn = Modules::sceneMan().findType( SNT_WaterNode )->factoryFunc( tpl );
 		return Modules::sceneMan().addNode( sn, *parentNode );
 	}

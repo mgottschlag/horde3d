@@ -38,6 +38,8 @@ Application::Application( const string &contentDir )
 	_freeze = false; _showStats = false; _debugViewMode = false; _wireframeMode = false;
 	_cam = 0;
 
+	_noiseTime = 0;
+
 	_contentDir = contentDir;
 }
 
@@ -81,8 +83,9 @@ bool Application::init()
 	// Add camera
 	_cam = Horde3D::addCameraNode( RootNode, "Camera", pipeRes );
 	// Add water
-	NodeHandle water = Horde3DWater::addWaterNode( RootNode, "water", waterMat );
-	Horde3D::setNodeTransform( water, 0, 0, 0, 0, 0, 0, 1, 1, 1 );
+	_noiseRes = Horde3DWater::addNoise( "waternoise", 8 );
+	NodeHandle water = Horde3DWater::addWaterNode( RootNode, "water", _noiseRes, waterMat );
+	Horde3D::setNodeTransform( water, 0, 0, 0, 0, 0, 0, 100, 10, 100 );
 	
 	/*// Add light source
 	NodeHandle light = Horde3D::addLightNode( RootNode, "Light1", 0, "LIGHTING", "SHADOWMAP" );
@@ -129,7 +132,11 @@ void Application::mainLoop( float fps )
 	Horde3D::showOverlay( 0.75f, 0.8f, 0, 1, 0.75f, 1, 0, 0,
 	                      1, 1, 1, 0, 1, 0.8f, 1, 1,
 	                      1, 1, 1, 1, _logoMatRes, 7 );
-	
+
+	// Update water noise
+	_noiseTime += 1.0f / _curFPS;
+	Horde3DWater::setNoiseTime( _noiseRes, _noiseTime );
+
 	// Render scene
 	Horde3D::render( _cam );
 	
@@ -138,6 +145,28 @@ void Application::mainLoop( float fps )
 
 	// Write all mesages to log file
 	Horde3DUtils::dumpMessages();
+
+	// Dump water noise
+	/*printf( "\n" );
+	printf( "\n" );
+	printf( "\n" );
+	printf( "\n" );
+	for( int y = 0; y < 50; y++ )
+	{
+		for( int x = 0; x < 50; x++ )
+		{
+			float height = Horde3DWater::getNoiseHeight( _noiseRes, x, y );
+			if( height < 0.25 )
+				printf( "." );
+			else if( height >= 0.25 && height < 0.50 )
+				printf( "o" );
+			else if( height >= 0.50 && height < 0.75 )
+				printf( "O" );
+			else
+				printf( "M" );
+		}
+		printf( "\n" );
+	}*/
 }
 
 

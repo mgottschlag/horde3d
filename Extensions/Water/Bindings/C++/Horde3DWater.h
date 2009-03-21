@@ -11,6 +11,19 @@
 #	endif
 #endif
 
+// Noise resource
+const int RT_NoiseResource = 148;
+
+struct NoiseResParams
+{
+	enum List
+	{
+		Octaves = 10000,
+		NormalMap
+	};
+};
+
+// Water scene node
 const int SNT_WaterNode = 149;
 
 struct WaterNodeParams
@@ -18,12 +31,18 @@ struct WaterNodeParams
 	enum List
 	{
 		MaterialRes = 10000,
-		MeshQuality
+		NoiseRes,
+		GridWidth,
+		GridHeight
 	};
 };
 
 namespace Horde3DWater
 {
-	DLL NodeHandle addWaterNode( NodeHandle parent, const char *name, ResHandle materialRes );
+	DLL ResHandle addNoise( const char *name, int octaves );
+	DLL void setNoiseTime( ResHandle noise, float time );
+	DLL float getNoiseHeight( ResHandle noise, float x, float z);
+
+	DLL NodeHandle addWaterNode( NodeHandle parent, const char *name, ResHandle noiseRes, ResHandle materialRes );
 }
 

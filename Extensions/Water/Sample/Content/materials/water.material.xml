@@ -2,6 +2,7 @@
 	<Shader source="materials/water.shader.xml"/>
 
 	<Sampler name="fresnel" map="materials/fresnel.png" />
+	<Sampler name="normalmap" map="materials/fresnel.png" />
 	<Sampler name="sky" map="models/skybox/skybox.dds" />
 	<!--<TexUnit unit="0" map="skybox.jpg" type="CUBE" />-->
 	

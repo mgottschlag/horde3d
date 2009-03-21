@@ -2,7 +2,7 @@
 //
 // Horde3D Water Extension
 // --------------------------------------------------------
-// Copyright (C) 2006-2008 Nicolas Schulz, Volker Wiendl, Mathias Gottschlag
+// Copyright (C) 2009 Mathias Gottschlag
 //
 //
 // This library is free software; you can redistribute it and/or
@@ -25,76 +25,72 @@
 #define _Horde3DWater_water_H_
 
 #include "noise.h"
-#include "egPrerequisites.h"
-#include "utMath.h"
-#include "egMaterial.h"
-#include "egTextures.h"
 #include "egScene.h"
-
 
 namespace Horde3DWater
 {
 	const int SNT_WaterNode = 149;
 
-	extern const char *vsWaterDebugView;
-	extern const char *fsWaterDebugView;
-	
 	struct WaterNodeParams
 	{
 		enum List
 		{
 			MaterialRes = 10000,
-			MeshQuality
+			NoiseRes,
+			GridWidth,
+			GridHeight
 		};
 	};
-	
+
+	const int GRID_SIZE = 64;
+
+	extern const char *vsWaterDebugView;
+	extern const char *fsWaterDebugView;
+
 	struct WaterNodeTpl : public SceneNodeTpl
 	{
-		PMaterialResource  matRes;
-		float              meshQuality;
-		int                blockSize;
+		PMaterialResource matRes;
+		PNoiseResource    noiseRes;
+		int               gridWidth;
+		int               gridHeight;
 
-		WaterNodeTpl( const std::string &name, MaterialResource *matRes ) :
+		WaterNodeTpl( const std::string &name, MaterialResource *matRes,
+		              NoiseResource *noiseRes ) :
 			SceneNodeTpl( SNT_WaterNode, name ), matRes( matRes ),
-			meshQuality( 50.0f )
+			noiseRes(noiseRes), gridWidth(64), gridHeight(64)
 		{
 		}
 	};
 
-	
 	class WaterNode : public SceneNode
 	{
 	protected:
-		
-		PMaterialResource _materialRes;
-		
-		float            *_heightArray;
-		uint32            _vertexBuffer, _indexBuffer;
+		// Settings
+		PMaterialResource _matRes;
+		PNoiseResource    _noiseRes;
+		int               _gridWidth;
+		int               _gridHeight;
 
+		// Geometry data
+		uint32            _vertexBuffer, _indexBuffer;
 		BoundingBox       _localBBox;
 
-		NoiseGenerator noise;
-		float lastframetime;
-
-		// Camera information
-		bool camerabuilt;
-		Frustum frustum;
-		Matrix4f viewMat;
-		Matrix4f projMat;
+		// Frustum data
+		Frustum           _frustum;
+		Matrix4f          _viewMat;
+		Matrix4f          _projMat;
+		Matrix4f          _absTransInv;
 
 		WaterNode( const WaterNodeTpl &waterTpl );
-		
-		void renderWater( float x, float z );
-		
-		void createBuffers( int sizeX, int sizeZ, uint32 *vertexBuffer, uint32 *indexBuffer,
-			bool fill = false, float x1 = 0, float y1 = 0, float x2 = 1, float y2 = 1 );
-		void createBuffers( bool fill = false, float x1 = 0, float y1 = 0, float x2 = 1, float y2 = 1 );
-		void destroyBuffers( void );
-		
-	public:
 
+		// Geometry
+		void createBuffers();
+		void destroyBuffers();
+		void updateBuffers( float x1 = 0, float y1 = 0, float x2 = 1, float y2 = 1 );
+		void render();
+	public:
 		static ShaderCombination debugViewShader;
-		
+
 		~WaterNode();
 
 		static SceneNodeTpl *parsingFunc( std::map< std::string, std::string > &attribs );
@@ -105,11 +101,9 @@ namespace Horde3DWater
 		bool canAttach( SceneNode &parent );
 		int getParami( int param );
 		bool setParami( int param, int value );
-		float getParamf( int param );
-		bool setParamf( int param, float value );
 
 		BoundingBox *getLocalBBox() { return &_localBBox; }
 	};
 }
 
-#endif // _Horde3DWater_water_H_
+#endif
