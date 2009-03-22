@@ -52,6 +52,7 @@ namespace Horde3DWater
 		: Resource( RT_NoiseResource, name, flags ), _octaves( octaves ),
 		_falloff( 0.5 ), _time( 0.0 ), _current( 0 )
 	{
+		_loaded = true;
 		// Create noise textures
 		for( int frame = 0; frame < NOISE_FRAMES; frame++ )
 		{
@@ -79,6 +80,7 @@ namespace Horde3DWater
 			glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA16F_ARB, NOISE_SIZE, NOISE_SIZE, 0, GL_RGBA, GL_FLOAT, data );
 		}
 		glGenFramebuffersEXT( 1, &_FBO );
+		glGenFramebuffersEXT( 1, &_FBO2 );
 		// TODO: Better names
 		_heightMap = new TextureResource("noise_heightmap", 0, 1024, 1024, false);
 		Modules::resMan().addNonExistingResource( *_heightMap, true );
@@ -104,6 +106,7 @@ namespace Horde3DWater
 	}
 	NoiseResource::~NoiseResource()
 	{
+		// TODO
 	}
 
 	void NoiseResource::initNoise()
@@ -265,6 +268,7 @@ namespace Horde3DWater
 			octavepack++;
 		}
 		// Create GPU heightmap
+		glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, _FBO2 );
 		glFramebufferTexture2DEXT( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, _heightMap->getTexObject(), 0 );
 		glViewport( 0, 0, 1024, 1024 );
 		glClear( GL_COLOR_BUFFER_BIT );
@@ -284,7 +288,6 @@ namespace Horde3DWater
 		}
 
 		// Create GPU normalmap
-		glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, _FBO );
 		glFramebufferTexture2DEXT( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, _normalMap->getTexObject(), 0 );
 		glClear( GL_COLOR_BUFFER_BIT );
 

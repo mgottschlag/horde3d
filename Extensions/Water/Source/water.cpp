@@ -99,10 +99,8 @@ namespace Horde3DWater
 				Vec4f p1(x2 - (width * x / (GRID_SIZE - 1)), y1 + (height * z / (GRID_SIZE - 1)), 1, 1);
 				p0 = invviewproj * p0;
 				p1 = invviewproj * p1;
-				p0.x /= p0.w; p0.y /= p0.w; p0.z /= p0.w;
-				p1.x /= p1.w; p1.y /= p1.w; p1.z /= p1.w;
-				Vec3f p03( p0.x, p0.y, p0.z );
-				Vec3f p13( p1.x, p1.y, p1.z );
+				Vec3f p03( p0.x / p0.w, p0.y / p0.w, p0.z / p0.w );
+				Vec3f p13( p1.x / p1.w, p1.y / p1.w, p1.z / p1.w );
 				Plane plane( 0, 1, 0, 0 );
 				Vec3f position;
 				if ( !rayPlaneIntersection( plane, p03, p13 - p03, position ) )
@@ -123,8 +121,10 @@ namespace Horde3DWater
 	}
 	void WaterNode::render()
 	{
+		Timer *timer = Modules::stats().getTimer( EngineStats::CustomTime );
+		timer->reset();
+		timer->setEnabled( true );
 		CameraNode *curCam = Modules::renderer().getCurCamera();
-		_absTransInv = _absTrans.inverted();
 		_viewMat = curCam->getViewMat();
 		_projMat = curCam->getProjMat();
 		_frustum.buildViewFrustum(_viewMat, _projMat);
@@ -217,6 +217,7 @@ namespace Horde3DWater
 		Modules::stats().incStat( EngineStats::TriCount, (GRID_SIZE - 1) * (GRID_SIZE - 1) * 2.0f );
 
 		glDisableClientState( GL_VERTEX_ARRAY );
+		timer->setEnabled( false );
 	}
 
 	WaterNode::~WaterNode()
@@ -257,9 +258,9 @@ namespace Horde3DWater
 			{
 				Modules::renderer().setShader( &debugViewShader );
 			}
-			printf("Rendering.\n");
 
 			// World transformation
+			water->_absTransInv = water->_absTrans.inverted();
 			ShaderCombination *curShader = Modules::renderer().getCurShader();
 			if( curShader->uni_worldMat >= 0 )
 			{
@@ -267,7 +268,7 @@ namespace Horde3DWater
 			}
 			if( curShader->uni_worldNormalMat >= 0 )
 			{
-				Matrix4f normalMat4 = water->_absTrans.inverted().transposed();
+				Matrix4f normalMat4 = water->_absTransInv.transposed();
 				float normalMat[9] = { normalMat4.x[0], normalMat4.x[1], normalMat4.x[2],
 									normalMat4.x[4], normalMat4.x[5], normalMat4.x[6],
 									normalMat4.x[8], normalMat4.x[9], normalMat4.x[10] };
@@ -310,5 +311,6 @@ namespace Horde3DWater
 			return true;
 		default:
 			return SceneNode::setParami( param, value );
-		}	}
+		}
+	}
 }

@@ -75,6 +75,7 @@ namespace Horde3DWater
 		uint32 _octaveTex[MAX_OCTAVES];
 		uint32 _normalProgram;
 		uint32 _FBO;
+		uint32 _FBO2;
 
 		void initNoise();
 		void calcNoise();

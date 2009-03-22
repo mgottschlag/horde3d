@@ -42,7 +42,7 @@ namespace Horde3DWater
 		};
 	};
 
-	const int GRID_SIZE = 64;
+	const int GRID_SIZE = 128;
 
 	extern const char *vsWaterDebugView;
 	extern const char *fsWaterDebugView;
