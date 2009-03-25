@@ -574,7 +574,7 @@ bool ShaderResource::load( const char *data, int size )
 			
 			// Parse content
 			const char *sectionContentStart = pData;
-			while( *pData != '\0' && *pData != '[' && *(pData+1) != '[' ) ++pData;
+			while( *pData != '\0' && !(*pData == '[' && *(pData+1) == '[') ) ++pData;
 			const char *sectionContentEnd = pData;
 			
 
