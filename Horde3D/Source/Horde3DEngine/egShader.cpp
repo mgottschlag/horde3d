@@ -250,11 +250,12 @@ void CodeResource::updateShaders()
 			// Mark shaders using this code as uncompiled
 			for( uint32 j = 0; j < shaderRes->getContexts().size(); ++j )
 			{
-				ShaderContext &con = shaderRes->getContexts()[j];
-
-				if( con.vertCode->hasDependency( this ) || con.fragCode->hasDependency( this ) )
+				ShaderContext &context = shaderRes->getContexts()[j];
+				
+				if( shaderRes->getCode( context.vertCodeIdx )->hasDependency( this ) ||
+				    shaderRes->getCode( context.fragCodeIdx )->hasDependency( this ) )
 				{
-					con.compiled = false;
+					context.compiled = false;
 				}
 			}
 			
@@ -307,6 +308,7 @@ void ShaderResource::release()
 	_samplers.clear();
 	_uniforms.clear();
 	//_preLoadList.clear();
+	_codeSections.clear();
 }
 
 
@@ -447,14 +449,18 @@ bool ShaderResource::parseFXSection( const char *data )
 		node2 = node1.getChildNode( "Shaders" );
 		if( node2.isEmpty() ) return raiseError( "Missing Shaders node in Context '" + context.id + "'" );
 
-		_tmpCode0 = _name + ":" + node2.getAttribute( "vertex", "" );
-		_tmpCode1 = _name + ":" + node2.getAttribute( "fragment", "" );
-		
-		context.vertCode = (CodeResource *)Modules::resMan().findResource( ResourceTypes::Code, _tmpCode0.c_str() );
-		if( context.vertCode == 0x0 )
+		// Find code resources
+		_tmpCode0 = node2.getAttribute( "vertex", "" );
+		_tmpCode1 = node2.getAttribute( "fragment", "" );
+		for( uint32 i = 0; i < _codeSections.size(); ++i )
+		{
+			if( _codeSections[i].getName() == _tmpCode0 ) context.vertCodeIdx = i;
+			if( _codeSections[i].getName() == _tmpCode1 ) context.fragCodeIdx = i;
+		}
+
+		if( context.vertCodeIdx < 0 )
 			return raiseError( "Context '" + context.id + "' references undefined vertex shader code section" );
-		context.fragCode = (CodeResource *)Modules::resMan().findResource( ResourceTypes::Code, _tmpCode1.c_str() );
-		if( context.fragCode == 0x0 )
+		if( context.fragCodeIdx < 0 )
 			return raiseError( "Context '" + context.id + "' references undefined fragment shader code section" );
 
 		_contexts.push_back( context );
@@ -588,14 +594,11 @@ bool ShaderResource::load( const char *data, int size )
 			}
 			else
 			{
-				// Add section as code resource
+				// Add section as private code resource which is not managed by resource manager
 				_tmpCode0.assign( sectionNameStart, sectionNameEnd );
-				ResHandle res = Modules::resMan().addResource(
-					ResourceTypes::Code, _name + ":" + _tmpCode0, 0, false );
-				CodeResource *codeRes = (CodeResource *)Modules::resMan().resolveResHandle( res );
-				
+				_codeSections.push_back( CodeResource( _tmpCode0, 0 ) );
 				_tmpCode0.assign( sectionContentStart, sectionContentEnd );
-				codeRes->load( _tmpCode0.c_str(), (uint32)_tmpCode0.length() );
+				_codeSections.back().load( _tmpCode0.c_str(), (uint32)_tmpCode0.length() );
 			}
 		}
 	}
@@ -659,8 +662,8 @@ void ShaderResource::compileCombination( ShaderContext &context, ShaderCombinati
 	}
 
 	// Add actual shader code
-	_tmpCode0 += context.vertCode->assembleCode();
-	_tmpCode1 += context.fragCode->assembleCode();
+	_tmpCode0 += getCode( context.vertCodeIdx )->assembleCode();
+	_tmpCode1 += getCode( context.fragCodeIdx )->assembleCode();
 
 	
 	Modules::log().writeInfo( "---- C O M P I L I N G  . S H A D E R . %s@%s[%i] ----",
@@ -723,8 +726,8 @@ void ShaderResource::compileContexts()
 		if( !context.compiled )
 		{
 			context.flagMask = 0;
-			if( !context.vertCode->tryLinking( &context.flagMask ) ||
-				!context.fragCode->tryLinking( &context.flagMask ) )
+			if( !getCode( context.vertCodeIdx )->tryLinking( &context.flagMask ) ||
+			    !getCode( context.fragCodeIdx )->tryLinking( &context.flagMask ) )
 			{
 				continue;
 			}
@@ -736,9 +739,9 @@ void ShaderResource::compileContexts()
 				
 				// Check if combination already exists
 				bool found = false;
-				for( size_t j = 0; j < _contexts[i].shaderCombs.size(); ++j )
+				for( size_t j = 0; j < context.shaderCombs.size(); ++j )
 				{
-					if( _contexts[i].shaderCombs[j].combMask == combMask )
+					if( context.shaderCombs[j].combMask == combMask )
 					{
 						found = true;
 						break;
@@ -747,14 +750,14 @@ void ShaderResource::compileContexts()
 
 				if( !found )
 				{	
-					_contexts[i].shaderCombs.push_back( ShaderCombination() );
-					_contexts[i].shaderCombs.back().combMask = combMask;
+					context.shaderCombs.push_back( ShaderCombination() );
+					context.shaderCombs.back().combMask = combMask;
 				}
 			}
 			
-			for( size_t j = 0; j < _contexts[i].shaderCombs.size(); ++j )
+			for( size_t j = 0; j < context.shaderCombs.size(); ++j )
 			{
-				compileCombination( _contexts[i], _contexts[i].shaderCombs[j] );
+				compileCombination( context, context.shaderCombs[j] );
 			}
 
 			context.compiled = true;

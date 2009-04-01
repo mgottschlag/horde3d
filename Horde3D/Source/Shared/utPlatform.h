@@ -48,9 +48,12 @@
 #endif
 
 #ifndef PLATFORM_WIN
-#	define _stricmp strcasecmp
-#	define _mkdir( name ) mkdir( name, 0755 )
-#	define strncpy_s( dst, dstSize, src, count ) strncpy( dst, src, count < dstSize ? count : dstSize )
+# define _stricmp strcasecmp
+# define _mkdir( name ) mkdir( name, 0755 )
+#endif
+
+#ifndef _MSC_VER
+# define strncpy_s( dst, dstSize, src, count ) strncpy( dst, src, count < dstSize ? count : dstSize )
 #endif
 
 // Runtime assertion

@@ -172,21 +172,15 @@ struct ShaderContext
 	
 	// Shaders
 	std::vector< ShaderCombination >  shaderCombs;
-	PCodeResource                     vertCode, fragCode;
+	int                               vertCodeIdx, fragCodeIdx;
 	bool                              compiled;
 
 
 	ShaderContext() :
 		compiled( false ), writeDepth( true ), blendMode( BlendModes::Replace ),
 		depthTest( TestModes::LessEqual ), alphaTest( TestModes::Always ),
-		alphaRef( 0.0f ), alphaToCoverage( false )
+		alphaRef( 0.0f ), alphaToCoverage( false ), vertCodeIdx( -1 ), fragCodeIdx( -1 )
 	{
-	}
-
-	~ShaderContext()
-	{
-		vertCode = 0x0;
-		fragCode = 0x0;
 	}
 };
 
@@ -224,6 +218,7 @@ private:
 	std::vector< ShaderContext >  _contexts;
 	std::vector< ShaderSampler >  _samplers;
 	std::vector< ShaderUniform >  _uniforms;
+	std::vector< CodeResource >   _codeSections;
 	std::set< uint32 >            _preLoadList;
 
 	bool raiseError( const std::string &msg, int line = -1 );
@@ -260,6 +255,7 @@ public:
 	}
 
 	std::vector< ShaderContext > &getContexts() { return _contexts; }
+	CodeResource *getCode( uint32 index ) { return &_codeSections[index]; }
 
 	friend class Renderer;
 };

@@ -298,6 +298,11 @@ namespace Horde3DUtils
 			outf << "border-bottom : 1px dotted #888888;\n";
 			outf << "}\n";
 
+			outf << "pre {\n";
+			outf << "font-family : arial;\n";
+			outf << "margin : 0;\n";
+			outf << "}\n";
+
 			outf << ".box {\n";
 			outf << "border : 1px dotted #818286;\n";
 			outf << "padding : 5px;\n";
@@ -363,9 +368,9 @@ namespace Horde3DUtils
 				outf << "debug";
 			}
 			
-			outf << "\">";
+			outf << "\"><pre>\n";
 			outf << text.c_str();
-			outf << "</td>\n";
+			outf << "\n</pre></td>\n";
 			outf << "</tr>\n";
 
 			outf.flush();

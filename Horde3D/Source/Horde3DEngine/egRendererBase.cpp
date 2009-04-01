@@ -331,7 +331,7 @@ uint32 RendererBase::loadShader( const char *vertexShader, const char *fragmentS
 		{
 			infoLog = new char[infologLength];
 			glGetShaderInfoLog( vs, infologLength, &charsWritten, infoLog );
-			_shaderLog = _shaderLog + "[Vertex Shader] " + "<pre>\n" + infoLog + "</pre>";
+			_shaderLog = _shaderLog + "[Vertex Shader]\n" + infoLog;
 			delete[] infoLog; infoLog = 0x0;
 		}
 
@@ -351,7 +351,7 @@ uint32 RendererBase::loadShader( const char *vertexShader, const char *fragmentS
 		{
 			infoLog = new char[infologLength];
 			glGetShaderInfoLog( fs, infologLength, &charsWritten, infoLog );
-			_shaderLog = _shaderLog + "[Fragment Shader] " + "<pre>\n" + infoLog + "</pre>";
+			_shaderLog = _shaderLog + "[Fragment Shader]\n" + infoLog;
 			delete[] infoLog; infoLog = 0x0;
 		}
 

@@ -58,7 +58,11 @@ protected:
 		DWORD_PTR threadAffMask = SetThreadAffinityMask( GetCurrentThread(), _affMask );
 
 		// Avoid the reordering of instructions by emitting a serialization instruction
-		_asm { CPUID };
+		#ifdef _MSC_VER
+		   _asm { CPUID };
+		#else
+		   asm volatile("cpuid");
+		#endif
 		
 		// Read high performance counter
 		LARGE_INTEGER curTick;
