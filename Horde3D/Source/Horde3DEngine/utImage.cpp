@@ -138,14 +138,14 @@ typedef unsigned char validate_uint32[sizeof(uint32)==4];
 //
 
 // this is not threadsafe
-static char *failure_reason;
+static const char *failure_reason;
 
-char *stbi_failure_reason(void)
+const char *stbi_failure_reason(void)
 {
    return failure_reason;
 }
 
-static int e(char *str)
+static int e(const char *str)
 {
    failure_reason = str;
    return 0;
@@ -2603,7 +2603,6 @@ static stbi_uc *bmp_load(stbi *s, int *x, int *y, int *comp, int req_comp)
    offset = get32le(s);
    hsz = get32le(s);
    if (hsz != 12 && hsz != 40 && hsz != 56 && hsz != 108) return epuc("unknown BMP", "BMP type not supported: unknown");
-   failure_reason = "bad BMP";
    if (hsz == 12) {
       s->img_x = get16le(s);
       s->img_y = get16le(s);
@@ -2611,7 +2610,7 @@ static stbi_uc *bmp_load(stbi *s, int *x, int *y, int *comp, int req_comp)
       s->img_x = get32le(s);
       s->img_y = get32le(s);
    }
-   if (get16le(s) != 1) return 0;
+   if (get16le(s) != 1) return epuc("bad BMP", "bad BMP");
    bpp = get16le(s);
    if (bpp == 1) return epuc("monochrome", "BMP type not supported: 1-bit");
    flip_vertically = ((int) s->img_y) > 0;
@@ -3318,7 +3317,7 @@ stbi_uc *stbi_psd_load_from_memory (stbi_uc const *buffer, int len, int *x, int 
 #ifndef STBI_NO_HDR
 static int hdr_test(stbi *s)
 {
-   char *signature = "#?RADIANCE\n";
+   const char *signature = "#?RADIANCE\n";
    int i;
    for (i=0; signature[i]; ++i)
       if (get8(s) != signature[i])
