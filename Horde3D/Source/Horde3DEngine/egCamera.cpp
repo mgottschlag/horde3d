@@ -272,27 +272,10 @@ void CameraNode::onPostUpdate()
 	_viewMat = _absTrans.inverted();
 	
 	// Calculate projection matrix
-	_projMat = Matrix4f();
-	if( !_orthographic )  // Perspective frustum
-	{
-		_projMat.x[0] = 2 * _frustNear / (_frustRight - _frustLeft);
-		_projMat.x[5] = 2 * _frustNear / (_frustTop - _frustBottom);
-		_projMat.x[8] = (_frustRight + _frustLeft) / (_frustRight - _frustLeft);
-		_projMat.x[9] = (_frustTop + _frustBottom) / (_frustTop - _frustBottom);
-		_projMat.x[10] = -(_frustFar + _frustNear) / (_frustFar - _frustNear);
-		_projMat.x[11] = -1;
-		_projMat.x[14] = -2 * _frustFar * _frustNear / (_frustFar - _frustNear);
-		_projMat.x[15] = 0;
-	}
-	else  // Orthographic frustum
-	{
-		_projMat.x[0] = 2 / (_frustRight - _frustLeft);
-		_projMat.x[5] = 2 / (_frustTop - _frustBottom);
-		_projMat.x[10] = -2 / (_frustFar - _frustNear);
-		_projMat.x[12] = -(_frustRight + _frustLeft) / (_frustRight - _frustLeft);
-		_projMat.x[13] = -(_frustTop + _frustBottom) / (_frustTop - _frustBottom);
-		_projMat.x[14] = -(_frustFar + _frustNear) / (_frustFar - _frustNear);
-	}
+	if( !_orthographic )
+		_projMat = Matrix4f::PerspectiveMat( _frustLeft, _frustRight, _frustBottom, _frustTop, _frustNear, _frustFar );
+	else
+		_projMat = Matrix4f::OrthoMat( _frustLeft, _frustRight, _frustBottom, _frustTop, _frustNear, _frustFar );
 
 	// Update frustum
 	_frustum.buildViewFrustum( _viewMat, _projMat );

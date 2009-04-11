@@ -53,14 +53,6 @@ void RendererBase::resize( int x, int y, int width, int height )
 }
 
 
-void RendererBase::myPerspective( float fovy, float aspect, float zNear, float zFar ) 
-{    
-	double ymax = zNear * tan( degToRad( fovy / 2 ) );
-	double xmax = ymax * aspect;
-	glFrustum( -xmax, xmax, -ymax, ymax, zNear, zFar );
-}
-
-
 uint32 RendererBase::uploadVertices( void *data, uint32 size, uint32 bufId )
 {
 	// Note:

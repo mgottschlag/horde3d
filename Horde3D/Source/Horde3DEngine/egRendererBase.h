@@ -105,9 +105,6 @@ protected:
 	std::string   _shaderLog;
 	RenderBuffer  *_curRendBuf;
 	int           _outputBufferIndex;  // Left and right eye for stereo rendering
-
-
-	void myPerspective( float fovy, float aspect, float zNear, float zFar );
 	
 	uint32 loadShader( const char *vertexShader, const char *fragmentShader );
 	bool linkShader( uint32 shaderId );

@@ -267,10 +267,10 @@ namespace Horde3DTerrain
 			// Bind VBO
 			glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, terrain->_indexBuffer );
 			glBindBuffer( GL_ARRAY_BUFFER, terrain->_vertexBuffer );
-			glVertexPointer( 3, GL_FLOAT, sizeof( float ) * 3, (char *)0 );
-			glEnableClientState( GL_VERTEX_ARRAY );
+			glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, sizeof( float ) * 3, (char *)0 );
 			glVertexAttribPointer( attrib_terHeight, 1, GL_FLOAT, GL_FALSE, sizeof( float ),
 			                       (char *)0 + terrain->getVertexCount() * sizeof( float ) * 3 );
+			glEnableVertexAttribArray( 0 );
 			glEnableVertexAttribArray( attrib_terHeight );
 		
 			// World transformation
@@ -290,7 +290,7 @@ namespace Horde3DTerrain
 
 			drawTerrainBlock( terrain, 0.0f, 0.0f, 1.0f, 1.0f, 0, 1.0f, localCamPos, frust1, frust2, uni_terBlockParams );
 
-			glDisableClientState( GL_VERTEX_ARRAY );
+			glDisableVertexAttribArray( 0 );
 			glDisableVertexAttribArray( attrib_terHeight );
 		}
 	}

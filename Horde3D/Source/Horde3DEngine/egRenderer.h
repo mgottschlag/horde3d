@@ -189,7 +189,6 @@ public:
 	void clearOverlays();
 	
 	void drawAABB( const Vec3f &bbMin, const Vec3f &bbMax );
-	void drawDebugAABB( const Vec3f &bbMin, const Vec3f &bbMax, bool saveStates );
 	
 	static void drawModels( const std::string &shaderContext, const std::string &theClass, bool debugView,
 		const Frustum *frust1, const Frustum *frust2, RenderingOrder::List order, int occSet );

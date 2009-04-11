@@ -473,6 +473,36 @@ public:
 		return Matrix4f( Quaternion( axis.x, axis.y, axis.z, cosf( angle * 0.5f ) ) );
 	}
 
+	static Matrix4f PerspectiveMat( float l, float r, float b, float t, float n, float f )
+	{
+		Matrix4f m;
+
+		m.x[0] = 2 * n / (r - l);
+		m.x[5] = 2 * n / (t - b);
+		m.x[8] = (r + l) / (r - l);
+		m.x[9] = (t + b) / (t - b);
+		m.x[10] = -(f + n) / (f - n);
+		m.x[11] = -1;
+		m.x[14] = -2 * f * n / (f - n);
+		m.x[15] = 0;
+
+		return m;
+	}
+
+	static Matrix4f OrthoMat( float l, float r, float b, float t, float n, float f )
+	{
+		Matrix4f m;
+
+		m.x[0] = 2 / (r - l);
+		m.x[5] = 2 / (t - b);
+		m.x[10] = -2 / (f - n);
+		m.x[12] = -(r + l) / (r - l);
+		m.x[13] = -(t + b) / (t - b);
+		m.x[14] = -(f + n) / (f - n);
+
+		return m;
+	}
+
 	static void fastMult43( Matrix4f &dst, const Matrix4f &m1, const Matrix4f &m2 )
 	{
 		// Note: dst may not be the same as m1 or m2

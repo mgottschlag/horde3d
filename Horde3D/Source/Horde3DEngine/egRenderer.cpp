@@ -97,9 +97,7 @@ void Renderer::initStates()
 {
 	glPixelStorei( GL_PACK_ALIGNMENT, 1 );
 	glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
-	glHint( GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST );
 	glDepthFunc( GL_LEQUAL );
-	glShadeModel( GL_SMOOTH );
 	glDisable( GL_MULTISAMPLE );
 	glDisable( GL_SAMPLE_ALPHA_TO_COVERAGE );
 	glEnable( GL_DEPTH_TEST );
@@ -278,7 +276,7 @@ bool Renderer::uploadShader( const char *vertexShader, const char *fragmentShade
 	if( shaderId == 0 ) return false;
 	
 	// Bind attributes
-	// Note: Index 0 is reserved for gl_Vertex when enabling GL_VERTEX_ARRAY
+	// Note: Index 0 is reserved for the vertex position (gl_Vertex)
 	// Mesh
 	glBindAttribLocation( shaderId, 1, "normal" );
 	glBindAttribLocation( shaderId, 2, "tangent" );
@@ -791,15 +789,12 @@ Matrix4f Renderer::calcLightMat( const Frustum &frustum )
 		bBox.makeUnion( Modules::sceneMan().getRenderableQueue()[j].node->getBBox() ); 
 	}
 	
-	// Get light matrix
-	float projMat[16];
-	glMatrixMode( GL_PROJECTION );
-	glLoadIdentity();
-	myPerspective( _curLight->_fov, 1, _curCamera->_frustNear, _curLight->_radius );
-	glGetFloatv( GL_PROJECTION_MATRIX, projMat );
-	glMatrixMode( GL_MODELVIEW );
-
-	Matrix4f lightMat = Matrix4f( projMat ) * _curLight->getViewMat();
+	// Calculate light matrix
+	float ymax = _curCamera->_frustNear * tan( degToRad( _curLight->_fov / 2 ) );
+	float xmax = ymax * 1.0f;  // ymax * aspect
+	Matrix4f projMat = Matrix4f::PerspectiveMat( -xmax, xmax, -ymax, ymax,
+	                                             _curCamera->_frustNear, _curLight->_radius );
+	Matrix4f lightMat = projMat * _curLight->getViewMat();
 
 	// Get frustum and bounding box extents in post-projective space
 	float frustMinX =  Math::MaxFloat, bbMinX =  Math::MaxFloat;
@@ -868,7 +863,7 @@ Matrix4f Renderer::calcLightMat( const Frustum &frustum )
 	cropView.x[13] = offsetY;
 	cropView.x[14] = offsetZ;
 
-	return cropView * Matrix4f( projMat );
+	return cropView * projMat;
 }
 
 
@@ -1050,79 +1045,6 @@ void Renderer::drawAABB( const Vec3f &bbMin, const Vec3f &bbMax )
 }
 
 
-void Renderer::drawDebugAABB( const Vec3f &bbMin, const Vec3f &bbMax, bool saveStates )
-{
-	static const unsigned int indices[24] = {
-		0, 1, 2, 3,
-		7, 6, 5, 4,
-		1, 5, 6, 2,
-		4, 0, 3, 7,
-		3, 2, 6, 7,
-		4, 5, 1, 0
-	};
-	
-	Vec3f corners[8] = {
-		Vec3f( bbMin.x, bbMin.y, bbMin.z ),
-		Vec3f( bbMax.x, bbMin.y, bbMin.z ),
-		Vec3f( bbMax.x, bbMax.y, bbMin.z ),
-		Vec3f( bbMin.x, bbMax.y, bbMin.z ),
-		Vec3f( bbMin.x, bbMin.y, bbMax.z ),
-		Vec3f( bbMax.x, bbMin.y, bbMax.z ),
-		Vec3f( bbMax.x, bbMax.y, bbMax.z ),
-		Vec3f( bbMin.x, bbMax.y, bbMax.z )
-	};
-
-	GLint array_buffer = 0; 
-	GLint element_buffer = 0; 
-	GLint shader = 0; 
-	GLboolean vertexArray = 0;
-	GLint vSize = 0; 
-	GLint vType = 0; 
-	GLint vStride = 0; 
-	GLvoid *vArray = 0x0; 
-	
-	// Save old states
-	if( saveStates )
-	{
-		glGetIntegerv( GL_ARRAY_BUFFER_BINDING, &array_buffer );
-		glGetIntegerv( GL_ELEMENT_ARRAY_BUFFER_BINDING, &element_buffer );
-		glGetIntegerv( GL_CURRENT_PROGRAM, &shader );
-		glIsEnabled( GL_VERTEX_ARRAY );	
-		glGetIntegerv( GL_VERTEX_ARRAY_SIZE, &vSize );
-		glGetIntegerv( GL_VERTEX_ARRAY_TYPE, &vType );
-		glGetIntegerv( GL_VERTEX_ARRAY_STRIDE, &vStride );
-		glGetPointerv( GL_VERTEX_ARRAY_POINTER, &vArray );
-		glPushClientAttrib( GL_CLIENT_PIXEL_STORE_BIT | GL_CLIENT_VERTEX_ARRAY_BIT );
-	}
-
-	glPushAttrib(GL_POLYGON_BIT | GL_CURRENT_BIT); 
-	
-	// Prepare rendering box
-	glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-	glDisable( GL_CULL_FACE );
-	glUseProgram( defColorShader.shaderObject );
-	glBindBuffer( GL_ARRAY_BUFFER, 0 );
-	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
-	glColor4f( 1, 1, 1, 1 );
-	glVertexPointer( 3, GL_FLOAT, 0, corners );
-	glEnableClientState( GL_VERTEX_ARRAY );
-	glDrawElements( GL_QUADS, 24, GL_UNSIGNED_INT, indices );	
-	glEnable(GL_CULL_FACE);
-	
-	// Restore old states
-	glPopAttrib();
-	
-	if( saveStates )
-	{
-		glUseProgram( shader );
-		glBindBuffer( GL_ARRAY_BUFFER, array_buffer );
-		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, element_buffer );
-		if( vertexArray ) glVertexPointer( vSize, vType, vStride, vArray );
-		glPopClientAttrib();
-	}
-}
-
-
 // =================================================================================================
 // Overlays
 // =================================================================================================
@@ -1145,10 +1067,9 @@ void Renderer::drawOverlays( const string &shaderContext )
 	++_curUpdateStamp;
 	
 	glMatrixMode( GL_PROJECTION );
-	glLoadIdentity();
-	glOrtho( 0, 1, 1, 0, -1, 1 );
+	glLoadMatrixf( Matrix4f::OrthoMat( 0, 1, 1, 0, -1, 1 ).x );
 	glMatrixMode( GL_MODELVIEW );
-	glLoadIdentity();
+	glLoadMatrixf( Matrix4f().x );
 	
 	for( int i = 0; i < 8; ++i )
 	{
@@ -1220,8 +1141,10 @@ void Renderer::clear( bool depth, bool buf0, bool buf1, bool buf2, bool buf3,
                       float r, float g, float b, float a )
 {
 	int mask = 0;
+	uint32 prevBuffers[4];
 
-	glPushAttrib( GL_COLOR_BUFFER_BIT );	// Store state of glDrawBuffers
+	// Store state of glDrawBuffers
+	for( uint32 i = 0; i < 4; ++i ) glGetIntegerv( GL_DRAW_BUFFER0 + i, (int *)&prevBuffers[i] );
 	
 	glDisable( GL_BLEND );	// Clearing floating point buffers causes problems when blending is enabled on Radeon 9600
 	glDepthMask( GL_TRUE );
@@ -1254,7 +1177,10 @@ void Renderer::clear( bool depth, bool buf0, bool buf1, bool buf2, bool buf3,
 	
 	if( mask != 0 ) glClear( mask );
 	glDisable( GL_SCISSOR_TEST );
-	glPopAttrib();
+	
+	// Restore state of glDrawBuffers
+	uint32 cnt = 4;
+	glDrawBuffers( cnt, prevBuffers );
 }
 
 
@@ -1269,13 +1195,12 @@ void Renderer::drawFSQuad( Resource *matRes, const string &shaderContext )
 	if( !setMaterial( (MaterialResource *)matRes, shaderContext ) ) return;
 	
 	glMatrixMode( GL_PROJECTION );
-	glLoadIdentity();
-	glOrtho( 0, 1, 0, 1, -1, 1 );
+	glLoadMatrixf( Matrix4f::OrthoMat( 0, 1, 0, 1, -1, 1 ).x );
 	glMatrixMode( GL_MODELVIEW );
 	if( _curCamera != 0x0 )
 		glLoadMatrixf( _curCamera->getViewMat().x );
 	else
-		glLoadIdentity();
+		glLoadMatrixf( Matrix4f().x );
 	
 	glBegin(GL_QUADS);
 	glTexCoord2f( 0, 0 ); glVertex3f( 0, 0, 1 );
@@ -1481,8 +1406,7 @@ void Renderer::drawLightShapes( const string shaderContext, bool noShadows, int 
 
 		// Prepare postprocessing step (set the camera transformation in MV matrix)
 		glMatrixMode( GL_PROJECTION );
-		glLoadIdentity();
-		glOrtho( 0, 1, 0, 1, -1, 1 );
+		glLoadMatrixf( Matrix4f::OrthoMat( 0, 1, 0, 1, -1, 1 ).x );
 		glMatrixMode( GL_MODELVIEW );
 		glLoadMatrixf( _curCamera->getViewMat().x );
 		
@@ -1557,8 +1481,8 @@ void Renderer::drawModels( const string &shaderContext, const string &theClass, 
 
 	Modules::renderer().setMaterial( 0x0, "" );
 
-	// Enable vertex array
-	glEnableClientState( GL_VERTEX_ARRAY );
+	// Enable vertex position array
+	glEnableVertexAttribArray( 0 );
 
 	// Loop over model queue
 	for( size_t i = 0, s = Modules::sceneMan().getRenderableQueue().size(); i < s; ++i )
@@ -1628,7 +1552,7 @@ void Renderer::drawModels( const string &shaderContext, const string &theClass, 
 			// Vertices
 			uint32 vertCount = curGeoRes->_vertCount;
 			glBindBuffer( GL_ARRAY_BUFFER, curGeoRes->getVertBuffer() );
-			glVertexPointer( 3, GL_FLOAT, 0, (char *)0 );
+			glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, (char *)0 );
 			glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, 0, (char *)0 + vertCount * 12 );
 			glVertexAttribPointer( 2, 3, GL_FLOAT, GL_FALSE, 0, (char *)0 + vertCount * 24 );
 			glVertexAttribPointer( 3, 3, GL_FLOAT, GL_FALSE, 0, (char *)0 + vertCount * 36 );
@@ -1698,11 +1622,11 @@ void Renderer::drawModels( const string &shaderContext, const string &theClass, 
 			else
 			{
 				Modules::renderer().setShader( &defColorShader );
-				if( curLod == 0 ) glColor3f( 0.5f, 0.75f, 1 );
-				else if( curLod == 1 ) glColor3f( 0.25f, 0.75, 0.75f );
-				else if( curLod == 2 ) glColor3f( 0.25f, 0.75, 0.5f );
-				else if( curLod == 3 ) glColor3f( 0.5f, 0.5f, 0.25f );
-				else glColor3f( 0.75f, 0.5, 0.25f );
+				if( curLod == 0 ) glColor4f( 0.5f, 0.75f, 1, 1 );
+				else if( curLod == 1 ) glColor4f( 0.25f, 0.75, 0.75f, 1 );
+				else if( curLod == 2 ) glColor4f( 0.25f, 0.75, 0.5f, 1 );
+				else if( curLod == 3 ) glColor4f( 0.5f, 0.5f, 0.25f, 1 );
+				else glColor4f( 0.75f, 0.5, 0.25f, 1 );
 			}
 
 			ShaderCombination *curShader = Modules::renderer().getCurShader();
@@ -1771,8 +1695,7 @@ void Renderer::drawModels( const string &shaderContext, const string &theClass, 
 	}
 
 	// Disable vertex streams
-	glDisableClientState( GL_VERTEX_ARRAY );
-	for( uint32 i = 1; i < 8; ++i ) glDisableVertexAttribArray( i );
+	for( uint32 i = 0; i < 8; ++i ) glDisableVertexAttribArray( i );
 }
 
 
@@ -1780,22 +1703,21 @@ void Renderer::drawParticles( const string &shaderContext, const string &theClas
                               const Frustum *frust1, const Frustum * /*frust2*/, RenderingOrder::List /*order*/,
                               int occSet )
 {
-	if( frust1 == 0x0 ) return;
+	if( frust1 == 0x0 || Modules::renderer().getCurCamera() == 0x0 ) return;
 	if( debugView ) return;  // Don't render particles in debug view
 	
 	Modules::renderer().setMaterial( 0x0, "" );
 
 	// Calculate right and up vectors for camera alignment
-	float mat[16];
-	glGetFloatv( GL_MODELVIEW_MATRIX, mat );
-	Vec3f right = Vec3f( mat[0], mat[4], mat[8] );
-	Vec3f up = Vec3f (mat[1], mat[5], mat[9] );
+	Matrix4f mat = Modules::renderer().getCurCamera()->getViewMat();
+	Vec3f right = Vec3f( mat.x[0], mat.x[4], mat.x[8] );
+	Vec3f up = Vec3f (mat.x[1], mat.x[5], mat.x[9] );
 	Vec3f corners[4] = { -right - up, right - up, right + up, -right + up };
 
 	// Bind particle geometry arrays
 	glBindBuffer( GL_ARRAY_BUFFER, Modules::renderer().getParticleVBO() );
-	glVertexPointer( 3, GL_FLOAT, sizeof( ParticleVert ), (char *)0 );
-	glEnableClientState( GL_VERTEX_ARRAY );
+	glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, sizeof( ParticleVert ), (char *)0 );
+	glEnableVertexAttribArray( 0 );
 	glVertexAttribPointer( 1, 1, GL_FLOAT, GL_FALSE, sizeof( ParticleVert ), (char *)0 + sizeof( float ) * 6 );
 	glEnableVertexAttribArray( 1 );
 	glVertexAttribPointer( 2, 1, GL_FLOAT, GL_FALSE, sizeof( ParticleVert ), (char *)0 + sizeof( float ) * 5 );
@@ -1930,7 +1852,7 @@ void Renderer::drawParticles( const string &shaderContext, const string &theClas
 			Modules::renderer().endOccQuery( emitter->_occQueries[occSet] );
 	}
 	
-	glDisableClientState( GL_VERTEX_ARRAY );
+	glDisableVertexAttribArray( 0 );
 	glDisableVertexAttribArray( 1 );
 	glDisableVertexAttribArray( 2 );
 	glDisableVertexAttribArray( 6 );
@@ -2103,20 +2025,18 @@ void Renderer::renderDebugView()
 	{
 		SceneNode *sn = Modules::sceneMan().getRenderableQueue()[i].node;
 		
-		drawDebugAABB( sn->_bBox.getMinCoords(), sn->_bBox.getMaxCoords(), false );
+		drawAABB( sn->_bBox.getMinCoords(), sn->_bBox.getMaxCoords() );
 	}
 
 	// Draw light volumes
 	glColor4f( 1, 1, 0, 0.25f );
-	glLineWidth( 2 );
 	for( size_t i = 0, s = Modules::sceneMan().getLightQueue().size(); i < s; ++i )
 	{
 		LightNode *lightNode = (LightNode *)Modules::sceneMan().getLightQueue()[i];
 		
 		if( lightNode->_fov < 180 )
 		{
-			glPushMatrix();
-			glMultMatrixf( lightNode->_absTrans.x );
+			glLoadMatrixf( (_curCamera->getViewMat() * lightNode->_absTrans).x );
 			
 			// Render cone
 			float r = lightNode->_radius * tanf( degToRad( lightNode->_fov / 2 ) );
@@ -2130,20 +2050,18 @@ void Renderer::renderDebugView()
 			}
 			glEnd();
 
-			glPopMatrix();
+			glLoadMatrixf( _curCamera->getViewMat().x );
 		}
 		else
 		{
-			drawDebugAABB( Vec3f( lightNode->_absPos.x - lightNode->_radius,
-			                      lightNode->_absPos.y - lightNode->_radius,
-			                      lightNode->_absPos.z - lightNode->_radius ),
-						   Vec3f( lightNode->_absPos.x + lightNode->_radius,
-			                      lightNode->_absPos.y + lightNode->_radius,
-			                      lightNode->_absPos.z + lightNode->_radius ), 
-			                      false );
+			drawAABB( Vec3f( lightNode->_absPos.x - lightNode->_radius,
+			                 lightNode->_absPos.y - lightNode->_radius,
+			                 lightNode->_absPos.z - lightNode->_radius ),
+			          Vec3f( lightNode->_absPos.x + lightNode->_radius,
+			                 lightNode->_absPos.y + lightNode->_radius,
+			                 lightNode->_absPos.z + lightNode->_radius ) );
 		}
 	}
-	glLineWidth( 1 );
 
 	// Draw screen space projection of light sources
 	glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
@@ -2163,10 +2081,9 @@ void Renderer::renderDebugView()
 		                                bbx, bby, bbw, bbh );
 
 		glMatrixMode( GL_PROJECTION );
-		glLoadIdentity();
-		glOrtho( 0, 1, 0, 1, -1, 1 );
+		glLoadMatrixf( Matrix4f::OrthoMat( 0, 1, 0, 1, -1, 1 ).x );
 		glMatrixMode( GL_MODELVIEW );
-		glLoadIdentity();
+		glLoadMatrixf( Matrix4f().x );
 		
 		glBegin( GL_QUADS );
 		glVertex3f( bbx, bby, 1 );
