@@ -118,13 +118,13 @@ bool EngineConfig::setOption( EngineOptions::List param, float value )
 		if( size != 128 && size != 256 && size != 512 && size != 1024 && size != 2048 ) return false;
 
 		// Update shadow map
-		Modules::renderer().destroyShadowBuffer();
+		Modules::renderer().releaseShadowRB();
 		
-		if( !Modules::renderer().createShadowBuffer( size, size ) )
+		if( !Modules::renderer().createShadowRB( size, size ) )
 		{
 			Modules::log().writeWarning( "Failed to create shadow map" );
 			// Restore old buffer
-			Modules::renderer().createShadowBuffer( shadowMapSize, shadowMapSize );
+			Modules::renderer().createShadowRB( shadowMapSize, shadowMapSize );
 			return false;
 		}
 		else

@@ -165,8 +165,6 @@ struct ShaderContext
 	// RenderConfig
 	BlendModes::List                  blendMode;
 	TestModes::List                   depthTest;
-	TestModes::List                   alphaTest;
-	float                             alphaRef;
 	bool                              writeDepth;
 	bool                              alphaToCoverage;
 	
@@ -178,8 +176,8 @@ struct ShaderContext
 
 	ShaderContext() :
 		compiled( false ), writeDepth( true ), blendMode( BlendModes::Replace ),
-		depthTest( TestModes::LessEqual ), alphaTest( TestModes::Always ),
-		alphaRef( 0.0f ), alphaToCoverage( false ), vertCodeIdx( -1 ), fragCodeIdx( -1 )
+		depthTest( TestModes::LessEqual ), alphaToCoverage( false ),
+		vertCodeIdx( -1 ), fragCodeIdx( -1 )
 	{
 	}
 };

@@ -69,7 +69,6 @@ ShaderCombination Renderer::occShader;
 Renderer::Renderer() : RendererBase()
 {
 	_frameID = 0;
-	_smFBO = 0; _smTex = 0;
 	_defShadowMap = 0;
 	_particleVBO = 0;
 	_curCamera = 0x0;
@@ -83,7 +82,7 @@ Renderer::Renderer() : RendererBase()
 
 Renderer::~Renderer()
 {
-	destroyShadowBuffer();
+	releaseShadowRB();
 	unloadTexture( _defShadowMap, TextureTypes::Tex2D );
 	if( _particleVBO != 0 ) unloadBuffers( _particleVBO, 0 );
 }
@@ -100,11 +99,9 @@ void Renderer::initStates()
 	glDepthFunc( GL_LEQUAL );
 	glDisable( GL_MULTISAMPLE );
 	glDisable( GL_SAMPLE_ALPHA_TO_COVERAGE );
-	glEnable( GL_DEPTH_TEST );
 	glEnable( GL_CULL_FACE );
-	glDisable( GL_ALPHA_TEST );
 	glClearDepth( 1.0f );
-	glClearColor( 0.0f, 0.0f, 0.0f, 1.0f );	
+	glClearColor( 0.0f, 0.0f, 0.0f, 1.0f );
 }
 
 
@@ -173,8 +170,8 @@ bool Renderer::init()
 	uploadShader( vsDefColor, fsDefColor, defColorShader );
 	uploadShader( vsOccBox, fsOccBox, occShader );
 	
-	// Create shadow map
-	if( !createShadowBuffer( Modules::config().shadowMapSize, Modules::config().shadowMapSize ) )
+	// Create shadow map render target
+	if( !createShadowRB( Modules::config().shadowMapSize, Modules::config().shadowMapSize ) )
 	{
 		Modules::log().writeError( "Failed to create shadow map" );
 		return false;
@@ -185,10 +182,8 @@ bool Renderer::init()
 	                      1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 	                      1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 	                      1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
-	glGenTextures( 1, &_defShadowMap );
-	glBindTexture( GL_TEXTURE_2D, _defShadowMap );
-	glTexImage2D( GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, 8, 8, 0,
-	              GL_DEPTH_COMPONENT, GL_FLOAT, shadowTex );
+	_defShadowMap = uploadTexture( TextureTypes::Tex2D, shadowTex, 8, 8,
+	                               TextureFormats::DEPTH, 0, 0, false, false );
 
 	// Create particle geometry array
 	ParticleVert v0( 0, 0, 0 );
@@ -426,43 +421,11 @@ bool Renderer::setMaterialRec( MaterialResource *materialRes, const string &shad
 			break;
 		}
 
-		// Configure alpha test and alpha-to-coverage
+		// Configure alpha-to-coverage
 		if( context->alphaToCoverage && Modules::config().sampleCount > 0 )
-		{
-			glDisable( GL_ALPHA_TEST );
 			glEnable( GL_SAMPLE_ALPHA_TO_COVERAGE );
-		}
 		else
-		{
 			glDisable( GL_SAMPLE_ALPHA_TO_COVERAGE );
-			
-			switch( context->alphaTest )
-			{
-			case TestModes::Always:
-				glDisable( GL_ALPHA_TEST );
-				break;
-			case TestModes::Less:
-				glEnable( GL_ALPHA_TEST );
-				glAlphaFunc( GL_LESS, context->alphaRef );
-				break;
-			case TestModes::LessEqual:
-				glEnable( GL_ALPHA_TEST );
-				glAlphaFunc( GL_LEQUAL, context->alphaRef );
-				break;
-			case TestModes::Greater:
-				glEnable( GL_ALPHA_TEST );
-				glAlphaFunc( GL_GREATER, context->alphaRef );
-				break;
-			case TestModes::GreaterEqual:
-				glEnable( GL_ALPHA_TEST );
-				glAlphaFunc( GL_GEQUAL, context->alphaRef );
-				break;
-			case TestModes::Equal:
-				glEnable( GL_ALPHA_TEST );
-				glAlphaFunc( GL_EQUAL, context->alphaRef );
-				break;
-			}
-		}
 	}
 	
 	// Setup standard shader uniforms
@@ -565,7 +528,6 @@ bool Renderer::setMaterialRec( MaterialResource *materialRes, const string &shad
 				{
 					glBindTexture( GL_TEXTURE_2D, rb->depthBuf );
 					glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE );
-					glTexParameteri( GL_TEXTURE_2D, GL_DEPTH_TEXTURE_MODE, GL_LUMINANCE );
 				}
 
 				break;
@@ -687,7 +649,6 @@ bool Renderer::setMaterial( MaterialResource *materialRes, const string &shaderC
 		_curMatRes = 0x0;
 		_curShader = 0x0;
 		glDisable( GL_BLEND );
-		glDisable( GL_ALPHA_TEST );
 		glEnable( GL_DEPTH_TEST );
 		glDepthFunc( GL_LEQUAL );
 		glDepthMask( 1 );
@@ -713,47 +674,17 @@ bool Renderer::setMaterial( MaterialResource *materialRes, const string &shaderC
 // Shadowing
 // =================================================================================================
 
-bool Renderer::createShadowBuffer( uint32 width, uint32 height )
+bool Renderer::createShadowRB( uint32 width, uint32 height )
 {
-	int curFBO;
-	glGetIntegerv( GL_FRAMEBUFFER_BINDING_EXT, &curFBO );
+	_shadowRB = createRenderBuffer( width, height, RenderBufferFormats::RGBA8, true, 0, 0 );
 	
-	// Create framebuffer
-	glGenFramebuffersEXT( 1, &_smFBO );
-	glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, _smFBO );
-	glDrawBuffer( GL_NONE );
-	glReadBuffer( GL_NONE );
-
-	// Attach renderable textures
-	glGenTextures( 1, &_smTex );
-	glBindTexture( GL_TEXTURE_2D, _smTex );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-	glTexImage2D( GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0x0 );
-	glFramebufferTexture2DEXT( GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, _smTex, 0 );
-
-	int depthBits;
-	glGetTexLevelParameteriv( GL_TEXTURE_2D, 0, GL_TEXTURE_DEPTH_SIZE, &depthBits );
-	if( depthBits == 16 )
-	{
-		Modules::log().writeWarning( "Shadow map precision is limited to 16 bit" );
-	}
-
-	// Check if successful
-	uint32 status = glCheckFramebufferStatusEXT( GL_FRAMEBUFFER_EXT );
-	glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, curFBO );
-	
-	if( status != GL_FRAMEBUFFER_COMPLETE_EXT ) return false;
-	
-	return true;
+	return _shadowRB.fbo != 0;
 }
 
 
-void Renderer::destroyShadowBuffer()
+void Renderer::releaseShadowRB()
 {
-	if( _smTex != 0 ) glDeleteTextures( 1, &_smTex );
-	if( _smFBO != 0 ) glDeleteFramebuffersEXT( 1, &_smFBO );
-
-	_smTex = 0; _smFBO = 0;
+	releaseRenderBuffer( _shadowRB );
 }
 
 
@@ -762,7 +693,7 @@ void Renderer::setupShadowMap( bool noShadows )
 	// Bind shadow map
 	glActiveTexture( GL_TEXTURE12 );
 
-	if( !noShadows && _curLight->_shadowMapCount > 0 )glBindTexture( GL_TEXTURE_2D, _smTex );
+	if( !noShadows && _curLight->_shadowMapCount > 0 ) glBindTexture( GL_TEXTURE_2D, _shadowRB.depthBuf );
 	else glBindTexture( GL_TEXTURE_2D, _defShadowMap );
 
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 1 );
@@ -871,11 +802,9 @@ void Renderer::updateShadowMap()
 {
 	if( _curLight == 0x0 || _curCamera == 0x0 ) return;
 	
-	glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, _smFBO );
-	glViewport( 0, 0, Modules::config().shadowMapSize, Modules::config().shadowMapSize );
-	_fbWidth = Modules::config().shadowMapSize;
-	_fbHeight = Modules::config().shadowMapSize;
-	
+	RenderBuffer *_prevRendBuf = _curRendBuf;
+	setRenderBuffer( &_shadowRB );
+
 	glDepthMask( GL_TRUE );
 	glClearDepth( 1.0f );
     glClear( GL_DEPTH_BUFFER_BIT );
@@ -1006,7 +935,7 @@ void Renderer::updateShadowMap()
 	glMatrixMode( GL_MODELVIEW );
 	glCullFace( GL_BACK );
 		
-	setRenderBuffer( _curRendBuf );
+	setRenderBuffer( _prevRendBuf );
 }
 
 
@@ -2104,7 +2033,6 @@ void Renderer::finishRendering()
 	// with direct OpenGL calls (e.g. Horde scene editor)
 	setRenderBuffer( 0x0 );
 	glDisable( GL_BLEND );
-	glDisable( GL_ALPHA_TEST );
 	glDisable( GL_SAMPLE_ALPHA_TO_COVERAGE );
 	glDepthMask( 1 );
 	glEnable( GL_DEPTH_TEST );

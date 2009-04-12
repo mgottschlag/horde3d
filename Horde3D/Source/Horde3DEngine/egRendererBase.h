@@ -81,7 +81,8 @@ struct TextureFormats
 		DXT3,
 		DXT5,
 		RGBA16F,
-		RGBA32F
+		RGBA32F,
+		DEPTH
 	};
 };
 
@@ -141,18 +142,18 @@ public:
 	bool setShaderVar1i( uint32 shaderId, const char *var, int value );
 	std::string &getShaderLog() { return _shaderLog; }
 
-	// Render buffer functions
+	// Render buffer
 	RenderBuffer createRenderBuffer( uint32 width, uint32 height, RenderBufferFormats::List format,
 	                                 bool depth, uint32 numColBufs, uint32 samples );
-	void destroyRenderBuffer( RenderBuffer &rb );
+	void releaseRenderBuffer( RenderBuffer &rb );
 	void setRenderBuffer( RenderBuffer *rb );
-	bool getBufferData( RenderBuffer *rb, int bufIndex, int *width, int *height,
-	                    int *compCount, float *dataBuffer, int bufferSize );
+	bool getRenderBufferData( RenderBuffer *rb, int bufIndex, int *width, int *height,
+	                          int *compCount, float *dataBuffer, int bufferSize );
 	void blitRenderBuffer( RenderBuffer &sourceBuf, RenderBuffer &destBuf );
 
 	// Occlusion queries
 	uint32 createOccQuery();
-	void destroyOccQuery( uint32 queryId );
+	void releaseOccQuery( uint32 queryId );
 	void beginOccQuery( uint32 queryId );
 	void endOccQuery( uint32 queryId );
 	uint32 getOccQueryResult( uint32 queryId );

@@ -52,7 +52,7 @@ ModelNode::~ModelNode()
 	for( uint32 i = 0; i < _occQueries.size(); ++i )
 	{
 		if( _occQueries[i] != 0 )
-			Modules::renderer().destroyOccQuery( _occQueries[i] );
+			Modules::renderer().releaseOccQuery( _occQueries[i] );
 	}
 
 	for( uint32 i = 0; i < MaxNumAnimStages; ++i ) delete _animStages[i];

@@ -900,11 +900,8 @@ extern PFNGLUNIFORMMATRIX4X3FVPROC glUniformMatrix4x3fv;
 #define GL_MODELVIEW                      0x1700
 #define GL_PROJECTION                     0x1701
 #define GL_QUADS                          0x0007
-#define GL_LUMINANCE                      0x1909
-#define GL_ALPHA_TEST                     0x0BC0
 #define GL_GENERATE_MIPMAP                0x8191
 
-GLAPI void GLAPIENTRY glAlphaFunc (GLenum func, GLclampf ref);
 GLAPI void GLAPIENTRY glMatrixMode (GLenum mode);
 GLAPI void GLAPIENTRY glLoadMatrixf (const GLfloat *m);
 GLAPI void GLAPIENTRY glBegin (GLenum mode);

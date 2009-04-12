@@ -53,7 +53,7 @@ void PipelineResource::initDefault()
 
 void PipelineResource::release()
 {
-	destroyRenderTargets();
+	releaseRenderTargets();
 
 	for( uint32 i = 0; i < _stages.size(); ++i )
 	{
@@ -321,13 +321,13 @@ bool PipelineResource::createRenderTargets()
 }
 
 
-void PipelineResource::destroyRenderTargets()
+void PipelineResource::releaseRenderTargets()
 {
 	for( uint32 i = 0; i < _renderTargets.size(); ++i )
 	{
 		RenderTarget &rt = _renderTargets[i];
 		
-		Modules::renderer().destroyRenderBuffer( rt.rendBuf );
+		Modules::renderer().releaseRenderBuffer( rt.rendBuf );
 	}
 }
 
@@ -420,7 +420,7 @@ bool PipelineResource::load( const char *data, int size )
 void PipelineResource::resize()
 {
 	// Recreate render targets
-	destroyRenderTargets();
+	releaseRenderTargets();
 	createRenderTargets();
 }
 
@@ -451,6 +451,6 @@ bool PipelineResource::getRenderTargetData( const string &target, int bufIndex, 
 		else rb = &rt->rendBuf;
 	}
 	
-	return Modules::renderer().getBufferData(
+	return Modules::renderer().getRenderBufferData(
 		rb, bufIndex, width, height, compCount, dataBuffer, bufferSize );
 }

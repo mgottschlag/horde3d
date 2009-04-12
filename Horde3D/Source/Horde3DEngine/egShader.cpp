@@ -421,22 +421,6 @@ bool ShaderResource::parseFXSection( const char *data )
 			else
 				context.depthTest = TestModes::LessEqual;
 
-			// Alpha test
-			if( _stricmp( node2.getAttribute( "alphaTest", "ALWAYS" ), "EQUAL" ) == 0 )
-				context.alphaTest = TestModes::Equal;
-			else if( _stricmp( node2.getAttribute( "alphaTest", "ALWAYS" ), "LESS" ) == 0 )
-				context.alphaTest = TestModes::Less;
-			else if( _stricmp( node2.getAttribute( "alphaTest", "ALWAYS" ), "LESS_EQUAL" ) == 0 )
-				context.alphaTest = TestModes::LessEqual;
-			else if( _stricmp( node2.getAttribute( "alphaTest", "ALWAYS" ), "GREATER" ) == 0 )
-				context.alphaTest = TestModes::Greater;
-			else if( _stricmp( node2.getAttribute( "alphaTest", "ALWAYS" ), "GREATER_EQUAL" ) == 0 )
-				context.alphaTest = TestModes::GreaterEqual;
-			else
-				context.alphaTest = TestModes::Always;
-			
-			context.alphaRef = (float)atof( node2.getAttribute( "alphaRef", "0" ) );
-
 			// Alpha-to-coverage
 			if( _stricmp( node2.getAttribute( "alphaToCoverage", "false" ), "true" ) == 0 ||
 				_stricmp( node2.getAttribute( "alphaToCoverage", "0" ), "1" ) == 0 )

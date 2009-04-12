@@ -242,6 +242,10 @@ uint32 RendererBase::uploadTexture( TextureTypes::List type, void *pixels, int w
 		inputFormat = GL_BGRA;
 		inputType = GL_FLOAT;
 		break;
+	case TextureFormats::DEPTH:
+		internalFormat = GL_DEPTH_COMPONENT;
+		inputFormat = GL_DEPTH_COMPONENT;
+		inputType = GL_FLOAT;
 	};
 	
 	if( format != TextureFormats::DXT1 && format != TextureFormats::DXT3 && format != TextureFormats::DXT5 )
@@ -422,8 +426,8 @@ bool RendererBase::setShaderVar1i( uint32 shaderId, const char *var, int value )
 
 
 RenderBuffer RendererBase::createRenderBuffer( uint32 width, uint32 height,
-											   RenderBufferFormats::List format, bool depth,
-											   uint32 numColBufs, uint32 samples )
+                                               RenderBufferFormats::List format, bool depth,
+                                               uint32 numColBufs, uint32 samples )
 {
 	if( (format == RenderBufferFormats::RGBA16F || format == RenderBufferFormats::RGBA32F) &&
 		!glExt::ARB_texture_float )
@@ -476,11 +480,11 @@ RenderBuffer RendererBase::createRenderBuffer( uint32 width, uint32 height,
 				glGenRenderbuffersEXT( 1, &rb.colBufs[j] );
 				glBindRenderbufferEXT( GL_RENDERBUFFER_EXT, rb.colBufs[j] );
 				glRenderbufferStorageMultisampleEXT( GL_RENDERBUFFER_EXT, rb.samples,
-													 glFormat, rb.width, rb.height );
+				                                     glFormat, rb.width, rb.height );
 
 				// Attach the renderbuffer
 				glFramebufferRenderbufferEXT( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT + j,
-											  GL_RENDERBUFFER_EXT, rb.colBufs[j] );
+				                              GL_RENDERBUFFER_EXT, rb.colBufs[j] );
 			}
 			else
 			{
@@ -496,8 +500,8 @@ RenderBuffer RendererBase::createRenderBuffer( uint32 width, uint32 height,
 			}
 		}
 
-		uint32 buffers[] = {	GL_COLOR_ATTACHMENT0_EXT, GL_COLOR_ATTACHMENT1_EXT,
-								GL_COLOR_ATTACHMENT2_EXT, GL_COLOR_ATTACHMENT3_EXT };
+		uint32 buffers[] = { GL_COLOR_ATTACHMENT0_EXT, GL_COLOR_ATTACHMENT1_EXT,
+		                     GL_COLOR_ATTACHMENT2_EXT, GL_COLOR_ATTACHMENT3_EXT };
 		glDrawBuffers( numColBufs, buffers );
 	}
 
@@ -510,11 +514,11 @@ RenderBuffer RendererBase::createRenderBuffer( uint32 width, uint32 height,
 			glGenRenderbuffersEXT( 1, &rb.depthBuf );
 			glBindRenderbufferEXT( GL_RENDERBUFFER_EXT, rb.depthBuf );
 			glRenderbufferStorageMultisampleEXT( GL_RENDERBUFFER_EXT, rb.samples,
-												 GL_DEPTH_COMPONENT, rb.width, rb.height );
+			                                     GL_DEPTH_COMPONENT, rb.width, rb.height );
 
 			// Attach the renderbuffer
 			glFramebufferRenderbufferEXT( GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,
-										  GL_RENDERBUFFER_EXT, rb.depthBuf );
+			                              GL_RENDERBUFFER_EXT, rb.depthBuf );
 		}
 		else
 		{
@@ -524,11 +528,18 @@ RenderBuffer RendererBase::createRenderBuffer( uint32 width, uint32 height,
 			glTexParameteri( GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_FALSE );
 			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
 			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE );
-			glTexParameteri( GL_TEXTURE_2D, GL_DEPTH_TEXTURE_MODE, GL_LUMINANCE );
 			glTexImage2D( GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, rb.width, rb.height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0x0 );
 
 			// Attach the texture
 			glFramebufferTexture2DEXT( GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, rb.depthBuf, 0 );
+
+			// Check depth precision
+			int depthBits;
+			glGetTexLevelParameteriv( GL_TEXTURE_2D, 0, GL_TEXTURE_DEPTH_SIZE, &depthBits );
+			if( depthBits == 16 )
+			{
+				Modules::log().writeWarning( "Rendertarget depth precision is limited to 16 bits" );
+			}
 		}
 	}
 
@@ -545,7 +556,7 @@ RenderBuffer RendererBase::createRenderBuffer( uint32 width, uint32 height,
 }
 
 
-void RendererBase::destroyRenderBuffer( RenderBuffer &rb )
+void RendererBase::releaseRenderBuffer( RenderBuffer &rb )
 {
 	glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, 0 );
 	
@@ -605,8 +616,8 @@ void RendererBase::setRenderBuffer( RenderBuffer *rb )
 }
 
 
-bool RendererBase::getBufferData( RenderBuffer *rb, int bufIndex, int *width, int *height,
-								  int *compCount, float *dataBuffer, int bufferSize )
+bool RendererBase::getRenderBufferData( RenderBuffer *rb, int bufIndex, int *width, int *height,
+                                        int *compCount, float *dataBuffer, int bufferSize )
 {
 	int x, y, w, h;
 	
@@ -658,9 +669,9 @@ void RendererBase::blitRenderBuffer( RenderBuffer &sourceBuf, RenderBuffer &dest
 	glBindFramebufferEXT( GL_DRAW_FRAMEBUFFER_EXT, destBuf.fbo );
 	glViewport( 0, 0, destBuf.width, destBuf.height );
 
-	// TODO:	- Determine if combining depth and color0 would yield any speedup
-	//			  (from the fbo_blit spec, it seems unlikely)
-	//			- Check that this routine works with multiple color attachments
+	// TODO:
+	//   - Determine if combining depth and color0 would yield any speedup (from the fbo_blit spec, it seems unlikely)
+	//   - Check that this routine works with multiple color attachments
 
 	if( sourceBuf.depthBuf != 0 && destBuf.depthBuf != 0 )
 	{
@@ -668,8 +679,8 @@ void RendererBase::blitRenderBuffer( RenderBuffer &sourceBuf, RenderBuffer &dest
 		glReadBuffer( GL_NONE );
 		glDrawBuffer( GL_NONE );
 		glBlitFramebufferEXT( 0, 0, sourceBuf.width, sourceBuf.height,
-							  0, 0, destBuf.width, destBuf.height,
-							  GL_DEPTH_BUFFER_BIT, GL_NEAREST );
+		                      0, 0, destBuf.width, destBuf.height,
+		                      GL_DEPTH_BUFFER_BIT, GL_NEAREST );
 	}
 
 	for( uint32 i = 0; i < RenderBuffer::MaxColorAttachmentCount; ++i )
@@ -679,8 +690,8 @@ void RendererBase::blitRenderBuffer( RenderBuffer &sourceBuf, RenderBuffer &dest
 			glReadBuffer( GL_COLOR_ATTACHMENT0_EXT + i );
 			glDrawBuffer( GL_COLOR_ATTACHMENT0_EXT + i );
 			glBlitFramebufferEXT( 0, 0, sourceBuf.width, sourceBuf.height,
-								  0, 0, destBuf.width, destBuf.height,
-								  GL_COLOR_BUFFER_BIT, GL_NEAREST );
+			                      0, 0, destBuf.width, destBuf.height,
+			                      GL_COLOR_BUFFER_BIT, GL_NEAREST );
 		}
 	}
 
@@ -697,7 +708,7 @@ uint32 RendererBase::createOccQuery()
 }
 
 
-void RendererBase::destroyOccQuery( uint32 queryId )
+void RendererBase::releaseOccQuery( uint32 queryId )
 {
 	glDeleteQueries( 1, &queryId );
 }

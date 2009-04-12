@@ -115,8 +115,8 @@ protected:
 	std::vector< char >                _occSets;  // Actually bool
 	std::vector< Overlay >             _overlays;
 	
+	RenderBuffer                       _shadowRB;
 	uint32                             _frameID;
-	uint32                             _smFBO, _smTex;
 	uint32                             _defShadowMap;
 	uint32                             _particleVBO;
 	MaterialResource                   *_curStageMatLink;
@@ -182,8 +182,8 @@ public:
 	void setShader( ShaderCombination *sc );
 	bool setMaterial( MaterialResource *materialRes, const std::string &shaderContext );
 	
-	bool createShadowBuffer( uint32 width, uint32 height );
-	void destroyShadowBuffer();
+	bool createShadowRB( uint32 width, uint32 height );
+	void releaseShadowRB();
 
 	void showOverlay( const Overlay &overlay );
 	void clearOverlays();

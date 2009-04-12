@@ -167,7 +167,7 @@ void TextureResource::release()
 	if( _rendBuf != 0x0 )
 	{
 		// In this case _texObject is just points to the render buffer
-		Modules::renderer().destroyRenderBuffer( *_rendBuf );
+		Modules::renderer().releaseRenderBuffer( *_rendBuf );
 		delete _rendBuf; _rendBuf = 0x0;
 	}
 	else if( _texObject != 0 && _texObject != defTex2DObject && _texObject != defTexCubeObject )

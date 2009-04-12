@@ -177,7 +177,7 @@ private:
 	                      uint32 width, uint32 height, float scale );
 	RenderTarget *findRenderTarget( const std::string &id );
 	bool createRenderTargets();
-	void destroyRenderTargets();
+	void releaseRenderTargets();
 
 public:
 
