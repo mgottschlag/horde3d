@@ -409,7 +409,7 @@ void EmitterNode::setMaxParticleCount( uint32 maxParticleCount )
 	// Initialize particles
 	_particleCount = maxParticleCount;
 	_particles = new ParticleData[_particleCount];
-	_parPositions = new Vec3f[_particleCount];
+	_parPositions = new float[_particleCount * 3];
 	_parSizesANDRotations = new float[_particleCount * 2];
 	_parColors = new float[_particleCount * 4];
 	for( uint32 i = 0; i < _particleCount; ++i )
@@ -417,7 +417,9 @@ void EmitterNode::setMaxParticleCount( uint32 maxParticleCount )
 		_particles[i].life = 0;
 		_particles[i].respawnCounter = 0;
 		
-		_parPositions[i] = Vec3f( 0, 0, 0 );
+		_parPositions[i*3+0] = 0.0f;
+		_parPositions[i*3+1] = 0.0f;
+		_parPositions[i*3+2] = 0.0f;
 		_parSizesANDRotations[i*2+0] = 0.0f;
 		_parSizesANDRotations[i*2+1] = 0.0f;
 		_parColors[i*4+0] = 0.0f;
@@ -608,7 +610,9 @@ void EmitterNode::onPostUpdate()
 				p.a0 = randomF( _effectRes->_colA.startMin, _effectRes->_colA.startMax );
 				
 				// Update arrays
-				_parPositions[i] = Vec3f( _absTrans.c[3][0], _absTrans.c[3][1], _absTrans.c[3][2] );
+				_parPositions[i * 3 + 0] = _absTrans.c[3][0];
+				_parPositions[i * 3 + 1] = _absTrans.c[3][1];
+				_parPositions[i * 3 + 2] = _absTrans.c[3][2];
 				_parSizesANDRotations[i * 2 + 0] = p.size0;
 				_parSizesANDRotations[i * 2 + 1] = randomF( 0, 360 );
 				_parColors[i * 4 + 0] = p.r0;
@@ -637,8 +641,9 @@ void EmitterNode::onPostUpdate()
 			_parColors[i * 4 + 3] = p.a0 * (1.0f + (_effectRes->_colA.endRate - 1.0f) * fac);
 
 			// Update particle position and rotation
-			_parPositions[i] += p.dir * moveVel * _timeDelta;
-			_parPositions[i] += _force * _timeDelta;
+			_parPositions[i * 3 + 0] += (p.dir.x * moveVel + _force.x) * _timeDelta;
+			_parPositions[i * 3 + 1] += (p.dir.y * moveVel + _force.y) * _timeDelta;
+			_parPositions[i * 3 + 2] += (p.dir.z * moveVel + _force.z) * _timeDelta;
 			_parSizesANDRotations[i * 2+ 1] +=  rotVel * _timeDelta;
 
 			// Decrease lifetime
@@ -652,7 +657,7 @@ void EmitterNode::onPostUpdate()
 		}
 
 		// Update bounding box
-		Vec3f &vertPos = _parPositions[i];
+		Vec3f vertPos( _parPositions[i*3+0], _parPositions[i*3+1], _parPositions[i*3+2] );
 		if( vertPos.x < bBMin.x ) bBMin.x = vertPos.x;
 		if( vertPos.y < bBMin.y ) bBMin.y = vertPos.y;
 		if( vertPos.z < bBMin.z ) bBMin.z = vertPos.z;

@@ -189,7 +189,7 @@ protected:
 
 	// Particle data
 	ParticleData             *_particles;
-	Vec3f                    *_parPositions;
+	float                    *_parPositions;
 	float                    *_parSizesANDRotations;
 	float                    *_parColors;
 

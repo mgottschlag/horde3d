@@ -1481,18 +1481,18 @@ void Renderer::drawModels( const string &shaderContext, const string &theClass, 
 			// Vertices
 			uint32 vertCount = curGeoRes->_vertCount;
 			glBindBuffer( GL_ARRAY_BUFFER, curGeoRes->getVertBuffer() );
-			glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, (char *)0 );
-			glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, 0, (char *)0 + vertCount * 12 );
-			glVertexAttribPointer( 2, 3, GL_FLOAT, GL_FALSE, 0, (char *)0 + vertCount * 24 );
-			glVertexAttribPointer( 3, 3, GL_FLOAT, GL_FALSE, 0, (char *)0 + vertCount * 36 );
+			glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, sizeof( Vec3f ), (char *)0 );
+			glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, sizeof( Vec3f ), (char *)0 + vertCount * sizeof( Vec3f ) );
+			glVertexAttribPointer( 2, 3, GL_FLOAT, GL_FALSE, sizeof( Vec3f ), (char *)0 + vertCount * sizeof( Vec3f ) * 2 );
+			glVertexAttribPointer( 3, 3, GL_FLOAT, GL_FALSE, sizeof( Vec3f ), (char *)0 + vertCount * sizeof( Vec3f ) * 3 );
 			glVertexAttribPointer( 4, 4, GL_FLOAT, GL_FALSE,
-			                       sizeof( VertexDataStatic ), (char *)0 + vertCount * 48 + 8 );
+			                       sizeof( VertexDataStatic ), (char *)0 + vertCount * sizeof( Vec3f ) * 4 + 8 );
 			glVertexAttribPointer( 5, 4, GL_FLOAT, GL_FALSE,
-			                       sizeof( VertexDataStatic ), (char *)0 + vertCount * 48 + 24 );
+			                       sizeof( VertexDataStatic ), (char *)0 + vertCount * sizeof( Vec3f ) * 4 + 24 );
 			glVertexAttribPointer( 6, 2, GL_FLOAT, GL_FALSE,
-			                       sizeof( VertexDataStatic ), (char *)0 + vertCount * 48 );
+			                       sizeof( VertexDataStatic ), (char *)0 + vertCount * sizeof( Vec3f ) * 4 );
 			glVertexAttribPointer( 7, 2, GL_FLOAT, GL_FALSE,
-			                       sizeof( VertexDataStatic ), (char *)0 + vertCount * 48 + 40 );
+			                       sizeof( VertexDataStatic ), (char *)0 + vertCount * sizeof( Vec3f ) * 4 + 40 );
 		}
 		
 		// Sort meshes
@@ -1641,7 +1641,10 @@ void Renderer::drawParticles( const string &shaderContext, const string &theClas
 	Matrix4f mat = Modules::renderer().getCurCamera()->getViewMat();
 	Vec3f right = Vec3f( mat.x[0], mat.x[4], mat.x[8] );
 	Vec3f up = Vec3f (mat.x[1], mat.x[5], mat.x[9] );
-	Vec3f corners[4] = { -right - up, right - up, right + up, -right + up };
+	float cornerCoords[12] = { -right.x - up.x, -right.y - up.y, -right.z - up.z,
+	                            right.x - up.x,  right.y - up.y,  right.z - up.z,
+                                right.x + up.x,  right.y + up.y,  right.z + up.z,
+							   -right.x + up.x, -right.y + up.y, -right.z + up.z };
 
 	// Bind particle geometry arrays
 	glBindBuffer( GL_ARRAY_BUFFER, Modules::renderer().getParticleVBO() );
@@ -1717,7 +1720,7 @@ void Renderer::drawParticles( const string &shaderContext, const string &theClas
 		
 		// Shader uniforms
 		ShaderCombination *curShader = Modules::renderer().getCurShader();
-		if( curShader->uni_parCorners >= 0 ) glUniform3fv( curShader->uni_parCorners, 4, (float *)corners );
+		if( curShader->uni_parCorners >= 0 ) glUniform3fv( curShader->uni_parCorners, 4, (float *)cornerCoords );
 
 		// Divide particles in batches and render them
 		for( uint32 j = 0; j < emitter->_particleCount / ParticlesPerBatch; ++j )
