@@ -361,8 +361,8 @@ namespace Horde3DWater
 	}
 	float NoiseResource::getHeight( float x, float y )
 	{
-		x *= 1 << (_octaves - 1);
-		y *= 1 << (_octaves - 1);
+		x *= PACKED_SIZE;
+		y *= PACKED_SIZE;
 		int packCount = (_octaves - 1) / PACK_SIZE;
 		int factor = 1 << (packCount * PACK_SIZE);
 		float height = 0.0f;
