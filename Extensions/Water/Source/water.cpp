@@ -45,21 +45,23 @@ namespace Horde3DWater
 	ShaderCombination WaterNode::debugViewShader;
 
 	WaterNode::WaterNode( const WaterNodeTpl &waterTpl ) : SceneNode( waterTpl ),
-		_matRes( waterTpl.matRes ), _noiseRes( waterTpl.noiseRes )
+		_matRes( waterTpl.matRes ), _noiseRes( waterTpl.noiseRes ), _vertexBuffer(0), 
+		_indexBuffer(0), vertices(NULL), indices(NULL)
 	{
 		_renderable = true;
 		_localBBox.getMinCoords() = Vec3f( -100, 0, -100 );
 		_localBBox.getMaxCoords() = Vec3f( 100, 100, 100 );
 
+		vertices = new float[3 * GRID_SIZE * GRID_SIZE];
+		indices = new unsigned short[(GRID_SIZE - 1) * (GRID_SIZE - 1) * 6];
+
 		createBuffers();
 
-		_matRes->setParamItemi( MaterialResParams::Sampler, "normalmap", _noiseRes->_normalMap->getHandle() );
+		_matRes->setSampler("normalmap", _noiseRes->_normalMap );
 	}
 
 	void WaterNode::createBuffers()
 	{
-		float *vertices = new float[3 * GRID_SIZE * GRID_SIZE];
-		unsigned short *indices = new unsigned short[(GRID_SIZE - 1) * (GRID_SIZE - 1) * 2 * 3];
 		for (int z = 0; z < GRID_SIZE - 1; z++)
 		{
 			for (int x = 0; x < GRID_SIZE - 1; x++)
@@ -74,10 +76,8 @@ namespace Horde3DWater
 			}
 		}
 
-		_vertexBuffer = Modules::renderer().uploadVertices( vertices, 3 * GRID_SIZE * GRID_SIZE * sizeof( float ) * 3 );
-		_indexBuffer = Modules::renderer().uploadIndices( indices, 6 * GRID_SIZE * GRID_SIZE * sizeof( short ) );
-		delete[] indices;
-		delete[] vertices;
+		_vertexBuffer = Modules::renderer().uploadVertices( vertices, 3 * GRID_SIZE * GRID_SIZE * sizeof( float ) );
+		_indexBuffer = Modules::renderer().uploadIndices( indices, (GRID_SIZE - 1) * (GRID_SIZE - 1) * 6 * sizeof( short ) );
 	}
 	void WaterNode::destroyBuffers()
 	{
@@ -85,7 +85,6 @@ namespace Horde3DWater
 	}
 	void WaterNode::updateBuffers( float x1, float y1, float x2, float y2 )
 	{
-		float *vertices = new float[GRID_SIZE * GRID_SIZE * 3];
 		float width = x2 - x1;
 		float height = y2 - y1;
 		Matrix4f invviewproj = (_projMat * _viewMat).inverted();
@@ -117,7 +116,6 @@ namespace Horde3DWater
 		}
 		// Upload data
 		Modules::renderer().updateVertices( vertices, 0, GRID_SIZE * GRID_SIZE * sizeof( float ) * 3, _vertexBuffer );
-		delete[] vertices;
 	}
 	void WaterNode::render()
 	{
@@ -223,6 +221,8 @@ namespace Horde3DWater
 	WaterNode::~WaterNode()
 	{
 		destroyBuffers();
+		delete[] indices;
+		delete[] vertices;
 	}
 
 	SceneNodeTpl *WaterNode::parsingFunc( std::map< std::string, std::string > &attribs )

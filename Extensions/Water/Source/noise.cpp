@@ -207,7 +207,7 @@ namespace Horde3DWater
 			int w0 = _octWeights[o] * (pow( sin( (fraction + 2) * Math::Pi / 3 ), 2 ) / 1.5f) * SCALE;
 			int w1 = _octWeights[o] * (pow( sin( (fraction + 1) * Math::Pi / 3 ), 2 ) / 1.5f) * SCALE;
 			int w2 = _octWeights[o] * (pow( sin( fraction * Math::Pi / 3 ), 2 ) / 1.5f) * SCALE;
-			int frame0 = frame;
+			int frame0 = frame & (NOISE_FRAMES - 1);
 			int frame1 = (frame + 1) & (NOISE_FRAMES - 1);
 			int frame2 = (frame + 2) & (NOISE_FRAMES - 1);
 			for( int i = 0; i < NOISE_SIZE_SQ; i++ )
@@ -346,9 +346,11 @@ namespace Horde3DWater
 
 	int NoiseResource::getParami( int param )
 	{
+		return 0;
 	}
 	bool NoiseResource::setParami( int param, int value )
 	{
+		return true;
 	}
 
 	void NoiseResource::setTime( float time )

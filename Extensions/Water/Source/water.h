@@ -42,7 +42,7 @@ namespace Horde3DWater
 		};
 	};
 
-	const int GRID_SIZE = 128;
+	const int GRID_SIZE = 64;
 
 	extern const char *vsWaterDebugView;
 	extern const char *fsWaterDebugView;
@@ -80,6 +80,9 @@ namespace Horde3DWater
 		Matrix4f          _viewMat;
 		Matrix4f          _projMat;
 		Matrix4f          _absTransInv;
+
+		float* vertices;
+		unsigned short* indices;
 
 		WaterNode( const WaterNodeTpl &waterTpl );
 

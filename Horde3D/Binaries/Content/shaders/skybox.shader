@@ -6,10 +6,12 @@
 
 <Context id="ATTRIBPASS">
 	<Shaders vertex="VS_GENERAL" fragment="FS_ATTRIBPASS" />
+	<RenderConfig writeDepth="false" />
 </Context>
 
 <Context id="AMBIENT">
 	<Shaders vertex="VS_GENERAL" fragment="FS_AMBIENT" />
+	<RenderConfig writeDepth="false" />
 </Context>
 
 
