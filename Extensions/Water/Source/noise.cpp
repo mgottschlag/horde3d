@@ -166,15 +166,15 @@ namespace Horde3DWater
 	}
 	void NoiseResource::calcNoise()
 	{
-		glPushAttrib( GL_VIEWPORT_BIT );
+		int viewport[4];
+		glGetIntegerv( GL_VIEWPORT, viewport );
 		glDisable( GL_DEPTH_TEST );
 		glDisable( GL_CULL_FACE );
-		glDisable( GL_ALPHA_TEST );
 		glDisable( GL_SAMPLE_ALPHA_TO_COVERAGE );
 		glClearDepth( 1.0f );
 		glDisable( GL_BLEND );
-		glDisable(GL_TEXTURE_GEN_S);
-		glDisable(GL_TEXTURE_GEN_T);
+		//glDisable(GL_TEXTURE_GEN_S);
+		//glDisable(GL_TEXTURE_GEN_T);
 		glBlendFunc( GL_ONE, GL_ONE );
 		glEnable( GL_BLEND );
 		glUseProgram( 0 );
@@ -188,10 +188,9 @@ namespace Horde3DWater
 		glEnable( GL_TEXTURE_2D );
 
 		glMatrixMode( GL_PROJECTION );
-		glLoadIdentity();
-		glOrtho( 0, 1, 0, 1, 0, 1 );
+		glLoadMatrixf( Matrix4f::OrthoMat( 0, 1, 0, 1, 0, 1 ).x );
 		glMatrixMode( GL_MODELVIEW );
-		glLoadIdentity();
+		glLoadMatrixf( Matrix4f().x );
 
 		// Interpolate between frames
 		glViewport( 0, 0, NOISE_SIZE, NOISE_SIZE );
@@ -226,28 +225,28 @@ namespace Horde3DWater
 			float w1f = (float)w1 / SCALE;
 			float w2f = (float)w2 / SCALE;
 			glBindTexture( GL_TEXTURE_2D, _noiseTex[frame0] );
-			glColor3f( w0f, w0f, w0f );
+			glColor4f( w0f, w0f, w0f, 1 );
 			glBegin( GL_QUADS );
-				glTexCoord2f( 0, 0 ); glVertex2f( 0, 0 );
-				glTexCoord2f( 1, 0 ); glVertex2f( 1, 0 );
-				glTexCoord2f( 1, 1 ); glVertex2f( 1, 1 );
-				glTexCoord2f( 0, 1 ); glVertex2f( 0, 1 );
+				glTexCoord2f( 0, 0 ); glVertex3f( 0, 0, 0 );
+				glTexCoord2f( 1, 0 ); glVertex3f( 1, 0, 0 );
+				glTexCoord2f( 1, 1 ); glVertex3f( 1, 1, 0 );
+				glTexCoord2f( 0, 1 ); glVertex3f( 0, 1, 0 );
 			glEnd();
 			glBindTexture( GL_TEXTURE_2D, _noiseTex[frame1] );
-			glColor3f( w1f, w1f, w1f );
+			glColor4f( w1f, w1f, w1f, 1 );
 			glBegin( GL_QUADS );
-				glTexCoord2f( 0, 0 ); glVertex2f( 0, 0 );
-				glTexCoord2f( 1, 0 ); glVertex2f( 1, 0 );
-				glTexCoord2f( 1, 1 ); glVertex2f( 1, 1 );
-				glTexCoord2f( 0, 1 ); glVertex2f( 0, 1 );
+				glTexCoord2f( 0, 0 ); glVertex3f( 0, 0, 0 );
+				glTexCoord2f( 1, 0 ); glVertex3f( 1, 0, 0 );
+				glTexCoord2f( 1, 1 ); glVertex3f( 1, 1, 0 );
+				glTexCoord2f( 0, 1 ); glVertex3f( 0, 1, 0 );
 			glEnd();
 			glBindTexture( GL_TEXTURE_2D, _noiseTex[frame2] );
-			glColor3f( w2f, w2f, w2f );
+			glColor4f( w2f, w2f, w2f, 1 );
 			glBegin( GL_QUADS );
-				glTexCoord2f( 0, 0 ); glVertex2f( 0, 0 );
-				glTexCoord2f( 1, 0 ); glVertex2f( 1, 0 );
-				glTexCoord2f( 1, 1 ); glVertex2f( 1, 1 );
-				glTexCoord2f( 0, 1 ); glVertex2f( 0, 1 );
+				glTexCoord2f( 0, 0 ); glVertex3f( 0, 0, 0 );
+				glTexCoord2f( 1, 0 ); glVertex3f( 1, 0, 0 );
+				glTexCoord2f( 1, 1 ); glVertex3f( 1, 1, 0 );
+				glTexCoord2f( 0, 1 ); glVertex3f( 0, 1, 0 );
 			glEnd();
 		}
 		// Pack octaves
@@ -273,17 +272,17 @@ namespace Horde3DWater
 		glViewport( 0, 0, 1024, 1024 );
 		glClear( GL_COLOR_BUFFER_BIT );
 
-		glColor3f( 1.0f, 1.0f, 1.0f );
+		glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
 		for( int o = 0; o < _octaves; o++ )
 		{
 			glBindTexture( GL_TEXTURE_2D, _octaveTex[o] );
 			float size = 1 << o;
 
 			glBegin( GL_QUADS );
-				glTexCoord2f( 0,    0 ); glVertex2f( 0, 0 );
-				glTexCoord2f( size, 0 ); glVertex2f( 1, 0 );
-				glTexCoord2f( size, size ); glVertex2f( 1, 1 );
-				glTexCoord2f( 0,    size ); glVertex2f( 0, 1 );
+				glTexCoord2f( 0,    0 ); glVertex3f( 0, 0, 0 );
+				glTexCoord2f( size, 0 ); glVertex3f( 1, 0, 0 );
+				glTexCoord2f( size, size ); glVertex3f( 1, 1, 0 );
+				glTexCoord2f( 0,    size ); glVertex3f( 0, 1, 0 );
 			glEnd();
 		}
 
@@ -296,17 +295,17 @@ namespace Horde3DWater
 		glBindTexture( GL_TEXTURE_2D, _heightMap->getTexObject() );
 
 		glBegin( GL_QUADS );
-			glTexCoord2f( 0, 0 ); glVertex2f( 0, 0 );
-			glTexCoord2f( 1, 0 ); glVertex2f( 1, 0 );
-			glTexCoord2f( 1, 1 ); glVertex2f( 1, 1 );
-			glTexCoord2f( 0, 1 ); glVertex2f( 0, 1 );
+			glTexCoord2f( 0, 0 ); glVertex3f( 0, 0, 0 );
+			glTexCoord2f( 1, 0 ); glVertex3f( 1, 0, 0 );
+			glTexCoord2f( 1, 1 ); glVertex3f( 1, 1, 0 );
+			glTexCoord2f( 0, 1 ); glVertex3f( 0, 1, 0 );
 		glEnd();
 
 		glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, 0 );
 		glBindTexture( GL_TEXTURE_2D, _normalMap->getTexObject() );
 		glGenerateMipmapEXT( GL_TEXTURE_2D );
 
-		glPopAttrib();
+		glViewport( viewport[0], viewport[1], viewport[2], viewport[3] );
 	}
 	void NoiseResource::calcOctWeights()
 	{

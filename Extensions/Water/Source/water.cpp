@@ -191,8 +191,8 @@ namespace Horde3DWater
 		// Bind VBO
 		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, _indexBuffer );
 		glBindBuffer( GL_ARRAY_BUFFER, _vertexBuffer );
-		glVertexPointer( 3, GL_FLOAT, sizeof( float ) * 3, (char *)0 );
-		glEnableClientState( GL_VERTEX_ARRAY );
+		glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, sizeof( float ) * 3, (char *)0 );
+		glEnableVertexAttribArray( 0 );
 
 		// World transformation
 		ShaderCombination *curShader = Modules::renderer().getCurShader();
@@ -214,7 +214,7 @@ namespace Horde3DWater
 		Modules::stats().incStat( EngineStats::BatchCount, 1 );
 		Modules::stats().incStat( EngineStats::TriCount, (GRID_SIZE - 1) * (GRID_SIZE - 1) * 2.0f );
 
-		glDisableClientState( GL_VERTEX_ARRAY );
+		glDisableVertexAttribArray( 0 );
 		timer->setEnabled( false );
 	}
 
