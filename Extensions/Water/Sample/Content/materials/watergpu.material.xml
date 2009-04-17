@@ -1,0 +1,8 @@
+<Material>
+	<Shader source="materials/watergpu.shader.xml"/>
+
+	<Sampler name="fresnel" map="materials/fresnel.png" />
+	<Sampler name="normalmap" map="materials/fresnel.png" />
+	<Sampler name="heightmap" map="materials/fresnel.png" />
+	<Sampler name="sky" map="models/skybox/skybox.dds" />
+</Material>

@@ -52,6 +52,10 @@ if(HORDE3D_BUILD_WATER)
 		${HORDE3D_EXTENSION_SOURCES}
 		${Horde3D_SOURCE_DIR}/Extensions/Water/Source/water.h
 		${Horde3D_SOURCE_DIR}/Extensions/Water/Source/water.cpp
+		${Horde3D_SOURCE_DIR}/Extensions/Water/Source/watersw.h
+		${Horde3D_SOURCE_DIR}/Extensions/Water/Source/watersw.cpp
+		${Horde3D_SOURCE_DIR}/Extensions/Water/Source/watergpu.h
+		${Horde3D_SOURCE_DIR}/Extensions/Water/Source/watergpu.cpp
 		${Horde3D_SOURCE_DIR}/Extensions/Water/Source/extension.h
 		${Horde3D_SOURCE_DIR}/Extensions/Water/Source/extension.cpp
 		${Horde3D_SOURCE_DIR}/Extensions/Water/Source/noise.h

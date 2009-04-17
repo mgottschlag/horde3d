@@ -38,14 +38,12 @@ namespace Horde3DWater
 			MaterialRes = 10000,
 			NoiseRes,
 			GridWidth,
-			GridHeight
+			GridHeight,
+			UseGPU
 		};
 	};
 
 	const int GRID_SIZE = 64;
-
-	extern const char *vsWaterDebugView;
-	extern const char *fsWaterDebugView;
 
 	struct WaterNodeTpl : public SceneNodeTpl
 	{
@@ -53,11 +51,12 @@ namespace Horde3DWater
 		PNoiseResource    noiseRes;
 		int               gridWidth;
 		int               gridHeight;
+		bool              useGPU;
 
 		WaterNodeTpl( const std::string &name, MaterialResource *matRes,
-		              NoiseResource *noiseRes ) :
+		              NoiseResource *noiseRes, bool useGPU ) :
 			SceneNodeTpl( SNT_WaterNode, name ), matRes( matRes ),
-			noiseRes(noiseRes), gridWidth(64), gridHeight(64)
+			noiseRes(noiseRes), gridWidth(64), gridHeight(64), useGPU(useGPU)
 		{
 		}
 	};
@@ -70,10 +69,7 @@ namespace Horde3DWater
 		PNoiseResource    _noiseRes;
 		int               _gridWidth;
 		int               _gridHeight;
-
-		// Geometry data
-		uint32            _vertexBuffer, _indexBuffer;
-		BoundingBox       _localBBox;
+		bool              _useGPU;
 
 		// Frustum data
 		Frustum           _frustum;
@@ -81,20 +77,13 @@ namespace Horde3DWater
 		Matrix4f          _projMat;
 		Matrix4f          _absTransInv;
 
-		float* vertices;
-		unsigned short* indices;
+		BoundingBox       _localBBox;
 
 		WaterNode( const WaterNodeTpl &waterTpl );
 
-		// Geometry
-		void createBuffers();
-		void destroyBuffers();
-		void updateBuffers( float x1 = 0, float y1 = 0, float x2 = 1, float y2 = 1 );
-		void render();
+		virtual void render() = 0;
 	public:
-		static ShaderCombination debugViewShader;
-
-		~WaterNode();
+		virtual ~WaterNode();
 
 		static SceneNodeTpl *parsingFunc( std::map< std::string, std::string > &attribs );
 		static SceneNode *factoryFunc( const SceneNodeTpl &nodeTpl );

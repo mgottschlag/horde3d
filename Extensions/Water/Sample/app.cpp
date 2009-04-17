@@ -71,6 +71,7 @@ bool Application::init()
 	_logoMatRes = Horde3D::addResource( ResourceTypes::Material, "overlays/logo.material.xml", 0 );
 	// Water
 	ResHandle waterMat = Horde3D::addResource( ResourceTypes::Material, "materials/water.material.xml", 0 );
+	//ResHandle waterMat = Horde3D::addResource( ResourceTypes::Material, "materials/watergpu.material.xml", 0 );
 	// Skybox
 	ResHandle skyBoxRes = Horde3D::addResource( ResourceTypes::SceneGraph, "models/skybox/skybox.scene.xml", 0 );
 	
@@ -86,6 +87,7 @@ bool Application::init()
 	// Add water
 	_noiseRes = Horde3DWater::addNoise( "waternoise", 8 );
 	NodeHandle water = Horde3DWater::addWaterNode( RootNode, "water", _noiseRes, waterMat );
+	//NodeHandle water = Horde3DWater::addWaterNodeGPU( RootNode, "water", _noiseRes, waterMat );
 	Horde3D::setNodeTransform( water, 0, 0, 0, 0, 0, 0, 100, 10, 100 );
 	
 	/*// Add light source

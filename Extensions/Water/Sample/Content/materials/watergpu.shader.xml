@@ -1,0 +1,85 @@
+[[FX]]
+
+<Sampler id="fresnel">
+	<StageConfig addressMode="CLAMP" />
+</Sampler>
+
+<Sampler id="sky">
+	<StageConfig addressMode="CLAMP" filtering="BILINEAR" maxAnisotropy="1" />
+</Sampler>
+
+<Sampler id="normalmap" />
+<Sampler id="heightmap" />
+
+<Context id="AMBIENT">
+	<Shaders vertex="VS_GENERAL" fragment="FS_AMBIENT" />
+</Context>
+
+[[VS_GENERAL]]
+// =================================================================================================
+
+#include "shaders/utilityLib/vertCommon.glsl"
+
+uniform sampler2D heightmap;
+
+varying vec3 position;
+
+uniform vec3 viewer;
+varying vec3 viewVec;
+
+uniform vec4 area;
+
+uniform mat4 invViewProj;
+uniform mat4 invAbsTrans;
+
+void main() {
+	vec4 pos = gl_Vertex;
+	pos.x = pos.x * (area.y - area.x) + area.x;
+	pos.y = pos.y * (area.w - area.z) + area.z;
+
+	vec4 p0 = invViewProj * vec4(pos.xy, 1.0, 1.0);
+	vec4 p1 = invViewProj * vec4(pos.xy, -1.0, 1.0);
+
+	//position = vec3(gl_Vertex.x, gl_Vertex.y, gl_Vertex.z);
+
+	pos = p0;
+	float dotnd = dot(vec4(0.0, 1.0, 0.0, 0.0), p0 - p1);
+	if (dotnd != 0)
+	{
+		float dotno = dot(vec4(0.0, 1.0, 0.0, 0.0), p1);
+		float i = -dotno / dotnd;
+		if ( i > 0.0 && i < 1.0 )
+		{
+			pos = p1 + (p0 - p1) * i;
+		}
+	}
+
+	viewVec = normalize(pos.xyz / pos.w - viewer);
+
+	float distance = length(viewer - pos.xyz / pos.w);
+	pos = invAbsTrans * pos;
+	pos /= pos.w;
+	pos.y = texture2DLod( heightmap, pos.xz, log2(distance) ).r;
+	position = pos.xyz;
+
+
+	gl_Position = gl_ModelViewProjectionMatrix * worldMat * pos;
+};
+
+[[FS_AMBIENT]]
+// =================================================================================================
+varying vec3 position;
+uniform samplerCube sky;
+uniform sampler2D fresnel;
+uniform sampler2D normalmap;
+varying vec3 viewVec;
+uniform mat3 worldNormalMat;
+void main() {
+	vec3 normal = -normalize(worldNormalMat * texture2D( normalmap, position.xz ).rgb);
+	vec3 reflVec = reflect( viewVec, normal );
+	float reflection = texture2D(fresnel, vec2(dot(viewVec, normal), 0.0)).r;
+	gl_FragColor = textureCube( sky, reflVec ) * reflection + vec4(0.18, 0.28, 0.26, 0.0) * (1 - reflection);
+	//gl_FragColor = vec4(reflection, reflection, reflection, reflection);
+
+	//gl_FragColor.rgb = position;
+}

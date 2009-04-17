@@ -23,7 +23,8 @@
 
 #include "utPlatform.h"
 
-#include "water.h"
+#include "watersw.h"
+#include "watergpu.h"
 #include "noise.h"
 #include "egModules.h"
 
@@ -46,8 +47,10 @@ namespace Horde3DWater
 
 		// Upload default shader used for debug view
 		Modules::renderer().uploadShader(
-			vsWaterDebugView, fsWaterDebugView, WaterNode::debugViewShader );
-		
+			vsWaterSWDebugView, fsWaterSWDebugView, WaterNodeSW::debugViewShader );
+		Modules::renderer().uploadShader(
+			vsWaterGPUDebugView, fsWaterGPUDebugView, WaterNodeGPU::debugViewShader );
+
 		return true;
 	}
 
@@ -100,6 +103,11 @@ namespace Horde3DWater
 		}
 	}
 
+	DLLEXP int getGPUWaterSupported( void )
+	{
+		return 1;
+	}
+
 	DLLEXP NodeHandle addWaterNode( NodeHandle parent, const char *name,
 	                                ResHandle noiseRes, ResHandle materialRes )
 	{
@@ -113,7 +121,25 @@ namespace Horde3DWater
 
 		Modules::log().writeInfo( "Adding Water node '%s'", safeStr( name ).c_str() );
 
-		WaterNodeTpl tpl( safeStr( name ), (MaterialResource *)matRes, (NoiseResource *)noiseResPtr );
+		WaterNodeTpl tpl( safeStr( name ), (MaterialResource *)matRes, (NoiseResource *)noiseResPtr, false );
+		SceneNode *sn = Modules::sceneMan().findType( SNT_WaterNode )->factoryFunc( tpl );
+		return Modules::sceneMan().addNode( sn, *parentNode );
+	}
+
+	DLLEXP NodeHandle addWaterNodeGPU( NodeHandle parent, const char *name,
+	                                   ResHandle noiseRes, ResHandle materialRes )
+	{
+		SceneNode *parentNode = Modules::sceneMan().resolveNodeHandle( parent );
+		if( parentNode == 0x0 ) return 0;
+
+		Resource *matRes =  Modules::resMan().resolveResHandle( materialRes );
+		if( matRes == 0x0 || matRes->getType() != ResourceTypes::Material ) return 0;
+		Resource *noiseResPtr =  Modules::resMan().resolveResHandle( noiseRes );
+		if( noiseResPtr == 0x0 || noiseResPtr->getType() != RT_NoiseResource ) return 0;
+
+		Modules::log().writeInfo( "Adding WaterGPU node '%s'", safeStr( name ).c_str() );
+
+		WaterNodeTpl tpl( safeStr( name ), (MaterialResource *)matRes, (NoiseResource *)noiseResPtr, true );
 		SceneNode *sn = Modules::sceneMan().findType( SNT_WaterNode )->factoryFunc( tpl );
 		return Modules::sceneMan().addNode( sn, *parentNode );
 	}

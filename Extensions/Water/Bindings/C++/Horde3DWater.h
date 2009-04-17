@@ -33,7 +33,8 @@ struct WaterNodeParams
 		MaterialRes = 10000,
 		NoiseRes,
 		GridWidth,
-		GridHeight
+		GridHeight,
+		UseGPU
 	};
 };
 
@@ -43,6 +44,9 @@ namespace Horde3DWater
 	DLL void setNoiseTime( ResHandle noise, float time );
 	DLL float getNoiseHeight( ResHandle noise, float x, float z);
 
+	DLL int getGPUWaterSupported( void );
+
 	DLL NodeHandle addWaterNode( NodeHandle parent, const char *name, ResHandle noiseRes, ResHandle materialRes );
+	DLL NodeHandle addWaterNodeGPU( NodeHandle parent, const char *name, ResHandle noiseRes, ResHandle materialRes );
 }
 

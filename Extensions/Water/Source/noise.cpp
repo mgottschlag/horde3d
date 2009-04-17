@@ -150,17 +150,7 @@ namespace Horde3DWater
 				data[i * 4 + 3] = (float)srcNoise[f + i] / SCALE;
 			}
 			glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA16F_ARB, NOISE_SIZE, NOISE_SIZE, 0, GL_RGBA, GL_FLOAT, data );
-			/*char *data = new char[NOISE_SIZE_SQ * 4];
-			for( int i = 0; i < NOISE_SIZE_SQ; i++ )
-			{
-				data[i * 4] = srcNoise[f + i];
-				data[i * 4 + 1] = srcNoise[f + i];
-				data[i * 4 + 2] = srcNoise[f + i];
-				data[i * 4 + 3] = srcNoise[f + i];
 
-			}
-			glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB8, NOISE_SIZE, NOISE_SIZE, 0, GL_RGBA, GL_UNSIGNED_BYTE, data );*/
-			
 			delete[] data;
 		}
 	}
@@ -173,8 +163,6 @@ namespace Horde3DWater
 		glDisable( GL_SAMPLE_ALPHA_TO_COVERAGE );
 		glClearDepth( 1.0f );
 		glDisable( GL_BLEND );
-		//glDisable(GL_TEXTURE_GEN_S);
-		//glDisable(GL_TEXTURE_GEN_T);
 		glBlendFunc( GL_ONE, GL_ONE );
 		glEnable( GL_BLEND );
 		glUseProgram( 0 );
@@ -303,6 +291,8 @@ namespace Horde3DWater
 
 		glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, 0 );
 		glBindTexture( GL_TEXTURE_2D, _normalMap->getTexObject() );
+		glGenerateMipmapEXT( GL_TEXTURE_2D );
+		glBindTexture( GL_TEXTURE_2D, _heightMap->getTexObject() );
 		glGenerateMipmapEXT( GL_TEXTURE_2D );
 
 		glViewport( viewport[0], viewport[1], viewport[2], viewport[3] );
